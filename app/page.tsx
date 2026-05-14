@@ -23,19 +23,19 @@ export default function HomePage() {
             لعبة تفاعلية تعليمية للأطفال والمراهقين تهدف إلى تعليمهم كيفية اتخاذ القرارات الصحيحة في مواقف الحياة اليومية.
           </p>
           <ul className="text-gray-600 space-y-2">
-            <li className="flex items-center gap-2 justify-end">
+            <li className="flex items-center gap-2 justify-center">
               <span>6 مواقف تفاعلية</span>
               <span>🎯</span>
             </li>
-            <li className="flex items-center gap-2 justify-end">
+            <li className="flex items-center gap-2 justify-center">
               <span>رسائل توعوية إيجابية</span>
               <span>💡</span>
             </li>
-            <li className="flex items-center gap-2 justify-end">
+            <li className="flex items-center gap-2 justify-center">
               <span>نظام نقاط ومكافآت</span>
               <span>⭐</span>
             </li>
-            <li className="flex items-center gap-2 justify-end">
+            <li className="flex items-center gap-2 justify-center">
               <span>مناسبة لجميع الأعمار</span>
               <span>👨‍👩‍👧‍👦</span>
             </li>
