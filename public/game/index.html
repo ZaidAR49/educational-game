@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بطل القرارات الصحيحة - جمعية حماية الأسرة والطفولة</title>
+    <link rel="icon" type="image/png" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png">
+    <link rel="apple-touch-icon" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ===== حاوية اللعبة الرئيسية ===== -->
+    <div class="game-container">
+        
+        <!-- ===== شاشة البداية ===== -->
+        <div id="start-screen" class="screen active">
+            <div class="logo-container">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png" alt="شعار جمعية حماية الأسرة والطفولة" class="site-logo">
+                <h1>بطل القرارات الصحيحة</h1>
+                <p class="subtitle">حملة توعوية من جمعية حماية الأسرة والطفولة</p>
+            </div>
+            
+            <div class="intro-text">
+                <p>مرحباً بك يا بطل! 👋</p>
+                <p>في هذه اللعبة ستمر بمواقف مختلفة من الحياة اليومية.</p>
+                <p>اختر القرار الصحيح في كل موقف واجمع أكبر عدد من النقاط!</p>
+                <p>هل أنت مستعد لتصبح بطل القرارات الصحيحة؟</p>
+            </div>
+            
+            <button class="btn-primary btn-start" onclick="startGame()">
+                🚀 ابدأ اللعبة
+            </button>
+            
+            <div class="decorations">
+                <span class="star">⭐</span>
+                <span class="star">🌟</span>
+                <span class="star">✨</span>
+            </div>
+        </div>
+        
+        <!-- ===== شاشة اللعبة ===== -->
+        <div id="game-screen" class="screen">
+            <!-- شريط المعلومات العلوي -->
+            <div class="game-header">
+                <div class="score-box">
+                    <span class="score-label">النقاط</span>
+                    <span class="score-value" id="score">0</span>
+                </div>
+                <div class="progress-box">
+                    <span class="progress-label">الموقف</span>
+                    <span class="progress-value">
+                        <span id="current-scenario">1</span>
+                        <span>/</span>
+                        <span id="total-scenarios">6</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- شريط التقدم -->
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            
+            <!-- بطاقة الموقف -->
+            <div class="scenario-card" id="scenario-card">
+                <div class="scenario-icon" id="scenario-icon">🏫</div>
+                <h2 class="scenario-title" id="scenario-title">عنوان الموقف</h2>
+                <p class="scenario-description" id="scenario-description">وصف الموقف</p>
+            </div>
+            
+            <!-- خيارات الإجابة -->
+            <div class="choices-container" id="choices-container">
+                <!-- سيتم إضافة الخيارات بواسطة JavaScript -->
+            </div>
+            
+            <!-- رسالة النتيجة -->
+            <div class="feedback-modal" id="feedback-modal">
+                <div class="feedback-content">
+                    <div class="feedback-icon" id="feedback-icon">✅</div>
+                    <h3 class="feedback-title" id="feedback-title">أحسنت!</h3>
+                    <p class="feedback-message" id="feedback-message">رسالة التوضيح</p>
+                    <div class="tip-box" id="tip-box">
+                        <span class="tip-icon">💡</span>
+                        <span class="tip-text" id="tip-text">نصيحة مفيدة</span>
+                    </div>
+                    <button class="btn-primary btn-continue" id="feedback-btn" onclick="nextScenario()">
+                        التالي ←
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ===== شاشة النتيجة النهائية ===== -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <div class="result-badge" id="result-badge">🏆</div>
+                <h1 class="result-title" id="result-title">مبروك!</h1>
+                <p class="result-subtitle" id="result-subtitle">لقد أكملت اللعبة بنجاح</p>
+                
+                <div class="final-score-box">
+                    <span class="final-score-label">نتيجتك النهائية</span>
+                    <span class="final-score-value" id="final-score">0</span>
+                    <span class="final-score-total">/ <span id="max-score">60</span> نقطة</span>
+                </div>
+                
+                <div class="result-message" id="result-message">
+                    رسالة تشجيعية
+                </div>
+                
+                <div class="association-message">
+                    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png" alt="شعار جمعية حماية الأسرة والطفولة" class="association-logo-img">
+                    <h3>رسالة من جمعية حماية الأسرة والطفولة</h3>
+                    <p>
+                        أنت قادر على اتخاذ القرارات الصحيحة دائماً!
+                        تذكر أن صحتك وسلامتك أهم من أي شيء.
+                        إذا واجهت أي موقف صعب، تحدث مع والديك أو معلمك.
+                        نحن فخورون بك! 💚
+                    </p>
+                </div>
+                
+                <div class="result-buttons">
+                    <button class="btn-primary" onclick="restartGame()">
+                        🔄 العب مرة أخرى
+                    </button>
+                    <button class="btn-secondary" onclick="shareResult()">
+                        📤 شارك نتيجتك
+                    </button>
+                </div>
+            </div>
+            
+            <div class="confetti" id="confetti"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
