@@ -24,7 +24,7 @@ export default function HomePage() {
           </p>
           <ul className="text-gray-600 space-y-2">
             <li className="flex items-center gap-2 justify-center">
-              <span>6 مواقف تفاعلية</span>
+              <span>10 مواقف تفاعلية</span>
               <span>🎯</span>
             </li>
             <li className="flex items-center gap-2 justify-center">
