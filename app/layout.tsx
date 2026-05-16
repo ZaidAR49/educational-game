@@ -1,18 +1,17 @@
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import type { Metadata } from "next"
+import { Geist } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { config } from "@/lib/config"
+import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: 'بطل القرارات الصحيحة - جمعية حماية الأسرة والطفولة',
-  description: 'لعبة تفاعلية توعوية للأطفال والمراهقين لتعليمهم اتخاذ القرارات الصحيحة والابتعاد عن المخدرات',
-  generator: 'v0.app',
+  title: `${config.appName} - ${config.organizationName}`,
+  description: config.appDescription,
   icons: {
-    icon: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png',
-    apple: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png',
+    icon: config.logoUrl,
+    apple: config.logoUrl,
   },
 }
 
@@ -23,9 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50">
-      <body className="font-sans antialiased">
+      <body className={`${geist.className} font-sans antialiased`}>
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {config.enableAnalytics && <Analytics />}
       </body>
     </html>
   )
