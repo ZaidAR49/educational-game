@@ -1,0 +1,18 @@
+{
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "devCommand": "next dev",
+  "installCommand": "pnpm install",
+  "env": {
+    "NEXT_PUBLIC_APP_NAME": "بطل القرارات الصحيحة",
+    "NEXT_PUBLIC_APP_DESCRIPTION": "حملة توعوية من جمعية حماية الأسرة والطفولة",
+    "NEXT_PUBLIC_ENABLE_ANALYTICS": "true"
+  },
+  "regions": ["iad"],
+  "functions": {
+    "api/**": {
+      "memory": 128,
+      "maxDuration": 10
+    }
+  }
+}
