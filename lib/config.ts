@@ -1,4 +1,4 @@
-/** Static technical configuration — all UI text lives in data/ui-content.json */
+/** Static technical configuration — all UI text lives in data/ui-content-general.json */
 export const config = {
   enableAnalytics: true,
   devPort: 3000,

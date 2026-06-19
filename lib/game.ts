@@ -1,5 +1,5 @@
 import { config } from "@/lib/config"
-import uiContent from "@/data/ui-content.json"
+import uiContent from "@/data/ui-content-general.json"
 
 export type ConfettiPiece = {
   id: number

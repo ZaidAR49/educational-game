@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "اختبر معلوماتك",
+    "icon": "🎯",
+    "campaignSubtitle": "لعبة تفاعلية تعليمية للجميع",
+    "organizationName": "جمعية حماية الأسرة والطفولة",
+    "copyrightText": "جميع الحقوق محفوظة © جمعية حماية الأسرة 2026",
+    "logoUrl": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png"
+  },
+  "home": {
+    "description": "لعبة تفاعلية تعليمية ممتعة تختبر معلوماتك وتنمي مهاراتك من خلال أسئلة متنوعة من الحياة اليومية والعملية.",
+    "features": [
+      { "text": "أسئلة تفاعلية متنوعة", "icon": "🎯" },
+      { "text": "تغذية راجعة فورية", "icon": "💡" },
+      { "text": "نظام نقاط ومكافآت", "icon": "⭐" },
+      { "text": "مناسبة لجميع الأعمار والمستويات", "icon": "🌍" }
+    ],
+    "startButtonLabel": "🚀 ابدأ الاختبار"
+  },
+  "gameStart": {
+    "welcomeLines": [
+      "مرحباً بك! 👋",
+      "ستواجه في هذا الاختبار مجموعة من الأسئلة المتنوعة.",
+      "اختر الإجابة الصحيحة في كل سؤال واجمع أكبر عدد من النقاط!"
+    ],
+    "ctaText": "هل أنت مستعد لاختبار معلوماتك؟",
+    "startButtonLabel": "🚀 ابدأ الاختبار",
+    "backToHomeLabel": "← العودة للرئيسية"
+  },
+  "gamePlay": {
+    "scoreLabel": "النقاط",
+    "questionLabel": "السؤال",
+    "skipButtonLabel": "⏭️ تخطى",
+    "skipFeedback": {
+      "title": "تم التخطي ⏭️",
+      "message": "اخترت تخطي هذا السؤال. لا بأس، الاستمرار هو المهم!",
+      "tip": "حاول الإجابة في المرة القادمة لتحصل على نقاط وتزيد من معرفتك! 💡"
+    },
+    "nextButtonLabel": "← التالي",
+    "showResultsLabel": "🏆 عرض النتيجة",
+    "feedbackCorrectIcon": "✅",
+    "feedbackWrongIcon": "💡",
+    "feedbackTipIcon": "💡"
+  },
+  "results": {
+    "finalScoreLabel": "نتيجتك النهائية",
+    "pointsSuffix": "نقطة",
+    "organizationMessageTitle": "رسالة من {organizationName}",
+    "organizationMessage": "أحسنت على مشاركتك! كل سؤال هو فرصة جديدة للتعلم والنمو. استمر في تطوير معلوماتك ومهاراتك، ونحن واثقون من قدراتك! 🌟",
+    "playAgainLabel": "🔄 العب مرة أخرى",
+    "shareLabel": "📤 شارك نتيجتك",
+    "resultLevels": {
+      "excellent": {
+        "badge": "🏆",
+        "title": "ممتاز!",
+        "subtitle": "أنت متفوق حقاً!",
+        "message": "🌟 أداء استثنائي! معلوماتك رائعة وإجاباتك دقيقة. استمر على هذا المستوى!"
+      },
+      "good": {
+        "badge": "⭐",
+        "title": "أحسنت!",
+        "subtitle": "أداء جيد جداً!",
+        "message": "💪 أنت في الطريق الصحيح! راجع الأسئلة التي فاتتك وستصل إلى القمة!"
+      },
+      "low": {
+        "badge": "🌱",
+        "title": "لا بأس، استمر!",
+        "subtitle": "كل محاولة تعلّم جديد!",
+        "message": "📚 لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!"
+      }
+    }
+  },
+  "share": {
+    "shareText": "🎯 لعبت لعبة \"{appName}\" وحصلت على {score} نقطة! 🌟\n\n🎮 جرب الآن:\n{gameUrl}",
+    "copiedMessage": "✅ تم نسخ النتيجة! يمكنك لصقها ومشاركتها مع أصدقائك.",
+    "fallbackPrefix": "📋 شارك نتيجتك:\n\n"
+  }
+}

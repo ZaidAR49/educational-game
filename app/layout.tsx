@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { config } from "@/lib/config"
-import uiContent from "@/data/ui-content.json"
+import uiContent from "@/data/ui-content-general.json"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })

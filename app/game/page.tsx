@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import scenarios from "@/data/scenarios-v2.json"
-import uiContent from "@/data/ui-content.json"
+import uiContent from "@/data/ui-content-general.json"
 import { config } from "@/lib/config"
 import {
   createConfettiPieces,
