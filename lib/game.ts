@@ -1,4 +1,5 @@
 import { config } from "@/lib/config"
+import uiContent from "@/data/ui-content.json"
 
 export type ConfettiPiece = {
   id: number
@@ -21,41 +22,24 @@ export function createConfettiPieces(): ConfettiPiece[] {
 
 export function getResultMessage(percentage: number) {
   const { excellent, good } = config.game.resultThresholds
+  const { resultLevels } = uiContent.results
 
-  if (percentage >= excellent) {
-    return {
-      badge: "🏆",
-      title: "مبروك يا بطل!",
-      subtitle: "أنت بطل القرارات الصحيحة!",
-      message:
-        "🌟 أداء رائع! أنت تعرف كيف تحمي نفسك وتتخذ القرارات الصحيحة!",
-    }
-  }
-
-  if (percentage >= good) {
-    return {
-      badge: "⭐",
-      title: "أحسنت!",
-      subtitle: "أداء جيد جداً!",
-      message: "💪 أنت في الطريق الصحيح! استمر في التعلم واتخاذ القرارات الحكيمة!",
-    }
-  }
-
-  return {
-    badge: "🌱",
-    title: "لا بأس!",
-    subtitle: "كل تجربة فرصة للتعلم!",
-    message: "📚 تعلمت أشياء مهمة! جرب مرة أخرى لتحسين نتيجتك!",
-  }
+  if (percentage >= excellent) return resultLevels.excellent
+  if (percentage >= good) return resultLevels.good
+  return resultLevels.low
 }
 
 export async function shareGameResult(score: number, gameUrl: string) {
-  const text = `🛡️ لعبت لعبة "${config.appName}" من جمعية حماية الأسرة وحصلت على ${score} نقطة! 🌟\n\n🎮 جرب الآن:\n${gameUrl}`
+  const { shareText, copiedMessage, fallbackPrefix } = uiContent.share
+  const text = shareText
+    .replace("{appName}", uiContent.app.name)
+    .replace("{score}", String(score))
+    .replace("{gameUrl}", gameUrl)
 
   if (navigator.share) {
     try {
       await navigator.share({
-        title: config.game.shareTitle,
+        title: uiContent.app.name,
         text,
         url: gameUrl,
       })
@@ -68,12 +52,12 @@ export async function shareGameResult(score: number, gameUrl: string) {
   if (navigator.clipboard) {
     try {
       await navigator.clipboard.writeText(text)
-      alert("✅ تم نسخ النتيجة! يمكنك لصقها ومشاركتها مع أصدقائك.")
+      alert(copiedMessage)
       return
     } catch {
       // fall through
     }
   }
 
-  alert("📋 شارك نتيجتك:\n\n" + text)
+  alert(fallbackPrefix + text)
 }

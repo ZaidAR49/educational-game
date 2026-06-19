@@ -2,16 +2,17 @@ import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { config } from "@/lib/config"
+import uiContent from "@/data/ui-content.json"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: `${config.appName} - ${config.organizationName}`,
-  description: config.appDescription,
+  title: `${uiContent.app.name} - ${uiContent.app.organizationName}`,
+  description: uiContent.home.description,
   icons: {
-    icon: config.logoUrl,
-    apple: config.logoUrl,
+    icon: uiContent.app.logoUrl,
+    apple: uiContent.app.logoUrl,
   },
 }
 

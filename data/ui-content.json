@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "بطل القرارات الصحيحة",
+    "icon": "🛡️",
+    "campaignSubtitle": "حملة توعوية من جمعية حماية الأسرة والطفولة",
+    "organizationName": "جمعية حماية الأسرة والطفولة",
+    "copyrightText": "جميع الحقوق محفوظة © جمعية حماية الأسرة 2026",
+    "logoUrl": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png"
+  },
+  "home": {
+    "description": "لعبة تفاعلية تعليمية للأطفال والمراهقين تهدف إلى تعليمهم كيفية اتخاذ القرارات الصحيحة في مواقف الحياة اليومية.",
+    "features": [
+      { "text": "10 مواقف تفاعلية", "icon": "🎯" },
+      { "text": "رسائل توعوية إيجابية", "icon": "💡" },
+      { "text": "نظام نقاط ومكافآت", "icon": "⭐" },
+      { "text": "مناسبة لجميع الأعمار", "icon": "👨‍👩‍👧‍👦" }
+    ],
+    "startButtonLabel": "🚀 ابدأ اللعبة"
+  },
+  "gameStart": {
+    "welcomeLines": [
+      "مرحباً بك يا بطل! 👋",
+      "في هذه اللعبة ستمر بمواقف مختلفة من الحياة اليومية.",
+      "اختر القرار الصحيح في كل موقف واجمع أكبر عدد من النقاط!"
+    ],
+    "ctaText": "هل أنت مستعد لتصبح بطل القرارات الصحيحة؟",
+    "startButtonLabel": "🚀 ابدأ اللعبة",
+    "backToHomeLabel": "← العودة للرئيسية"
+  },
+  "gamePlay": {
+    "scoreLabel": "النقاط",
+    "questionLabel": "الموقف",
+    "skipButtonLabel": "⏭️ تخطى",
+    "skipFeedback": {
+      "title": "تم التخطي ⏭️",
+      "message": "اخترت تخطي هذا السؤال. لا بأس، المهم الاستمرار!",
+      "tip": "حاول الإجابة في المرة القادمة لتحصل على نقاط وتزيد من معرفتك! 💡"
+    },
+    "nextButtonLabel": "← التالي",
+    "showResultsLabel": "🏆 عرض النتيجة",
+    "feedbackCorrectIcon": "✅",
+    "feedbackWrongIcon": "💡",
+    "feedbackTipIcon": "💡"
+  },
+  "results": {
+    "finalScoreLabel": "نتيجتك النهائية",
+    "pointsSuffix": "نقطة",
+    "organizationMessageTitle": "رسالة من {organizationName}",
+    "organizationMessage": "أنت قادر على اتخاذ القرارات الصحيحة دائماً! تذكر أن صحتك وسلامتك أهم من أي شيء. إذا واجهت أي موقف صعب، تحدث مع والديك أو معلمك. نحن فخورون بك! 💚",
+    "playAgainLabel": "🔄 العب مرة أخرى",
+    "shareLabel": "📤 شارك نتيجتك",
+    "resultLevels": {
+      "excellent": {
+        "badge": "🏆",
+        "title": "مبروك يا بطل!",
+        "subtitle": "أنت بطل القرارات الصحيحة!",
+        "message": "🌟 أداء رائع! أنت تعرف كيف تحمي نفسك وتتخذ القرارات الصحيحة!"
+      },
+      "good": {
+        "badge": "⭐",
+        "title": "أحسنت!",
+        "subtitle": "أداء جيد جداً!",
+        "message": "💪 أنت في الطريق الصحيح! استمر في التعلم واتخاذ القرارات الحكيمة!"
+      },
+      "low": {
+        "badge": "🌱",
+        "title": "لا بأس!",
+        "subtitle": "كل تجربة فرصة للتعلم!",
+        "message": "📚 تعلمت أشياء مهمة! جرب مرة أخرى لتحسين نتيجتك!"
+      }
+    }
+  },
+  "share": {
+    "shareText": "🛡️ لعبت لعبة \"{appName}\" وحصلت على {score} نقطة! 🌟\n\n🎮 جرب الآن:\n{gameUrl}",
+    "copiedMessage": "✅ تم نسخ النتيجة! يمكنك لصقها ومشاركتها مع أصدقائك.",
+    "fallbackPrefix": "📋 شارك نتيجتك:\n\n"
+  }
+}
