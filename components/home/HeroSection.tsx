@@ -7,7 +7,7 @@ import { config } from "@/lib/config"
 
 export function HeroSection({ content }: { content: any }) {
   return (
-    <div className="relative overflow-hidden bg-emerald-50 min-h-[90vh] flex items-center pt-32 pb-32 md:pb-20">
+    <div className="relative overflow-hidden bg-emerald-50 min-h-[75vh] flex items-center pt-24 pb-24 md:pb-16">
       {/* Background Animated Shapes */}
       <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none hidden md:block">
         <motion.div
@@ -49,7 +49,7 @@ export function HeroSection({ content }: { content: any }) {
       </div>
 
       <div className="w-full px-4 sm:px-8 lg:px-16 2xl:px-24 mx-auto relative z-10 max-w-none">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 2xl:gap-24 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           
           {/* Text Content */}
           <div className="text-right flex flex-col items-start w-full">
@@ -67,7 +67,7 @@ export function HeroSection({ content }: { content: any }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold text-gray-900 leading-tight mb-6"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-tight mb-6"
             >
               صمم ألعابك <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-blue-600">
@@ -79,7 +79,7 @@ export function HeroSection({ content }: { content: any }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg md:text-xl xl:text-2xl 2xl:text-3xl text-gray-600 mb-8 max-w-lg xl:max-w-2xl 2xl:max-w-3xl leading-relaxed"
+              className="text-lg md:text-xl xl:text-2xl text-gray-600 mb-8 max-w-lg xl:max-w-2xl leading-relaxed"
             >
               منصة {content.app.name} تتيح للمعلمين إنشاء سيناريوهات تفاعلية واختبارات شيقة للطلاب بدون الحاجة لإنشاء حسابات للطلاب.
             </motion.p>
@@ -114,7 +114,7 @@ export function HeroSection({ content }: { content: any }) {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative hidden lg:block"
           >
-            <div className="relative w-full aspect-square max-w-lg xl:max-w-xl 2xl:max-w-2xl mx-auto">
+            <div className="relative w-full aspect-square max-w-md lg:max-w-lg xl:max-w-xl mx-auto">
               <div className="absolute inset-0 bg-gradient-to-tr from-emerald-100 to-white rounded-[3rem] rotate-3 shadow-xl border border-white/50 backdrop-blur-sm"></div>
               <div className="absolute inset-0 bg-white rounded-[3rem] -rotate-3 shadow-lg border border-emerald-50 overflow-hidden p-8 flex flex-col justify-between">
                 {/* Abstract UI Elements */}

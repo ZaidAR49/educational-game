@@ -55,10 +55,10 @@ export default function OverviewPage() {
       </div>
 
       {/* Recent Games & Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         
         {/* Recent Games Table */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-50 flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900">أحدث الألعاب</h2>
             <Link href="/dashboard/games" className="text-sm font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
@@ -96,29 +96,6 @@ export default function OverviewPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Quick Tips / News */}
-        <div className="bg-emerald-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden flex flex-col justify-center">
-          {/* Decorative Background */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500 rounded-full opacity-50 blur-3xl mix-blend-screen" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-700 rounded-full opacity-50 blur-3xl mix-blend-multiply" />
-          
-          <div className="relative z-10 space-y-4">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl mb-6">
-              💡
-            </div>
-            <h3 className="text-xl font-black">نصيحة اليوم</h3>
-            <p className="text-emerald-50 leading-relaxed text-sm">
-              استخدام شاشات نتيجة مخصصة ورسائل تشجيعية من مؤسستك يزيد من حماس الطلاب للعب مرة أخرى وتحسين نتائجهم بنسبة 40%.
-            </p>
-            <Link 
-              href="/dashboard/organizations/new" 
-              className="inline-block mt-4 bg-white text-emerald-700 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-colors shadow-sm"
-            >
-              تحديث شاشة النتيجة
-            </Link>
           </div>
         </div>
 

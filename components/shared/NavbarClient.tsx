@@ -29,10 +29,10 @@ export function NavbarClient({ session }: { session: any }) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
+            <Link href="/#features" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
               المميزات
             </Link>
-            <Link href="#how-it-works" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
+            <Link href="/#how-it-works" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
               كيف تعمل؟
             </Link>
             {session && (
@@ -91,14 +91,14 @@ export function NavbarClient({ session }: { session: any }) {
         <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 shadow-xl">
           <div className="flex flex-col p-4 space-y-4">
             <Link 
-              href="#features" 
+              href="/#features" 
               className="p-3 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-medium transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               المميزات
             </Link>
             <Link 
-              href="#how-it-works" 
+              href="/#how-it-works" 
               className="p-3 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-medium transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
