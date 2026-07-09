@@ -1,31 +1,38 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
-import { DrizzleAdapter } from "@auth/drizzle-adapter"
-import { db } from "@/lib/db"
-import { users, accounts, sessions, verificationTokens } from "@/lib/db/schema"
+import { SupabaseAdapter } from "@/lib/supabase-adapter"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: DrizzleAdapter(db, {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens,
-  }),
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
+  adapter: SupabaseAdapter({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  }),
+  session: {
+    strategy: "jwt"
+  },
   pages: {
     signIn: '/login',
   },
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    jwt({ token, user, profile }) {
+      if (user) {
+        token.id = user.id
+        token.image = user.image || (profile?.picture as string)
       }
-      return session;
+      return token
+    },
+    session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.id as string
+        session.user.image = token.image as string
+      }
+      return session
     },
   },
 })
