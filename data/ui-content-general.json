@@ -1,10 +1,10 @@
 {
   "app": {
-    "name": "اختبر معلوماتك",
+    "name": "EduPlay",
     "icon": "🎯",
     "campaignSubtitle": "لعبة تفاعلية تعليمية للجميع",
-    "organizationName": "جمعية حماية الأسرة والطفولة",
-    "copyrightText": "جميع الحقوق محفوظة © جمعية حماية الأسرة 2026",
+    "organizationName": "EduPlay",
+    "copyrightText": "جميع الحقوق محفوظة © EduPlay 2026",
     "logoUrl": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RAjIY76Hw3j0ou7DFHe6b2WCKJ74Rb.png"
   },
   "home": {
