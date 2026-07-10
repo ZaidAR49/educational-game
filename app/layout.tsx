@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50">
+    <html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
       <body className={`${tajawal.className} font-sans antialiased`}>
         {children}
         {config.enableAnalytics && <Analytics />}

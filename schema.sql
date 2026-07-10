@@ -190,6 +190,8 @@ CREATE TABLE players (
   classroom_play_id    uuid NOT NULL REFERENCES classroom_plays(id) ON DELETE CASCADE,
   name                 text NOT NULL,
   total_score          integer NOT NULL DEFAULT 0,
+  total_correct_answers integer NOT NULL DEFAULT 0,
+  total_wrong_answers  integer NOT NULL DEFAULT 0,
   is_finished          boolean NOT NULL DEFAULT false,
   started_at           timestamptz NOT NULL DEFAULT now(),
   completed_at         timestamptz,

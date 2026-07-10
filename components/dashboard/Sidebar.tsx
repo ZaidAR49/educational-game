@@ -8,7 +8,8 @@ import {
   Building2, 
   Gamepad2, 
   Settings, 
-  LogOut 
+  LogOut,
+  History
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import uiContent from "@/data/ui-content-general.json"
@@ -21,6 +22,7 @@ export function Sidebar() {
     { href: "/dashboard", label: "نظرة عامة", icon: LayoutDashboard },
     { href: "/dashboard/organizations", label: "المؤسسات", icon: Building2 },
     { href: "/dashboard/games", label: "ألعابي", icon: Gamepad2 },
+    { href: "/dashboard/sessions", label: "الجلسات", icon: History },
     { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
   ]
 
@@ -29,7 +31,7 @@ export function Sidebar() {
       {/* Logo */}
       <Link href="/" className="flex items-center gap-3 mb-10 px-2 group">
         <div className="w-10 h-10 overflow-hidden flex items-center justify-center rounded-lg">
-          <Image src={AppLogo} alt="Logo" width={40} height={40} className="object-contain" />
+          <Image src={AppLogo} alt="Logo" width={40} height={40} className="object-contain" priority />
         </div>
         <span className="text-xl font-black text-emerald-600 tracking-tight">
           {uiContent.app.name}

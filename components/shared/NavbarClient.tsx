@@ -20,7 +20,7 @@ export function NavbarClient({ session }: { session: any }) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-14 h-14 overflow-hidden flex items-center justify-center rounded-xl">
-              <Image src={AppLogo} alt="Logo" width={60} height={60} className="object-contain" />
+              <Image src={AppLogo} alt="Logo" width={60} height={60} className="object-contain" priority />
             </div>
             <span className="text-2xl font-black text-gray-900 tracking-tight">
               {uiContent.app.name}

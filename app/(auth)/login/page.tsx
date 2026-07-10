@@ -38,7 +38,7 @@ export default function LoginPage() {
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white p-8">
           <div className="text-center mb-8">
             <Link href="/" className="w-20 h-20 mx-auto mb-4 flex items-center justify-center hover:opacity-80 transition-opacity">
-              <Image src={AppLogo} alt="Logo" width={80} height={80} className="object-contain drop-shadow-md" />
+              <Image src={AppLogo} alt="Logo" width={80} height={80} className="object-contain drop-shadow-md" priority />
             </Link>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">مرحباً بعودتك!</h1>
             <p className="text-gray-500 text-sm">سجل دخولك للوصول إلى لوحة التحكم الخاصة بك وإدارة ألعابك.</p>
