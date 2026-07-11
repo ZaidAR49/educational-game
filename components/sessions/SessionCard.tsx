@@ -50,7 +50,6 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
           </div>
           <div>
             <h3 className="font-bold text-gray-900 text-lg leading-tight">{session.gameName}</h3>
-            <p className="text-xs text-gray-400 font-medium mt-1">ID: {session.id}</p>
           </div>
         </div>
 

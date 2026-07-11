@@ -1,39 +1,57 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { 
   ArrowRight, ArrowLeft, Save, 
   Gamepad2, ListChecks, Send, 
-  CheckCircle2, AlertCircle, Link as LinkIcon, Download
+  CheckCircle2, AlertCircle, Link as LinkIcon, Download, Loader2
 } from "lucide-react"
 import { QRCodeCanvas } from "qrcode.react"
 
 import { GameFormData, Scenario } from "./wizard/types"
-import { MOCK_ORGANIZATIONS, generateDefaultChoices } from "./wizard/constants"
-import { BasicInfoStep } from "./wizard/BasicInfoStep"
+import { generateDefaultChoices } from "./wizard/constants"
+import { BasicInfoStep, OrganizationOption } from "./wizard/BasicInfoStep"
 import { ScenariosStep } from "./wizard/ScenariosStep"
 import { PublishStep } from "./wizard/PublishStep"
+import { saveFullGameAction } from "@/lib/actions/game-wizard.actions"
 
-export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
+interface GameWizardProps {
+  isEdit?: boolean;
+  gameId?: string;
+  initialGame?: Partial<GameFormData>;
+  initialScenarios?: Scenario[];
+  organizations: OrganizationOption[];
+}
+
+export function GameWizard({ 
+  isEdit = false, 
+  gameId, 
+  initialGame, 
+  initialScenarios, 
+  organizations 
+}: GameWizardProps) {
+  const router = useRouter()
   const [step, setStep] = useState(1)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+  const [isPending, startTransition] = useTransition()
   
   // Game State
   const [formData, setFormData] = useState<GameFormData>({
-    title: "",
-    description: "",
-    slug: "",
-    icon: "🎮",
-    status: "draft",
-    organizationId: "",
+    title: initialGame?.title || "",
+    description: initialGame?.description || "",
+    slug: initialGame?.slug || "",
+    icon: initialGame?.icon || "🎮",
+    status: initialGame?.status || "draft",
+    organizationId: initialGame?.organizationId || "",
   })
 
   // Scenarios State
-  const [scenarios, setScenarios] = useState<Scenario[]>([
+  const [scenarios, setScenarios] = useState<Scenario[]>(initialScenarios || [
     {
       id: "1",
       icon: "❓",
@@ -43,7 +61,7 @@ export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
     }
   ])
 
-  const [activeScenarioId, setActiveScenarioId] = useState<string>("1")
+  const [activeScenarioId, setActiveScenarioId] = useState<string>(scenarios[0]?.id || "1")
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -119,6 +137,7 @@ export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
     if (!formData.description.trim()) newErrors.description = "الرجاء إدخال وصف اللعبة."
     if (!formData.slug.trim()) newErrors.slug = "الرجاء إدخال الرابط المختصر."
     if (!formData.icon.trim()) newErrors.icon = "الرجاء إدخال أيقونة."
+    if (!formData.organizationId) newErrors.organizationId = "الرجاء اختيار المؤسسة التابعة لها اللعبة."
     
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) {
@@ -185,11 +204,39 @@ export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
   }
 
   const handleSave = () => {
-    if (formData.status === 'published') {
-      setShowSuccessPopup(true)
-    } else {
-      alert("تم حفظ اللعبة كمسودة بنجاح! سيتم ربط هذا بقاعدة البيانات لاحقاً.")
-    }
+    startTransition(async () => {
+      try {
+        const result = await saveFullGameAction(
+          {
+            title: formData.title,
+            description: formData.description,
+            slug: formData.slug,
+            icon: formData.icon,
+            status: formData.status as any,
+            organizationId: formData.organizationId || null,
+          },
+          scenarios.map(s => ({
+            id: s.id,
+            title: s.title,
+            description: s.description,
+            icon: s.icon,
+            choices: s.choices,
+          })),
+          gameId
+        );
+
+        if (result.success) {
+          if (formData.status === 'published') {
+            setShowSuccessPopup(true)
+          } else {
+            router.push("/dashboard/games");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to save game", error);
+        setErrorMsg("حدث خطأ أثناء حفظ اللعبة. يرجى المحاولة مرة أخرى.");
+      }
+    });
   }
 
   const gameUrl = `https://your-domain.com/game/${formData.slug || 'slug'}`
@@ -204,7 +251,7 @@ export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
     downloadLink.click()
   }
 
-  const selectedOrg = MOCK_ORGANIZATIONS.find(org => org.id === formData.organizationId)
+  const selectedOrg = organizations.find(org => org.id === formData.organizationId)
   const qrLogo = selectedOrg?.logo || "/logo.png"
 
   return (
@@ -277,6 +324,7 @@ export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
               formData={formData} 
               onChange={handleFormChange} 
               errors={errors} 
+              organizations={organizations}
             />
           )}
           {step === 2 && (
@@ -329,10 +377,11 @@ export function GameWizard({ isEdit = false }: { isEdit?: boolean }) {
         ) : (
           <button 
             onClick={handleSave}
-            className="pointer-events-auto flex items-center justify-center gap-3 bg-gray-900 hover:bg-black text-white w-full sm:w-[240px] px-6 py-4 rounded-xl font-black text-lg transition-all shadow-2xl shadow-gray-900/40 hover:scale-105 active:scale-95"
+            disabled={isPending}
+            className="pointer-events-auto flex items-center justify-center gap-3 bg-gray-900 hover:bg-black disabled:bg-gray-700 text-white w-full sm:w-[240px] px-6 py-4 rounded-xl font-black text-lg transition-all shadow-2xl shadow-gray-900/40 hover:scale-105 active:scale-95"
           >
-            <Save className="w-6 h-6 text-emerald-400" />
-            <span>حفظ واعتماد اللعبة</span>
+            {isPending ? <Loader2 className="w-6 h-6 animate-spin text-emerald-400" /> : <Save className="w-6 h-6 text-emerald-400" />}
+            <span>{isPending ? "جاري الحفظ..." : "حفظ واعتماد اللعبة"}</span>
           </button>
         )}
         

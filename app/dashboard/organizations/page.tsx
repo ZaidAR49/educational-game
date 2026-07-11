@@ -1,27 +1,20 @@
-"use client"
-
 import Link from "next/link"
 import { Plus, Building2, Pencil, Trash2 } from "lucide-react"
+import { getMyOrganizationsAction, deleteOrganizationAction } from "@/lib/actions/organizations.actions"
+import { getMyGamesAction } from "@/lib/actions/games.actions"
 
-// Static mockup data
-const MOCK_ORGANIZATIONS = [
-  {
-    id: "1",
-    name: "جمعية حماية الأسرة والطفولة",
-    logo: null,
-    gamesCount: 3,
-    createdAt: "2026-07-01",
-  },
-  {
-    id: "2",
-    name: "مدرسة الأمل النموذجية",
-    logo: null,
-    gamesCount: 5,
-    createdAt: "2026-07-05",
-  },
-]
+export default async function OrganizationsPage() {
+  const organizations = await getMyOrganizationsAction();
+  const games = await getMyGamesAction();
 
-export default function OrganizationsPage() {
+  const orgsWithStats = organizations.map((org) => {
+    return {
+      ...org,
+      gamesCount: games.filter(g => g.organizationId === org.id).length,
+      formattedDate: org.createdAt ? new Date(org.createdAt).toISOString().split('T')[0] : "غير معروف",
+    }
+  });
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
@@ -43,7 +36,7 @@ export default function OrganizationsPage() {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_ORGANIZATIONS.map((org) => (
+        {orgsWithStats.map((org) => (
           <div key={org.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col group hover:shadow-md hover:border-emerald-100 transition-all">
             
             <div className="flex items-start justify-between mb-4">
@@ -52,24 +45,27 @@ export default function OrganizationsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Link 
-                  href={`/dashboard/organizations/new`} // Mock edit link
+                  href={`/dashboard/organizations/${org.id}`} // Or wherever the edit page is
                   className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors"
                   title="تعديل"
                 >
                   <Pencil className="w-4 h-4" />
                 </Link>
-                <button 
-                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                  title="حذف"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <form action={deleteOrganizationAction.bind(null, org.id)}>
+                  <button 
+                    type="submit"
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                    title="حذف"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </form>
               </div>
             </div>
 
             <div className="mb-6">
               <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{org.name}</h3>
-              <p className="text-sm text-gray-500">تم الإنشاء في: {org.createdAt}</p>
+              <p className="text-sm text-gray-500">تم الإنشاء في: {org.formattedDate}</p>
             </div>
 
             <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">

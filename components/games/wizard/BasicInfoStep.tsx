@@ -1,15 +1,21 @@
 import { motion } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import { GameFormData } from "./types"
-import { MOCK_ORGANIZATIONS } from "./constants"
+
+export interface OrganizationOption {
+  id: string;
+  name: string;
+  logo: string | null;
+}
 
 interface BasicInfoStepProps {
   formData: GameFormData
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
   errors?: Record<string, string>
+  organizations: OrganizationOption[]
 }
 
-export function BasicInfoStep({ formData, onChange, errors = {} }: BasicInfoStepProps) {
+export function BasicInfoStep({ formData, onChange, errors = {}, organizations = [] }: BasicInfoStepProps) {
   return (
     <motion.div 
       key="step1"
@@ -68,15 +74,20 @@ export function BasicInfoStep({ formData, onChange, errors = {} }: BasicInfoStep
                 name="organizationId"
                 value={formData.organizationId}
                 onChange={onChange}
-                className="w-full px-6 py-4 rounded-2xl border-2 border-gray-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all text-right font-black text-xl text-gray-700 bg-white appearance-none cursor-pointer placeholder:text-gray-300"
+                className={`w-full px-6 py-4 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right font-black text-xl text-gray-700 bg-white appearance-none cursor-pointer placeholder:text-gray-300 ${
+                  errors.organizationId 
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
+                    : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
+                }`}
               >
-                <option value="">اختيار المؤسسة (اختياري)</option>
-                {MOCK_ORGANIZATIONS.map(org => (
+                <option value="">اختيار المؤسسة</option>
+                {organizations.map(org => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
               </select>
               <ChevronDown className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-6 h-6" />
             </div>
+            {errors.organizationId && <p className="text-red-500 text-sm font-bold">{errors.organizationId}</p>}
           </div>
 
           <div className="space-y-3">

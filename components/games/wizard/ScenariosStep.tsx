@@ -88,15 +88,18 @@ export function ScenariosStep({
           <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm space-y-8">
             
             <div className="flex flex-col md:flex-row md:items-start gap-6 pb-8 border-b border-gray-100">
-              <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border shrink-0 self-center md:self-start ${
-                errors[`scenario_${activeScenario.id}_icon`] ? 'bg-red-50 text-red-500 border-red-200' : 'bg-blue-50 text-blue-500 border-blue-100'
-              }`}>
-                <input 
-                  type="text" 
-                  value={activeScenario.icon}
-                  onChange={(e) => updateActiveScenario('icon', e.target.value)}
-                  className="w-full bg-transparent text-center outline-none"
-                />
+              <div className="flex flex-col items-center gap-1 shrink-0 self-center md:self-start">
+                <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border ${
+                  errors[`scenario_${activeScenario.id}_icon`] ? 'bg-red-50 text-red-500 border-red-200' : 'bg-blue-50 text-blue-500 border-blue-100'
+                }`}>
+                  <input 
+                    type="text" 
+                    value={activeScenario.icon}
+                    onChange={(e) => updateActiveScenario('icon', e.target.value)}
+                    className="w-full bg-transparent text-center outline-none"
+                  />
+                </div>
+                {errors[`scenario_${activeScenario.id}_icon`] && <p className="text-red-500 text-xs font-bold">{errors[`scenario_${activeScenario.id}_icon`]}</p>}
               </div>
               <div className="flex-1 space-y-3 pt-1 w-full">
                 <input 
@@ -108,6 +111,7 @@ export function ScenariosStep({
                     errors[`scenario_${activeScenario.id}_title`] ? 'text-red-500 placeholder:text-red-300' : 'text-gray-400'
                   }`}
                 />
+                {errors[`scenario_${activeScenario.id}_title`] && <p className="text-red-500 text-sm font-bold">{errors[`scenario_${activeScenario.id}_title`]}</p>}
                 <textarea 
                   value={activeScenario.description}
                   onChange={(e) => updateActiveScenario('description', e.target.value)}
@@ -117,6 +121,7 @@ export function ScenariosStep({
                     errors[`scenario_${activeScenario.id}_desc`] ? 'text-red-600 placeholder:text-red-200' : 'text-gray-900 placeholder:text-gray-200'
                   }`}
                 />
+                {errors[`scenario_${activeScenario.id}_desc`] && <p className="text-red-500 text-sm font-bold">{errors[`scenario_${activeScenario.id}_desc`]}</p>}
               </div>
             </div>
 
@@ -154,15 +159,18 @@ export function ScenariosStep({
                               className="w-full bg-transparent text-center outline-none"
                             />
                           </div>
-                          <input 
-                            type="text"
-                            value={choice.text}
-                            onChange={(e) => updateChoice(index, 'text', e.target.value)}
-                            placeholder={`الخيار ${index + 1}`}
-                            className={`flex-1 min-w-0 bg-transparent font-black text-lg outline-none placeholder:text-gray-300 ${
-                              choiceError ? 'text-red-600' : 'text-gray-900'
-                            }`}
-                          />
+                          <div className="flex-1 min-w-0">
+                            <input 
+                              type="text"
+                              value={choice.text}
+                              onChange={(e) => updateChoice(index, 'text', e.target.value)}
+                              placeholder={`الخيار ${index + 1}`}
+                              className={`w-full bg-transparent font-black text-lg outline-none placeholder:text-gray-300 ${
+                                choiceError ? 'text-red-600' : 'text-gray-900'
+                              }`}
+                            />
+                            {choiceError && <p className="text-red-500 text-xs font-bold mt-1">{choiceError}</p>}
+                          </div>
                         </div>
                         <button 
                           onClick={() => updateChoice(index, 'isCorrect', 'true')}
@@ -194,6 +202,7 @@ export function ScenariosStep({
                             feedbackError ? 'text-red-600' : 'text-gray-600'
                           }`}
                         />
+                        {feedbackError && <p className="text-red-500 text-xs font-bold mt-1">{feedbackError}</p>}
                       </div>
                     </div>
                   );

@@ -1,18 +1,16 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
-import { SupabaseAdapter } from "@/lib/supabase-adapter"
+import { DrizzleAdapter } from "@auth/drizzle-adapter"
+import { db } from "@/lib/db"
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, signIn, signOut, auth, update } = NextAuth({
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
-  adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  }),
+  adapter: DrizzleAdapter(db),
   session: {
     strategy: "jwt"
   },
@@ -20,10 +18,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/login',
   },
   callbacks: {
-    jwt({ token, user, profile }) {
+    jwt({ token, user, profile, trigger, session }) {
       if (user) {
         token.id = user.id
         token.image = user.image || (profile?.picture as string)
+        token.name = user.name // Always use the name from the database
+      }
+      if (trigger === "update" && session) {
+        // Handle both { name: "..." } and { user: { name: "..." } }
+        const newName = session.name || session.user?.name;
+        if (newName) {
+          token.name = newName;
+        }
       }
       return token
     },

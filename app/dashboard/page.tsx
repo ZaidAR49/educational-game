@@ -1,23 +1,17 @@
-"use client"
-
 import Link from "next/link"
-import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus } from "lucide-react"
+import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks } from "lucide-react"
+import { getDashboardOverviewAction } from "@/lib/actions/dashboard.actions"
 
-// Static mockup data
-const STATS = [
-  { label: "إجمالي الألعاب", value: "12", icon: Gamepad2, color: "bg-blue-50 text-blue-600" },
-  { label: "إجمالي اللاعبين", value: "1,248", icon: Users, color: "bg-emerald-50 text-emerald-600" },
-  { label: "معدل الإكمال", value: "84%", icon: Target, color: "bg-purple-50 text-purple-600" },
-  { label: "متوسط النقاط", value: "85/100", icon: Trophy, color: "bg-amber-50 text-amber-600" },
-]
+export default async function OverviewPage() {
+  const data = await getDashboardOverviewAction();
 
-const RECENT_GAMES = [
-  { id: "1", title: "لعبة التوعية الأسرية", status: "published", plays: 842, date: "2026-07-08" },
-  { id: "2", title: "اختبار حقوق الطفل", status: "draft", plays: 0, date: "2026-07-09" },
-  { id: "3", title: "تحدي التربية الإيجابية", status: "published", plays: 406, date: "2026-07-01" },
-]
+  const STATS = [
+    { label: "إجمالي الألعاب", value: data.stats.totalGames.toString(), icon: Gamepad2, color: "bg-blue-50 text-blue-600" },
+    { label: "إجمالي اللاعبين", value: data.stats.totalPlayers.toLocaleString(), icon: Users, color: "bg-emerald-50 text-emerald-600" },
+    { label: "المؤسسات التابعة لك", value: data.stats.totalOrgs.toString(), icon: Building2, color: "bg-purple-50 text-purple-600" },
+    { label: "إجمالي الأسئلة", value: data.stats.totalScenarios.toString(), icon: ListChecks, color: "bg-amber-50 text-amber-600" },
+  ]
 
-export default function OverviewPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
@@ -68,34 +62,51 @@ export default function OverviewPage() {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-right">
-              <thead className="bg-gray-50/50 text-gray-500 text-sm">
-                <tr>
-                  <th className="font-bold py-4 px-6">اسم اللعبة</th>
-                  <th className="font-bold py-4 px-6">الحالة</th>
-                  <th className="font-bold py-4 px-6">مرات اللعب</th>
-                  <th className="font-bold py-4 px-6">تاريخ الإنشاء</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 text-sm">
-                {RECENT_GAMES.map((game) => (
-                  <tr key={game.id} className="hover:bg-gray-50/50 transition-colors group">
-                    <td className="py-4 px-6 font-bold text-gray-900">{game.title}</td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                        game.status === 'published' 
-                          ? 'bg-emerald-100 text-emerald-700' 
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {game.status === 'published' ? 'منشورة' : 'مسودة'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-gray-600 font-medium">{game.plays}</td>
-                    <td className="py-4 px-6 text-gray-500">{game.date}</td>
+            {data.recentGames.length > 0 ? (
+              <table className="w-full text-right">
+                <thead className="bg-gray-50/50 text-gray-500 text-sm">
+                  <tr>
+                    <th className="font-bold py-4 px-6">اسم اللعبة</th>
+                    <th className="font-bold py-4 px-6">الحالة</th>
+                    <th className="font-bold py-4 px-6">مرات اللعب</th>
+                    <th className="font-bold py-4 px-6">تاريخ الإنشاء</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-50 text-sm">
+                  {data.recentGames.map((game) => (
+                    <tr key={game.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="py-4 px-6 font-bold text-gray-900">{game.title}</td>
+                      <td className="py-4 px-6">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                          game.status === 'published' 
+                            ? 'bg-emerald-100 text-emerald-700' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {game.status === 'published' ? 'منشورة' : 'مسودة'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-gray-600 font-medium">{game.plays}</td>
+                      <td className="py-4 px-6 text-gray-500">{game.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                  <Gamepad2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">لا توجد ألعاب بعد</h3>
+                <p className="text-gray-500 mb-6">قم بإنشاء لعبتك الأولى لتبدأ برؤية الإحصائيات هنا.</p>
+                <Link 
+                  href="/dashboard/games/new"
+                  className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-6 py-2.5 rounded-xl font-bold transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>إنشاء لعبة جديدة</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 

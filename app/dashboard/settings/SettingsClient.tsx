@@ -1,22 +1,54 @@
 "use client"
 
-import { useState } from "react"
-import { Save, UserCircle2, Mail } from "lucide-react"
+import { useState, useTransition } from "react"
+import { Save, UserCircle2, Mail, Loader2 } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { updateUserAction } from "@/lib/actions/users.actions"
+import { useSession } from "next-auth/react"
 
 interface SettingsClientProps {
   session: any
 }
 
 export default function SettingsClient({ session }: SettingsClientProps) {
+  const router = useRouter()
+  const { update: updateSession } = useSession()
+  const [isPending, startTransition] = useTransition()
+
+  const [error, setError] = useState<string>("")
+
   // Use session data if available, fallback to mock data
   const [formData, setFormData] = useState({
-    name: session?.user?.name || "Zaid Radaideh",
-    email: session?.user?.email || "ziedradaideh1975@gmail.com",
+    name: session?.user?.name || "",
+    email: session?.user?.email || "",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+    if (error) setError("")
+  }
+
+  const handleSave = () => {
+    if (!formData.name.trim()) {
+      setError("الرجاء إدخال الاسم الكامل")
+      return;
+    }
+    
+    startTransition(async () => {
+      try {
+        await updateUserAction({ name: formData.name });
+        
+        // This updates the client session without a full page reload
+        await updateSession({ name: formData.name });
+        
+        // Refresh server components
+        router.refresh();
+      } catch (error) {
+        console.error("Failed to save user settings:", error);
+        alert("حدث خطأ أثناء الحفظ.");
+      }
+    });
   }
 
   const userImage = session?.user?.image
@@ -32,9 +64,13 @@ export default function SettingsClient({ session }: SettingsClientProps) {
             تحديث المعلومات الشخصية الخاصة بك.
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0">
-          <Save className="w-5 h-5" />
-          <span>حفظ التغييرات</span>
+        <button 
+          onClick={handleSave}
+          disabled={isPending}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0"
+        >
+          {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+          <span>{isPending ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
         </button>
       </div>
 
@@ -73,10 +109,11 @@ export default function SettingsClient({ session }: SettingsClientProps) {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full pl-4 pr-11 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all text-right"
+                  className={`w-full pl-4 pr-11 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-right ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200'}`}
                 />
-                <UserCircle2 className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
+                <UserCircle2 className={`w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 ${error ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
+              {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
             </div>
 
             <div className="space-y-2">

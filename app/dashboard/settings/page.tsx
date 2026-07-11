@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import SettingsClient from "./SettingsClient"
 import { redirect } from "next/navigation"
+import { SessionProvider } from "next-auth/react"
 
 export default async function SettingsPage() {
   const session = await auth()
@@ -9,5 +10,9 @@ export default async function SettingsPage() {
     redirect("/login")
   }
 
-  return <SettingsClient session={session} />
+  return (
+    <SessionProvider session={session}>
+      <SettingsClient session={session} />
+    </SessionProvider>
+  )
 }
