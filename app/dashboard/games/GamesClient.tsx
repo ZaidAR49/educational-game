@@ -8,6 +8,7 @@ import { ConfirmModal } from "@/components/shared/ConfirmModal"
 import { Game } from "@/components/games/types"
 import { GameCard } from "@/components/games/GameCard"
 import { GameShareModal } from "@/components/games/GameShareModal"
+import { toast } from "sonner"
 import { toggleGamePublishStatusAction, deleteGameAction } from "@/lib/actions/games.actions"
 
 interface GamesClientProps {
@@ -34,7 +35,7 @@ export function GamesClient({ initialGames }: GamesClientProps) {
         await toggleGamePublishStatusAction(id, isPublishing);
       } catch (error) {
         console.error("Failed to update status:", error);
-        alert("حدث خطأ أثناء تحديث حالة اللعبة");
+        toast.error("حدث خطأ أثناء تحديث حالة اللعبة");
       }
     });
   }
@@ -46,11 +47,20 @@ export function GamesClient({ initialGames }: GamesClientProps) {
       try {
         await deleteGameAction(gameToDelete.id);
         setGameToDelete(null);
+        toast.success("تم حذف اللعبة بنجاح");
       } catch (error) {
         console.error("Failed to delete game:", error);
-        alert("حدث خطأ أثناء حذف اللعبة");
+        toast.error("حدث خطأ أثناء حذف اللعبة");
       }
     });
+  }
+
+  const initiateDelete = (game: Game) => {
+    if (game.status === 'published') {
+      toast.error("لا يمكنك حذف اللعبة أثناء وجود جلسة مباشرة. يرجى إنهاء الجلسة أولاً.");
+      return;
+    }
+    setGameToDelete(game);
   }
 
   return (
@@ -81,7 +91,7 @@ export function GamesClient({ initialGames }: GamesClientProps) {
             game={game} 
             onToggleStatus={toggleGameStatus} 
             onShare={setShareGame} 
-            onDelete={setGameToDelete} 
+            onDelete={initiateDelete} 
           />
         ))}
 

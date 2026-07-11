@@ -1,5 +1,5 @@
-import { GameWizard } from "@/components/games/GameWizard"
 import { getMyOrganizationsAction } from "@/lib/actions/organizations.actions"
+import { NewGameFlow } from "@/components/games/NewGameFlow"
 
 export default async function NewGamePage() {
   const organizations = await getMyOrganizationsAction();
@@ -10,5 +10,5 @@ export default async function NewGamePage() {
     logo: org.logoPath
   }));
 
-  return <GameWizard isEdit={false} organizations={orgOptions} />
+  return <NewGameFlow organizations={orgOptions} />
 }

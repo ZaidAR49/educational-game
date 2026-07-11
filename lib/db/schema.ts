@@ -153,6 +153,7 @@ export const games = pgTable("games", {
   status: gameStatusEnum("status").notNull().default("draft"),
   language: text("language").notNull().default("ar"),
   isPublic: boolean("is_public").notNull().default(true),
+  isDemo: boolean("is_demo").notNull().default(false),
   accessCode: text("access_code"),
   settings: jsonb("settings").notNull().default({}),
   maxPoints: integer("max_points").notNull().default(0),

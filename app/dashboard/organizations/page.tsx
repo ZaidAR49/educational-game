@@ -40,8 +40,13 @@ export default async function OrganizationsPage() {
           <div key={org.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col group hover:shadow-md hover:border-emerald-100 transition-all">
             
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-                <Building2 className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 overflow-hidden">
+                {org.logoPath ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={org.logoPath} alt={org.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Building2 className="w-6 h-6" />
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Link 

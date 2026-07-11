@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Save, Image as ImageIcon, ArrowRight, Trash2, Loader2 } from "lucide-react"
+import { Building2, Save, Upload, X, Loader2, Image as ImageIcon, ArrowRight, Trash2 } from "lucide-react"
 import { LivePreview } from "@/components/dashboard/LivePreview"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { uploadLogoAction } from "@/lib/actions/upload.actions"
 import { createOrganizationAction, updateOrganizationAction } from "@/lib/actions/organizations.actions"
+import { toast } from "sonner"
 
 export type OrganizationFormData = {
   institutionName: string;
@@ -96,13 +97,13 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
     if (!file) return
 
     if (!file.type.startsWith("image/")) {
-      alert("الرجاء رفع ملف صورة صالح (PNG, JPG, إلخ)")
-      return
+      toast.warning("الرجاء رفع ملف صورة صالح (PNG, JPG, إلخ)");
+      return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت")
-      return
+      toast.warning("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت");
+      return;
     }
 
     setSelectedFile(file)
@@ -131,7 +132,7 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
 
   const handleSave = async () => {
     if (!validateForm()) {
-      alert("يوجد بعض الأخطاء في النموذج، يرجى مراجعتها.");
+      toast.error("يوجد بعض الأخطاء في النموذج، يرجى مراجعتها.");
       return;
     }
 
@@ -175,7 +176,7 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
       router.push("/dashboard/organizations");
     } catch (error) {
       console.error("Save error", error);
-      alert("حدث خطأ أثناء حفظ المؤسسة. الرجاء المحاولة مرة أخرى.");
+      toast.error("حدث خطأ أثناء حفظ المؤسسة. الرجاء المحاولة مرة أخرى.");
     } finally {
       setIsSaving(false);
     }

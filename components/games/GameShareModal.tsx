@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, Maximize, Link as LinkIcon, Users } from "lucide-react"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
+import { toast } from "sonner"
 import { Game } from "./types"
 
 interface GameShareModalProps {
   game: Game | null
   onClose: () => void
+  hideLiveSessionButton?: boolean
 }
 
-export function GameShareModal({ game, onClose }: GameShareModalProps) {
+export function GameShareModal({ game, onClose, hideLiveSessionButton }: GameShareModalProps) {
   const [isQrFullscreen, setIsQrFullscreen] = useState(false)
 
   if (!game) return null
@@ -93,7 +95,7 @@ export function GameShareModal({ game, onClose }: GameShareModalProps) {
                     <button 
                       onClick={() => {
                         navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${game.id}`);
-                        alert("تم نسخ الرابط!");
+                        toast.success("تم نسخ الرابط بنجاح!");
                       }}
                       className="flex items-center gap-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-5 font-bold transition-colors shrink-0"
                     >
@@ -103,17 +105,27 @@ export function GameShareModal({ game, onClose }: GameShareModalProps) {
                   </div>
                 </div>
 
-                <Link
-                  href={`/dashboard/games/${game.id}/live`}
-                  className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-xl font-bold transition-all shadow-md shadow-indigo-600/20"
-                >
-                  <Users className="w-5 h-5" />
-                  <span>عرض الجلسة المباشرة</span>
-                  <div className="relative flex h-3 w-3 mr-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                  </div>
-                </Link>
+                {hideLiveSessionButton ? (
+                  <button
+                    onClick={() => { onClose(); setIsQrFullscreen(false); }}
+                    className="mt-6 w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 px-6 rounded-xl font-bold transition-all shadow-sm"
+                  >
+                    <X className="w-5 h-5" />
+                    <span>إغلاق</span>
+                  </button>
+                ) : (
+                  <Link
+                    href={`/dashboard/games/${game.id}/live`}
+                    className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-xl font-bold transition-all shadow-md shadow-indigo-600/20"
+                  >
+                    <Users className="w-5 h-5" />
+                    <span>عرض الجلسة المباشرة</span>
+                    <div className="relative flex h-3 w-3 mr-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                    </div>
+                  </Link>
+                )}
               </>
             )}
           </div>

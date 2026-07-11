@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { Save, UserCircle2, Mail, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { updateUserAction } from "@/lib/actions/users.actions"
 import { useSession } from "next-auth/react"
 
@@ -45,8 +46,8 @@ export default function SettingsClient({ session }: SettingsClientProps) {
         // Refresh server components
         router.refresh();
       } catch (error) {
-        console.error("Failed to save user settings:", error);
-        alert("حدث خطأ أثناء الحفظ.");
+        console.error("Failed to save settings", error);
+        toast.error("حدث خطأ أثناء الحفظ.");
       }
     });
   }

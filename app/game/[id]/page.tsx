@@ -1,9 +1,19 @@
-import { getLiveGameForStudentAction } from "@/lib/actions/plays.actions";
+import { getLiveGameForStudentAction, getGameForPreviewAction } from "@/lib/actions/plays.actions";
 import GameClient from "./GameClient";
 
-export default async function GamePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function GamePage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ preview?: string }>
+}) {
   const { id } = await params;
-  const data = await getLiveGameForStudentAction(id);
+  const { preview } = await searchParams;
+  
+  const data = preview === 'true' 
+    ? await getGameForPreviewAction(id)
+    : await getLiveGameForStudentAction(id);
 
   if (!data || data.error || !data.game || !data.play) {
     return (

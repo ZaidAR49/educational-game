@@ -16,6 +16,9 @@ import { generateDefaultChoices } from "./wizard/constants"
 import { BasicInfoStep, OrganizationOption } from "./wizard/BasicInfoStep"
 import { ScenariosStep } from "./wizard/ScenariosStep"
 import { PublishStep } from "./wizard/PublishStep"
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import { toast } from "sonner"
+import { createGameAction, updateGameAction, deleteGameAction } from "@/lib/actions/games.actions"
 import { saveFullGameAction } from "@/lib/actions/game-wizard.actions"
 
 interface GameWizardProps {
@@ -24,6 +27,7 @@ interface GameWizardProps {
   initialGame?: Partial<GameFormData>;
   initialScenarios?: Scenario[];
   organizations: OrganizationOption[];
+  customTopActions?: React.ReactNode;
 }
 
 export function GameWizard({ 
@@ -31,13 +35,15 @@ export function GameWizard({
   gameId, 
   initialGame, 
   initialScenarios, 
-  organizations 
+  organizations,
+  customTopActions
 }: GameWizardProps) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+  const [createdGameId, setCreatedGameId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   
   // Game State
@@ -86,7 +92,7 @@ export function GameWizard({
 
   const removeScenario = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (scenarios.length <= 1) return alert("يجب أن تحتوي اللعبة على سؤال واحد على الأقل.")
+    if (scenarios.length <= 1) return toast.error("يجب أن تحتوي اللعبة على سؤال واحد على الأقل.")
     const filtered = scenarios.filter(s => s.id !== id)
     setScenarios(filtered)
     if (activeScenarioId === id) {
@@ -227,6 +233,7 @@ export function GameWizard({
 
         if (result.success) {
           if (formData.status === 'published') {
+            if (result.gameId) setCreatedGameId(result.gameId);
             setShowSuccessPopup(true)
           } else {
             router.push("/dashboard/games");
@@ -239,7 +246,10 @@ export function GameWizard({
     });
   }
 
-  const gameUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${formData.slug || 'slug'}`
+  const finalGameId = createdGameId || gameId;
+  const gameUrl = finalGameId 
+    ? `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${finalGameId}`
+    : "";
 
   const downloadQR = () => {
     const canvas = document.getElementById("qr-code-canvas") as HTMLCanvasElement
@@ -258,7 +268,7 @@ export function GameWizard({
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-28">
       
       {/* Top Navigation */}
-      <div>
+      <div className="flex items-center gap-4">
         <Link 
           href="/dashboard/games" 
           className="inline-flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100"
@@ -266,6 +276,7 @@ export function GameWizard({
           <ArrowRight className="w-4 h-4" />
           <span>العودة للألعاب</span>
         </Link>
+        {customTopActions}
       </div>
 
       {/* Wizard Header */}
@@ -450,8 +461,10 @@ export function GameWizard({
                   </div>
                   <button 
                     onClick={() => {
-                      navigator.clipboard.writeText(gameUrl);
-                      alert("تم نسخ الرابط!");
+                      if (finalGameId) {
+                        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${finalGameId}`);
+                        toast.success("تم نسخ الرابط بنجاح!");
+                      }
                     }}
                     className="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-6 rounded-xl font-bold transition-colors shrink-0"
                   >

@@ -4,9 +4,11 @@ import { useState, useEffect, use, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, Users, Activity, Trophy, Medal, Award, Crown, CheckCircle2, XCircle, PowerOff, RefreshCw, Loader2 } from "lucide-react"
+import { ArrowRight, Users, Activity, Trophy, Medal, Award, Crown, CheckCircle2, XCircle, PowerOff, RefreshCw, Loader2, QrCode } from "lucide-react"
 import { getLiveSessionDataAction } from "@/lib/actions/sessions.actions"
 import { toggleGamePublishStatusAction } from "@/lib/actions/games.actions"
+import { GameShareModal } from "@/components/games/GameShareModal"
+import { toast } from "sonner"
 
 export default function LiveSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -16,6 +18,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
   const [students, setStudents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
+  const [showQrModal, setShowQrModal] = useState(false)
 
   // Poll database for live updates
   useEffect(() => {
@@ -54,10 +57,14 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
     startTransition(async () => {
       try {
         await toggleGamePublishStatusAction(id, false);
-        router.push("/dashboard/sessions");
+        if (session?.id) {
+          router.push(`/dashboard/sessions/${session.id}/podium`);
+        } else {
+          router.push("/dashboard/sessions");
+        }
       } catch (error) {
         console.error("Failed to end session", error);
-        alert("حدث خطأ أثناء إنهاء الجلسة");
+        toast.error("حدث خطأ أثناء إنهاء الجلسة");
       }
     });
   }
@@ -91,8 +98,11 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
     )
   }
 
-  // Sort students by score descending
-  const sortedStudents = [...students].sort((a, b) => b.score - a.score)
+  // Sort students by score descending, then by duration ascending
+  const sortedStudents = [...students].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return (a.durationSeconds || Infinity) - (b.durationSeconds || Infinity);
+  })
   const top3 = sortedStudents.slice(0, 3)
 
   const activePlayers = students.filter(s => s.isConnected).length
@@ -135,6 +145,13 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
 
         {/* Management Actions */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowQrModal(true)}
+            className="flex items-center justify-center w-[42px] h-[42px] bg-white border border-gray-100 shadow-sm text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 rounded-xl transition-all"
+            title="عرض رمز QR للطلاب"
+          >
+            <QrCode className="w-5 h-5" />
+          </button>
           <button 
             disabled={isPending}
             onClick={handleEndSession}
@@ -349,6 +366,14 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
       </div>
+      
+      {showQrModal && session && (
+        <GameShareModal 
+          game={{ id, title: session.gameName } as any} 
+          onClose={() => setShowQrModal(false)}
+          hideLiveSessionButton={true}
+        />
+      )}
     </div>
   )
 }

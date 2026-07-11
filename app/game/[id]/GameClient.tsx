@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import Link from "next/link"
 import uiContent from "@/data/ui-content-general.json"
+import nicknames from "@/data/nicknames.json"
 import { config } from "@/lib/config"
 import {
   createConfettiPieces,
@@ -12,8 +13,15 @@ import {
 } from "@/lib/game"
 import { joinPlayAction, updatePlayerAction } from "@/lib/actions/plays.actions"
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 type GameScreen = "join" | "start" | "game" | "result"
+
+const generateRandomName = () => {
+  const noun = nicknames.nouns[Math.floor(Math.random() * nicknames.nouns.length)];
+  const adj = nicknames.adjectives[Math.floor(Math.random() * nicknames.adjectives.length)];
+  return `${noun} ${adj}`;
+};
 
 export default function GameClient({ game, play, scenarios }: { game: any, play: any, scenarios: any[] }) {
   const [screen, setScreen] = useState<GameScreen>("join")
@@ -36,6 +44,16 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
 
   const { app, gameStart, gamePlay, results } = uiContent
 
+  useEffect(() => {
+    // Check local storage for existing name
+    const savedName = localStorage.getItem("drugGamePlayerName");
+    if (savedName) {
+      setPlayerName(savedName);
+    } else {
+      setPlayerName(generateRandomName());
+    }
+  }, []);
+
   const currentScenario = scenarios[currentScenarioIndex]
   // max score should ideally be derived from scenarios and choices, but we assume each correct is 10 points for now
   const maxScore = scenarios.reduce((acc, scenario) => {
@@ -56,11 +74,23 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
 
     startTransition(async () => {
       try {
+        if (game.isDemo) {
+          // Bypass DB for demo
+          setPlayerId("demo-player-id");
+          localStorage.setItem("drugGamePlayerName", playerName.trim());
+          setScreen("start");
+          return;
+        }
+
         const player = await joinPlayAction(play.id, playerName.trim());
         setPlayerId(player.id);
+        
+        // Save name for future sessions
+        localStorage.setItem("drugGamePlayerName", playerName.trim());
+        
         setScreen("start");
-      } catch (error) {
-        alert("تعذر الانضمام، قد يكون الاسم مستخدماً مسبقاً أو الجلسة مغلقة.");
+      } catch (error: any) {
+        toast.error("هذا الاسم مستخدم بالفعل في هذه الجلسة، يرجى اختيار اسم آخر.");
       }
     });
   }
@@ -78,6 +108,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
   }
 
   const syncProgress = async (newScore: number, newCorrect: number, newWrong: number, finished: boolean) => {
+    if (game.isDemo) return; // Bypass DB for demo
     if (!playerId) return;
     try {
       await updatePlayerAction(playerId, {
@@ -185,8 +216,12 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
         {/* ─── JOIN SCREEN ─── */}
         {screen === "join" && (
           <form onSubmit={handleJoin} className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
-             <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600 text-4xl">
-               🎮
+             <div className={`w-20 h-20 ${game.organization?.logoPath ? 'bg-transparent' : 'bg-indigo-50'} rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600 text-4xl overflow-hidden`}>
+               {game.organization?.logoPath ? (
+                 <img src={game.organization.logoPath} alt="Logo" className="w-full h-full object-contain" />
+               ) : (
+                 "🎮"
+               )}
              </div>
              <h1 className="text-3xl font-black text-gray-900 mb-2">
                الانضمام للعبة
@@ -195,15 +230,25 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
              
              <div className="mb-6 text-right">
                <label className="block text-gray-700 font-bold mb-2">اسمك الأول</label>
-               <input 
-                 type="text" 
-                 required
-                 value={playerName}
-                 onChange={(e) => setPlayerName(e.target.value)}
-                 className="w-full px-5 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-bold"
-                 placeholder="اكتب اسمك هنا..."
-                 autoFocus
-               />
+               <div className="relative">
+                 <input 
+                   type="text" 
+                   required
+                   value={playerName}
+                   onChange={(e) => setPlayerName(e.target.value)}
+                   className="w-full pl-16 pr-5 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-bold"
+                   placeholder="اكتب اسمك هنا..."
+                   autoFocus
+                 />
+                 <button
+                   type="button"
+                   onClick={() => setPlayerName(generateRandomName())}
+                   className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition-colors group"
+                   title="توليد اسم عشوائي"
+                 >
+                   <span className="text-xl group-hover:rotate-180 inline-block transition-transform duration-300">🎲</span>
+                 </button>
+               </div>
              </div>
 
              <button
@@ -219,6 +264,11 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
         {/* ─── START SCREEN ─── */}
         {screen === "start" && (
           <div className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
+            {game.organization?.logoPath && (
+              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                 <img src={game.organization.logoPath} alt="Logo" className="w-full h-full object-contain" />
+              </div>
+            )}
             <h1 className="text-3xl font-black text-emerald-600 mb-2">
               {game.title}
             </h1>
@@ -387,8 +437,12 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
             ))}
 
             <div className="relative z-10">
-              <div className="text-7xl mb-4 animate-in zoom-in duration-700">
-                {resultData.badge}
+              <div className="text-7xl mb-4 animate-in zoom-in duration-700 flex justify-center">
+                {game.organization?.logoPath ? (
+                  <img src={game.organization.logoPath} alt="Logo" className="w-24 h-24 object-contain" />
+                ) : (
+                  resultData.badge
+                )}
               </div>
               <h1 className="text-3xl font-black text-emerald-600 mb-2">
                 {resultData.title}
@@ -415,9 +469,30 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
                 >
                   {results.shareLabel}
                 </button>
-                <div className="text-gray-400 font-medium text-sm mt-4">
-                  تم تسجيل النتيجة وحفظها بنجاح 🎯
-                </div>
+                
+                {game.isDemo && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={startGame}
+                      className="bg-white border-2 border-emerald-500 text-emerald-600 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-emerald-50 hover:scale-105 transition-all duration-300"
+                    >
+                      إعادة المحاولة 🔄
+                    </button>
+                    <Link
+                      href={game.id === '00000000-0000-0000-0000-000000000003' ? '/' : '/dashboard/games'}
+                      className="bg-gray-100 text-gray-700 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-gray-200 hover:scale-105 transition-all duration-300"
+                    >
+                      {game.id === '00000000-0000-0000-0000-000000000003' ? 'العودة للرئيسية 🏠' : 'العودة للوحة التحكم 🔙'}
+                    </Link>
+                  </>
+                )}
+
+                {!game.isDemo && (
+                  <div className="text-gray-400 font-medium text-sm mt-4">
+                    تم تسجيل النتيجة وحفظها بنجاح 🎯
+                  </div>
+                )}
               </div>
             </div>
           </div>

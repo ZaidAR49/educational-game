@@ -69,10 +69,13 @@ export function GameCard({ game, onToggleStatus, onShare, onDelete }: GameCardPr
 
       <div className="border-t border-gray-50 p-2 sm:p-3 flex flex-col gap-1.5 sm:gap-2 bg-gray-50/50">
         <div className="flex gap-1.5 sm:gap-2">
-          <button className="flex-1 flex items-center justify-center gap-1.5 bg-white text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-colors border border-gray-100 shadow-sm">
+          <Link 
+            href={`/game/${game.id}?preview=true`}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-white text-gray-700 hover:text-emerald-600 hover:bg-emerald-50 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-colors border border-gray-100 shadow-sm"
+          >
             <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden xl:inline">تجربة</span>
-          </button>
+          </Link>
           <Link 
             href={`/dashboard/games/${game.id}/edit`} 
             className="flex-1 flex items-center justify-center gap-1.5 bg-white text-gray-700 hover:text-blue-600 hover:bg-blue-50 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-colors border border-gray-100 shadow-sm"

@@ -1,8 +1,9 @@
 import { config } from "@/lib/config"
 import uiContent from "@/data/ui-content-general.json"
+import { toast } from "sonner"
 
 export type ConfettiPiece = {
-  id: number
+  id: string
   left: string
   color: string
   delay: string
@@ -11,8 +12,8 @@ export type ConfettiPiece = {
 
 export function createConfettiPieces(): ConfettiPiece[] {
   const { confettiPieceCount, confettiColors } = config.game
-  return Array.from({ length: confettiPieceCount }, (_, i) => ({
-    id: i,
+  return Array.from({ length: confettiPieceCount }, () => ({
+    id: Math.random().toString(36).substring(2, 9) + Date.now().toString(36),
     left: `${Math.random() * 100}%`,
     color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
     delay: `${Math.random() * 2}s`,
@@ -52,12 +53,12 @@ export async function shareGameResult(score: number, gameUrl: string) {
   if (navigator.clipboard) {
     try {
       await navigator.clipboard.writeText(text)
-      alert(copiedMessage)
+      toast.success(copiedMessage)
       return
     } catch {
       // fall through
     }
   }
 
-  alert(fallbackPrefix + text)
+  toast.info(fallbackPrefix + text)
 }

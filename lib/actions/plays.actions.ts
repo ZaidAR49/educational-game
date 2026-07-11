@@ -100,6 +100,9 @@ export async function getLiveGameForStudentAction(gameId: string) {
   // Get game info
   const game = await db.query.games.findFirst({
     where: eq(games.id, gameId),
+    with: {
+      organization: true,
+    }
   });
 
   if (!game) {
@@ -132,6 +135,42 @@ export async function getLiveGameForStudentAction(gameId: string) {
   return {
     game,
     play: livePlay,
+    scenarios: gameScenarios,
+  };
+}
+
+/**
+ * Fetches a game for a teacher to preview without an active session.
+ */
+export async function getGameForPreviewAction(gameId: string) {
+  const { db } = await import("@/lib/db");
+  const { games, scenarios } = await import("@/lib/db/schema");
+  const { eq } = await import("drizzle-orm");
+
+  const game = await db.query.games.findFirst({
+    where: eq(games.id, gameId),
+    with: {
+      organization: true,
+    }
+  });
+
+  if (!game) {
+    return { error: "لم يتم العثور على اللعبة." };
+  }
+
+  const gameScenarios = await db.query.scenarios.findMany({
+    where: eq(scenarios.gameId, gameId),
+    orderBy: (scenarios, { asc }) => [asc(scenarios.orderIndex)],
+    with: {
+      choices: {
+        orderBy: (choices, { asc }) => [asc(choices.orderIndex)],
+      }
+    }
+  });
+
+  return {
+    game: { ...game, isDemo: true }, // Force isDemo true for previews
+    play: { id: "preview-play" },
     scenarios: gameScenarios,
   };
 }

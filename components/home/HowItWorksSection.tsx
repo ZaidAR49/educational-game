@@ -1,25 +1,31 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { UserPlus, Settings2, Rocket } from "lucide-react"
+import { Settings2, PlayCircle, Smartphone, Trophy } from "lucide-react"
 
 const steps = [
   {
-    title: "1. أنشئ حسابك",
-    description: "سجل كمعلم في ثوانٍ للوصول إلى لوحة التحكم الخاصة بك والبدء في إنشاء الألعاب.",
-    icon: UserPlus,
+    title: "1. صمم لعبتك",
+    description: "أضف الأسئلة والخيارات بسهولة مع تحديد الإجابات الصحيحة والتغذية الراجعة.",
+    icon: Settings2,
     color: "from-blue-400 to-blue-600",
   },
   {
-    title: "2. صمم اللعبة أو الاختبار",
-    description: "استخدم محررنا البسيط لإضافة الأسئلة، الخيارات، والتغذية الراجعة التفاعلية لكل سؤال.",
-    icon: Settings2,
+    title: "2. أطلق جلسة مباشرة",
+    description: "بنقرة واحدة، ابدأ جلسة لعب حية واعرض رمز الاستجابة السريعة (QR) لطلابك.",
+    icon: PlayCircle,
     color: "from-emerald-400 to-emerald-600",
   },
   {
-    title: "3. انشر وشارك",
-    description: "احصل على رابط مباشر للعبتك وشاركه مع طلابك ليلعبوا فوراً دون الحاجة لتسجيل الدخول.",
-    icon: Rocket,
+    title: "3. انضمام الطلاب فوراً",
+    description: "ينضم الطلاب من هواتفهم دون الحاجة لتسجيل الدخول، ويبدأ التحدي والمنافسة.",
+    icon: Smartphone,
+    color: "from-amber-400 to-amber-600",
+  },
+  {
+    title: "4. التتويج والنتائج",
+    description: "تابع النتائج بشكل مباشر على الشاشة واعرض منصة التتويج لأفضل الطلاب أداءً!",
+    icon: Trophy,
     color: "from-purple-400 to-purple-600",
   },
 ]
@@ -39,15 +45,15 @@ export function HowItWorksSection() {
             كيف <span className="text-emerald-600">تعمل المنصة؟</span>
           </h2>
           <p className="text-lg text-gray-600">
-            ثلاث خطوات بسيطة تفصلك عن إنشاء تجربة تعليمية لا تُنسى لطلابك.
+            أربع خطوات بسيطة تفصلك عن إنشاء تجربة تعليمية لا تُنسى لطلابك.
           </p>
         </motion.div>
 
-        <div className="relative max-w-5xl mx-auto">
+        <div className="relative max-w-6xl mx-auto">
           {/* Connecting Line */}
           <div className="hidden lg:block absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-blue-200 via-emerald-200 to-purple-200 -translate-y-1/2 z-0 rounded-full"></div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
             {steps.map((step, index) => {
               const Icon = step.icon
               return (
@@ -57,7 +63,7 @@ export function HowItWorksSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: index * 0.2 }}
-                  className="bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100 text-center relative group hover:-translate-y-2 transition-transform duration-300"
+                  className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100 text-center relative group hover:-translate-y-2 transition-transform duration-300"
                 >
                   <div className={`w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center text-white mb-6 shadow-lg transform group-hover:scale-110 transition-transform duration-300 rotate-3 group-hover:rotate-0`}>
                     <Icon className="w-10 h-10" />
@@ -65,7 +71,7 @@ export function HowItWorksSection() {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">
                     {step.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     {step.description}
                   </p>
                 </motion.div>

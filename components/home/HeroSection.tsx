@@ -98,7 +98,7 @@ export function HeroSection({ content }: { content: any }) {
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               </Link>
               <Link
-                href={config.routes.game}
+                href="/game/00000000-0000-0000-0000-000000000003"
                 className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-sm hover:shadow-md"
               >
                 <PlayCircle className="w-5 h-5 text-blue-600" />

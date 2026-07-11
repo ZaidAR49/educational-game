@@ -193,6 +193,7 @@ export async function getLiveSessionDataAction(gameId: string) {
         correct: p.totalCorrectAnswers,
         wrong: p.totalWrongAnswers,
         isConnected: !p.isFinished, // Using isFinished to determine if they are currently active
+        durationSeconds: duration,
       };
     }),
   };
