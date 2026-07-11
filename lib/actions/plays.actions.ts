@@ -87,3 +87,51 @@ export async function updatePlayerAction(playerId: string, playerData: Partial<N
   
   return updatedPlayer;
 }
+
+/**
+ * Fetches the live play and scenarios for a student joining a game.
+ * Public endpoint (no auth required).
+ */
+export async function getLiveGameForStudentAction(gameId: string) {
+  const { db } = await import("@/lib/db");
+  const { games, scenarios, classroomPlays } = await import("@/lib/db/schema");
+  const { eq, and } = await import("drizzle-orm");
+
+  // Get game info
+  const game = await db.query.games.findFirst({
+    where: eq(games.id, gameId),
+  });
+
+  if (!game) {
+    return { error: "لم يتم العثور على اللعبة." };
+  }
+
+  // Get live play
+  const livePlay = await db.query.classroomPlays.findFirst({
+    where: and(
+      eq(classroomPlays.gameId, gameId),
+      eq(classroomPlays.status, "live")
+    ),
+  });
+
+  if (!livePlay) {
+    return { error: "لا توجد جلسة مباشرة نشطة لهذه اللعبة حالياً. يرجى الانتظار حتى يبدأ المعلم الجلسة." };
+  }
+
+  // Get scenarios with choices
+  const gameScenarios = await db.query.scenarios.findMany({
+    where: eq(scenarios.gameId, gameId),
+    orderBy: (scenarios, { asc }) => [asc(scenarios.orderIndex)],
+    with: {
+      choices: {
+        orderBy: (choices, { asc }) => [asc(choices.orderIndex)],
+      }
+    }
+  });
+
+  return {
+    game,
+    play: livePlay,
+    scenarios: gameScenarios,
+  };
+}

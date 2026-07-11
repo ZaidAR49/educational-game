@@ -57,7 +57,7 @@ export function GameShareModal({ game, onClose }: GameShareModalProps) {
             >
               <div className="relative w-full h-full flex items-center justify-center">
                 <QRCodeCanvas
-                  value={`https://your-domain.com/game/${game.id}`}
+                  value={`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${game.id}`}
                   size={1000} // High res internal canvas
                   level="H"
                   fgColor="#064e3b"
@@ -88,11 +88,11 @@ export function GameShareModal({ game, onClose }: GameShareModalProps) {
                   <label className="text-sm font-bold text-gray-500 block text-right">أو انسخ الرابط المباشر</label>
                   <div className="flex rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50">
                     <div className="flex-1 px-4 py-3 bg-transparent text-gray-600 font-sans text-left min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" dir="ltr">
-                      {`https://your-domain.com/game/${game.id}`}
+                      {`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${game.id}`}
                     </div>
                     <button 
                       onClick={() => {
-                        navigator.clipboard.writeText(`https://your-domain.com/game/${game.id}`);
+                        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${game.id}`);
                         alert("تم نسخ الرابط!");
                       }}
                       className="flex items-center gap-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-5 font-bold transition-colors shrink-0"

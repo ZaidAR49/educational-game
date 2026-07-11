@@ -1,58 +1,110 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect, use, useTransition } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowRight, Users, Activity, Trophy, Medal, Award, Crown, CheckCircle2, XCircle, PowerOff, RefreshCw } from "lucide-react"
-
-// Mock real-time data for students
-const MOCK_STUDENTS = [
-  { id: 1, name: "أحمد محمد", score: 950, correct: 9, wrong: 1, isConnected: true },
-  { id: 2, name: "سارة خالد", score: 880, correct: 8, wrong: 2, isConnected: true },
-  { id: 3, name: "عمر عبدالله", score: 820, correct: 8, wrong: 2, isConnected: true },
-  { id: 4, name: "نورة سعد", score: 750, correct: 7, wrong: 3, isConnected: true },
-  { id: 5, name: "فهد عبدالعزيز", score: 640, correct: 6, wrong: 4, isConnected: false },
-  { id: 6, name: "ريم طارق", score: 580, correct: 5, wrong: 5, isConnected: true },
-  { id: 7, name: "يوسف علي", score: 420, correct: 4, wrong: 6, isConnected: true },
-]
+import { ArrowRight, Users, Activity, Trophy, Medal, Award, Crown, CheckCircle2, XCircle, PowerOff, RefreshCw, Loader2 } from "lucide-react"
+import { getLiveSessionDataAction } from "@/lib/actions/sessions.actions"
+import { toggleGamePublishStatusAction } from "@/lib/actions/games.actions"
 
 export default function LiveSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const [students, setStudents] = useState(MOCK_STUDENTS)
+  const router = useRouter()
+  
+  const [session, setSession] = useState<{ id: string; gameName: string } | null>(null)
+  const [students, setStudents] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isPending, startTransition] = useTransition()
 
-  // Simulate live data updates to make the dashboard feel alive
+  // Poll database for live updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStudents(prev => {
-        // 30% chance to skip an update cycle to feel more organic
-        if (Math.random() > 0.7) return prev;
-        
-        return prev.map(s => {
-          // Randomly update connected students
-          if (s.isConnected && Math.random() > 0.6) {
-            const isCorrect = Math.random() > 0.2; // 80% chance to be correct
-            return {
-              ...s,
-              score: s.score + (isCorrect ? Math.floor(Math.random() * 5 + 5) * 10 : 0),
-              correct: s.correct + (isCorrect ? 1 : 0),
-              wrong: s.wrong + (!isCorrect ? 1 : 0)
-            }
+    let mounted = true;
+    
+    const fetchLiveSession = async () => {
+      try {
+        const data = await getLiveSessionDataAction(id);
+        if (mounted) {
+          if (data) {
+            setSession(data.session);
+            setStudents(data.players);
+          } else {
+            // No live session found, maybe it was closed
+            // You could potentially redirect here, but we will just keep rendering an empty state
           }
-          return s
-        })
-      })
-    }, 2000)
+          setIsLoading(false);
+        }
+      } catch (e) {
+        console.error("Failed to fetch live session data", e);
+      }
+    };
 
-    return () => clearInterval(interval)
-  }, [])
+    // Fetch immediately
+    fetchLiveSession();
+
+    // Poll every 3 seconds
+    const interval = setInterval(fetchLiveSession, 3000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [id]);
+
+  const handleEndSession = () => {
+    startTransition(async () => {
+      try {
+        await toggleGamePublishStatusAction(id, false);
+        router.push("/dashboard/sessions");
+      } catch (error) {
+        console.error("Failed to end session", error);
+        alert("حدث خطأ أثناء إنهاء الجلسة");
+      }
+    });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+        <p className="text-gray-500 font-bold">جاري تحميل بيانات الجلسة المباشرة...</p>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
+        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+          <PowerOff className="w-10 h-10" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-gray-900 mb-2">لا توجد جلسة مباشرة</h2>
+          <p className="text-gray-500 max-w-md mx-auto">هذه اللعبة غير قيد التشغيل حالياً. يجب عليك بدء اللعبة من صفحة الألعاب أولاً.</p>
+        </div>
+        <Link 
+          href="/dashboard/games"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-sm"
+        >
+          العودة للألعاب
+        </Link>
+      </div>
+    )
+  }
 
   // Sort students by score descending
   const sortedStudents = [...students].sort((a, b) => b.score - a.score)
   const top3 = sortedStudents.slice(0, 3)
-  const others = sortedStudents.slice(3)
 
   const activePlayers = students.filter(s => s.isConnected).length
-  const avgScore = Math.round(students.reduce((acc, curr) => acc + curr.score, 0) / students.length)
+  const avgScore = students.length > 0 
+    ? Math.round(students.reduce((acc, curr) => acc + curr.score, 0) / students.length)
+    : 0
+    
+  const totalCorrect = students.reduce((acc, curr) => acc + curr.correct, 0)
+  const totalQuestionsAnswered = students.reduce((acc, curr) => acc + curr.correct + curr.wrong, 0)
+  const correctPercentage = totalQuestionsAnswered > 0 
+    ? Math.round((totalCorrect / totalQuestionsAnswered) * 100) 
+    : 0
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500" dir="rtl">
@@ -76,19 +128,19 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
               مباشر الآن
             </div>
           </div>
-          <p className="text-gray-500 mr-14">
-            تحدي الثقافة العامة
+          <p className="text-gray-500 mr-14 font-bold text-lg">
+            {session.gameName}
           </p>
         </div>
 
         {/* Management Actions */}
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-100 shadow-sm text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold transition-all">
-            <RefreshCw className="w-4 h-4" />
-            <span>جلسة جديدة</span>
-          </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-100 shadow-sm text-red-600 hover:bg-red-100 rounded-xl font-bold transition-all">
-            <PowerOff className="w-4 h-4" />
+          <button 
+            disabled={isPending}
+            onClick={handleEndSession}
+            className="flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-100 shadow-sm text-red-600 hover:bg-red-100 disabled:opacity-50 rounded-xl font-bold transition-all"
+          >
+            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PowerOff className="w-4 h-4" />}
             <span>إنهاء الجلسة</span>
           </button>
         </div>
@@ -140,7 +192,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           </div>
           <div className="relative z-10">
             <p className="text-gray-500 font-medium mb-1">معدل الإجابات الصحيحة</p>
-            <h3 className="text-3xl font-black text-gray-900">72%</h3>
+            <h3 className="text-3xl font-black text-gray-900">{correctPercentage}%</h3>
           </div>
         </div>
       </div>
@@ -161,67 +213,74 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
             أوائل التحدي
           </h2>
 
-          <div className="flex items-end justify-center gap-2 sm:gap-4 w-full relative z-10 h-64 mt-auto">
-            {/* 2nd Place - Silver */}
-            {top3[1] && (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-col items-center w-1/3 group"
-              >
-                <div className="text-white font-bold mb-6 text-center text-sm truncate w-full group-hover:-translate-y-1 transition-transform">{top3[1].name}</div>
-                <div className="w-full bg-gradient-to-t from-slate-400 via-slate-300 to-slate-200 rounded-t-2xl h-32 flex flex-col items-center justify-start pt-6 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3),0_10px_20px_rgba(0,0,0,0.5)] border-t border-white/50">
-                  <div className="absolute -top-7 w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-300 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-[0_0_15px_rgba(148,163,184,0.5)]">
-                    <Medal className="w-6 h-6 text-slate-600" />
+          {students.length > 0 ? (
+            <div className="flex items-end justify-center gap-2 sm:gap-4 w-full relative z-10 h-64 mt-auto">
+              {/* 2nd Place - Silver */}
+              {top3[1] && (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex flex-col items-center w-1/3 group"
+                >
+                  <div className="text-white font-bold mb-6 text-center text-sm truncate w-full group-hover:-translate-y-1 transition-transform">{top3[1].name}</div>
+                  <div className="w-full bg-gradient-to-t from-slate-400 via-slate-300 to-slate-200 rounded-t-2xl h-32 flex flex-col items-center justify-start pt-6 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3),0_10px_20px_rgba(0,0,0,0.5)] border-t border-white/50">
+                    <div className="absolute -top-7 w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-300 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-[0_0_15px_rgba(148,163,184,0.5)]">
+                      <Medal className="w-6 h-6 text-slate-600" />
+                    </div>
+                    <span className="text-slate-800 font-black text-3xl mt-2 drop-shadow-sm">2</span>
+                    <span className="text-slate-700 font-bold text-sm mt-1 bg-white/30 px-3 py-0.5 rounded-full backdrop-blur-sm shadow-inner">{top3[1].score}</span>
                   </div>
-                  <span className="text-slate-800 font-black text-3xl mt-2 drop-shadow-sm">2</span>
-                  <span className="text-slate-700 font-bold text-sm mt-1 bg-white/30 px-3 py-0.5 rounded-full backdrop-blur-sm shadow-inner">{top3[1].score}</span>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
 
-            {/* 1st Place - Gold */}
-            {top3[0] && (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center w-1/3 z-20"
-              >
-                <div className="text-white font-black mb-8 text-center text-lg truncate w-full drop-shadow-md animate-[bounce_2s_ease-in-out_infinite]">{top3[0].name}</div>
-                <div className="w-full bg-gradient-to-t from-amber-600 via-amber-400 to-yellow-300 rounded-t-2xl h-44 flex flex-col items-center justify-start pt-6 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3),0_10px_30px_rgba(245,158,11,0.3)] border-t-2 border-white/60">
-                  <div className="absolute -top-10 w-20 h-20 bg-gradient-to-br from-yellow-100 to-amber-300 rounded-full border-4 border-slate-900 flex items-center justify-center shadow-[0_0_30px_rgba(251,191,36,0.6)] relative">
-                    <div className="absolute inset-0 rounded-full animate-ping bg-amber-400/40"></div>
-                    <Crown className="w-10 h-10 text-amber-700 drop-shadow-sm relative z-10" />
+              {/* 1st Place - Gold */}
+              {top3[0] && (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center w-1/3 z-20"
+                >
+                  <div className="text-white font-black mb-8 text-center text-lg truncate w-full drop-shadow-md animate-[bounce_2s_ease-in-out_infinite]">{top3[0].name}</div>
+                  <div className="w-full bg-gradient-to-t from-amber-600 via-amber-400 to-yellow-300 rounded-t-2xl h-44 flex flex-col items-center justify-start pt-6 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3),0_10px_30px_rgba(245,158,11,0.3)] border-t-2 border-white/60">
+                    <div className="absolute -top-10 w-20 h-20 bg-gradient-to-br from-yellow-100 to-amber-300 rounded-full border-4 border-slate-900 flex items-center justify-center shadow-[0_0_30px_rgba(251,191,36,0.6)] relative">
+                      <div className="absolute inset-0 rounded-full animate-ping bg-amber-400/40"></div>
+                      <Crown className="w-10 h-10 text-amber-700 drop-shadow-sm relative z-10" />
+                    </div>
+                    <span className="text-amber-900 font-black text-5xl mt-5 drop-shadow-md">1</span>
+                    <span className="text-amber-900 font-bold mt-2 bg-white/40 px-4 py-1 rounded-full backdrop-blur-sm shadow-inner text-lg">{top3[0].score}</span>
                   </div>
-                  <span className="text-amber-900 font-black text-5xl mt-5 drop-shadow-md">1</span>
-                  <span className="text-amber-900 font-bold mt-2 bg-white/40 px-4 py-1 rounded-full backdrop-blur-sm shadow-inner text-lg">{top3[0].score}</span>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
 
-            {/* 3rd Place - Bronze */}
-            {top3[2] && (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="flex flex-col items-center w-1/3 group"
-              >
-                <div className="text-white font-bold mb-6 text-center text-sm truncate w-full group-hover:-translate-y-1 transition-transform">{top3[2].name}</div>
-                <div className="w-full bg-gradient-to-t from-orange-600 via-orange-400 to-orange-300 rounded-t-2xl h-24 flex flex-col items-center justify-start pt-5 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3),0_10px_20px_rgba(0,0,0,0.5)] border-t border-white/40">
-                  <div className="absolute -top-6 w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-300 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.4)]">
-                    <Award className="w-5 h-5 text-orange-700" />
+              {/* 3rd Place - Bronze */}
+              {top3[2] && (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex flex-col items-center w-1/3 group"
+                >
+                  <div className="text-white font-bold mb-6 text-center text-sm truncate w-full group-hover:-translate-y-1 transition-transform">{top3[2].name}</div>
+                  <div className="w-full bg-gradient-to-t from-orange-600 via-orange-400 to-orange-300 rounded-t-2xl h-24 flex flex-col items-center justify-start pt-5 relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.3),0_10px_20px_rgba(0,0,0,0.5)] border-t border-white/40">
+                    <div className="absolute -top-6 w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-300 rounded-full border-4 border-slate-800 flex items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+                      <Award className="w-5 h-5 text-orange-700" />
+                    </div>
+                    <span className="text-orange-900 font-black text-2xl mt-2 drop-shadow-sm">3</span>
+                    <span className="text-orange-800 font-bold text-xs mt-1 bg-white/30 px-2 py-0.5 rounded-full backdrop-blur-sm shadow-inner">{top3[2].score}</span>
                   </div>
-                  <span className="text-orange-900 font-black text-2xl mt-2 drop-shadow-sm">3</span>
-                  <span className="text-orange-800 font-bold text-xs mt-1 bg-white/30 px-2 py-0.5 rounded-full backdrop-blur-sm shadow-inner">{top3[2].score}</span>
-                </div>
-              </motion.div>
-            )}
-          </div>
+                </motion.div>
+              )}
+            </div>
+          ) : (
+             <div className="text-white/60 font-bold z-10 flex flex-col items-center gap-2">
+               <Users className="w-10 h-10 opacity-50" />
+               في انتظار انضمام الطلاب...
+             </div>
+          )}
         </div>
 
         {/* Leaderboard Table */}
@@ -231,7 +290,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           </div>
           
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
-            {sortedStudents.map((student, index) => (
+            {sortedStudents.length > 0 ? sortedStudents.map((student, index) => (
               <motion.div 
                 key={student.id}
                 layout
@@ -260,7 +319,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
                   <div className="flex items-center gap-2">
                     <h4 className="font-bold text-gray-900 truncate">{student.name}</h4>
                     {!student.isConnected && (
-                      <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">غير متصل</span>
+                      <span className="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">أكمل الاختبار</span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 text-xs font-medium mt-1">
@@ -281,7 +340,12 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
                   <div className="text-xs text-gray-400 font-medium">نقطة</div>
                 </div>
               </motion.div>
-            ))}
+            )) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <Users className="w-12 h-12 mb-3 opacity-20" />
+                <p className="font-bold">لا يوجد طلاب متصلين حالياً</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

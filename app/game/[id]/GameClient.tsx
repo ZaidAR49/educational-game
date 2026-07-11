@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
-import scenarios from "@/data/scenarios-v2.json"
 import uiContent from "@/data/ui-content-general.json"
 import { config } from "@/lib/config"
 import {
@@ -11,13 +10,24 @@ import {
   shareGameResult,
   type ConfettiPiece,
 } from "@/lib/game"
+import { joinPlayAction, updatePlayerAction } from "@/lib/actions/plays.actions"
+import { Loader2 } from "lucide-react"
 
-type GameScreen = "start" | "game" | "result"
+type GameScreen = "join" | "start" | "game" | "result"
 
-export default function GamePage() {
-  const [screen, setScreen] = useState<GameScreen>("start")
+export default function GameClient({ game, play, scenarios }: { game: any, play: any, scenarios: any[] }) {
+  const [screen, setScreen] = useState<GameScreen>("join")
+  const [playerName, setPlayerName] = useState("")
+  const [playerId, setPlayerId] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0)
+  
+  // Scoring
   const [score, setScore] = useState(0)
+  const [correctAnswers, setCorrectAnswers] = useState(0)
+  const [wrongAnswers, setWrongAnswers] = useState(0)
+  
   const [hasAnswered, setHasAnswered] = useState(false)
   const [selectedChoiceIndex, setSelectedChoiceIndex] = useState<number | null>(null)
   const [isSkipped, setIsSkipped] = useState(false)
@@ -27,22 +37,59 @@ export default function GamePage() {
   const { app, gameStart, gamePlay, results } = uiContent
 
   const currentScenario = scenarios[currentScenarioIndex]
-  const maxScore = scenarios.length * 10
-  const percentage = (score / maxScore) * 100
+  // max score should ideally be derived from scenarios and choices, but we assume each correct is 10 points for now
+  const maxScore = scenarios.reduce((acc, scenario) => {
+    const maxChoicePoints = Math.max(...scenario.choices.map((c: any) => c.points || 0), 0);
+    return acc + maxChoicePoints;
+  }, 0) || scenarios.length * 10;
+  
+  const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0
   const resultData = getResultMessage(percentage)
   const selectedChoice =
     selectedChoiceIndex !== null
       ? currentScenario?.choices[selectedChoiceIndex]
       : null
 
+  const handleJoin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!playerName.trim()) return;
+
+    startTransition(async () => {
+      try {
+        const player = await joinPlayAction(play.id, playerName.trim());
+        setPlayerId(player.id);
+        setScreen("start");
+      } catch (error) {
+        alert("تعذر الانضمام، قد يكون الاسم مستخدماً مسبقاً أو الجلسة مغلقة.");
+      }
+    });
+  }
+
   const startGame = () => {
     setCurrentScenarioIndex(0)
     setScore(0)
+    setCorrectAnswers(0)
+    setWrongAnswers(0)
     setHasAnswered(false)
     setSelectedChoiceIndex(null)
     setIsSkipped(false)
     setShowFeedback(false)
     setScreen("game")
+  }
+
+  const syncProgress = async (newScore: number, newCorrect: number, newWrong: number, finished: boolean) => {
+    if (!playerId) return;
+    try {
+      await updatePlayerAction(playerId, {
+        totalScore: newScore,
+        totalCorrectAnswers: newCorrect,
+        totalWrongAnswers: newWrong,
+        isFinished: finished,
+        completedAt: finished ? new Date() : undefined,
+      });
+    } catch (error) {
+      console.error("Failed to sync progress");
+    }
   }
 
   const selectChoice = (choiceIndex: number) => {
@@ -53,9 +100,17 @@ export default function GamePage() {
     setSelectedChoiceIndex(choiceIndex)
 
     const choice = currentScenario.choices[choiceIndex]
-    if (choice.isCorrect) {
-      setScore((prev) => prev + choice.points)
-    }
+    
+    const newScore = score + (choice.points || 0);
+    const newCorrect = correctAnswers + (choice.isCorrect ? 1 : 0);
+    const newWrong = wrongAnswers + (!choice.isCorrect ? 1 : 0);
+    
+    setScore(newScore);
+    if (choice.isCorrect) setCorrectAnswers(newCorrect);
+    else setWrongAnswers(newWrong);
+
+    // Sync score after answering
+    syncProgress(newScore, newCorrect, newWrong, false);
 
     setTimeout(() => {
       setShowFeedback(true)
@@ -68,7 +123,11 @@ export default function GamePage() {
     setHasAnswered(true)
     setIsSkipped(true)
     setSelectedChoiceIndex(null)
-    // 0 points added (no score change)
+    
+    const newWrong = wrongAnswers + 1; // Count skip as wrong
+    setWrongAnswers(newWrong);
+
+    syncProgress(score, correctAnswers, newWrong, false);
 
     setTimeout(() => {
       setShowFeedback(true)
@@ -77,7 +136,11 @@ export default function GamePage() {
 
   const showResults = () => {
     setScreen("result")
-    const resultPercentage = (score / maxScore) * 100
+    const resultPercentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+    
+    // Final sync
+    syncProgress(score, correctAnswers, wrongAnswers, true);
+
     if (resultPercentage >= config.game.resultThresholds.good) {
       setConfetti(createConfettiPieces())
       setTimeout(() => setConfetti([]), config.game.confettiClearMs)
@@ -97,11 +160,6 @@ export default function GamePage() {
     setShowFeedback(false)
   }
 
-  const restartGame = () => {
-    setScreen("start")
-    setConfetti([])
-  }
-
   const handleShare = () => {
     const gameUrl = typeof window !== "undefined" ? window.location.href : ""
     void shareGameResult(score, gameUrl)
@@ -110,7 +168,12 @@ export default function GamePage() {
   // Feedback content: skipped vs answered
   const activeFeedback = isSkipped
     ? gamePlay.skipFeedback
-    : selectedChoice?.feedback ?? null
+    : selectedChoice ? {
+        title: selectedChoice.feedbackTitle || (selectedChoice.isCorrect ? "إجابة صحيحة!" : "إجابة خاطئة!"),
+        message: selectedChoice.feedbackMessage || "",
+        tip: selectedChoice.feedbackTip || ""
+      } : null;
+      
   const feedbackIsCorrect = !isSkipped && (selectedChoice?.isCorrect ?? false)
 
   return (
@@ -119,28 +182,54 @@ export default function GamePage() {
       dir="rtl"
     >
       <div className="w-full max-w-lg">
+        {/* ─── JOIN SCREEN ─── */}
+        {screen === "join" && (
+          <form onSubmit={handleJoin} className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
+             <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600 text-4xl">
+               🎮
+             </div>
+             <h1 className="text-3xl font-black text-gray-900 mb-2">
+               الانضمام للعبة
+             </h1>
+             <p className="text-gray-500 font-bold mb-8">{game.title}</p>
+             
+             <div className="mb-6 text-right">
+               <label className="block text-gray-700 font-bold mb-2">اسمك الأول</label>
+               <input 
+                 type="text" 
+                 required
+                 value={playerName}
+                 onChange={(e) => setPlayerName(e.target.value)}
+                 className="w-full px-5 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-bold"
+                 placeholder="اكتب اسمك هنا..."
+                 autoFocus
+               />
+             </div>
+
+             <button
+               type="submit"
+               disabled={isPending || !playerName.trim()}
+               className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-xl font-bold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+             >
+               {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "دخول الآن"}
+             </button>
+          </form>
+        )}
+
         {/* ─── START SCREEN ─── */}
         {screen === "start" && (
           <div className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
-            <img
-              src={app.logoUrl}
-              alt={`شعار ${app.organizationName}`}
-              className="w-28 h-28 mx-auto mb-4 object-contain"
-            />
-            <h1 className="text-3xl font-bold text-emerald-600 mb-2">
-              {app.name}
+            <h1 className="text-3xl font-black text-emerald-600 mb-2">
+              {game.title}
             </h1>
-            <p className="text-gray-500 mb-6">{app.campaignSubtitle}</p>
+            <p className="text-gray-500 mb-6 font-bold">مرحباً {playerName}! 👋</p>
 
             <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl p-5 mb-6 text-right">
-              {gameStart.welcomeLines.map((line, i) => (
-                <p
-                  key={i}
-                  className={`text-gray-700 mb-3 ${i === gameStart.welcomeLines.length - 1 ? "" : ""}`}
-                >
-                  {line}
+              {game.description && (
+                <p className="text-gray-700 mb-4 leading-relaxed font-medium">
+                  {game.description}
                 </p>
-              ))}
+              )}
               <p className="text-emerald-700 font-bold">{gameStart.ctaText}</p>
             </div>
 
@@ -157,13 +246,6 @@ export default function GamePage() {
               <span className="text-2xl animate-pulse" style={{ animationDelay: "0.3s" }}>🌟</span>
               <span className="text-2xl animate-pulse" style={{ animationDelay: "0.6s" }}>✨</span>
             </div>
-
-            <Link
-              href={config.routes.home}
-              className="inline-block mt-6 text-gray-400 hover:text-gray-600 text-sm"
-            >
-              {gameStart.backToHomeLabel}
-            </Link>
           </div>
         )}
 
@@ -173,8 +255,8 @@ export default function GamePage() {
             {/* Header row: score | skip | question counter */}
             <div className="flex justify-between items-center mb-4 gap-2">
               <div className="bg-gradient-to-br from-emerald-50 to-blue-50 px-4 py-2 rounded-xl text-center min-w-[80px]">
-                <span className="block text-xs text-gray-500">{gamePlay.scoreLabel}</span>
-                <span className="text-2xl font-bold text-emerald-600">{score}</span>
+                <span className="block text-xs text-gray-500 font-bold">{gamePlay.scoreLabel}</span>
+                <span className="text-2xl font-black text-emerald-600">{score}</span>
               </div>
 
               {/* Skip button — centre */}
@@ -182,7 +264,7 @@ export default function GamePage() {
                 type="button"
                 onClick={skipQuestion}
                 disabled={hasAnswered}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full border-2 text-sm font-semibold transition-all duration-200
+                className={`flex items-center gap-1 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all duration-200
                   ${hasAnswered
                     ? "border-gray-200 text-gray-300 cursor-not-allowed"
                     : "border-amber-400 text-amber-600 hover:bg-amber-50 hover:scale-105 active:scale-95"
@@ -192,8 +274,8 @@ export default function GamePage() {
               </button>
 
               <div className="bg-gradient-to-br from-emerald-50 to-blue-50 px-4 py-2 rounded-xl text-center min-w-[80px]">
-                <span className="block text-xs text-gray-500">{gamePlay.questionLabel}</span>
-                <span className="text-xl font-bold text-blue-600">
+                <span className="block text-xs text-gray-500 font-bold">{gamePlay.questionLabel}</span>
+                <span className="text-xl font-black text-blue-600">
                   {currentScenarioIndex + 1} / {scenarios.length}
                 </span>
               </div>
@@ -209,24 +291,24 @@ export default function GamePage() {
 
             {/* Scenario card */}
             <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 rounded-2xl p-5 text-center mb-5 animate-in slide-in-from-right duration-500">
-              <div className="text-5xl mb-3">{currentScenario.icon}</div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
+              <div className="text-5xl mb-3">{currentScenario.icon || "❓"}</div>
+              <h2 className="text-xl font-black text-gray-800 mb-2">
                 {currentScenario.title}
               </h2>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 font-medium leading-relaxed">
                 {currentScenario.description}
               </p>
             </div>
 
             {/* Choices */}
             <div className="space-y-3">
-              {currentScenario.choices.map((choice, index) => (
+              {currentScenario.choices.map((choice: any, index: number) => (
                 <button
-                  key={index}
+                  key={choice.id || index}
                   type="button"
                   onClick={() => selectChoice(index)}
                   disabled={hasAnswered}
-                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 text-right
+                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 text-right font-bold
                     ${!hasAnswered ? "border-gray-200 hover:border-blue-400 hover:bg-gray-50 hover:-translate-x-1" : ""}
                     ${hasAnswered && selectedChoiceIndex === index && choice.isCorrect ? "border-emerald-500 bg-emerald-50" : ""}
                     ${hasAnswered && selectedChoiceIndex === index && !choice.isCorrect ? "border-amber-500 bg-amber-50 animate-shake" : ""}
@@ -234,7 +316,7 @@ export default function GamePage() {
                     ${hasAnswered ? "pointer-events-none" : "cursor-pointer"}
                   `}
                 >
-                  <span className="text-2xl flex-shrink-0">{choice.icon}</span>
+                  {choice.icon && <span className="text-2xl flex-shrink-0">{choice.icon}</span>}
                   <span className="text-gray-700">{choice.text}</span>
                 </button>
               ))}
@@ -242,13 +324,13 @@ export default function GamePage() {
 
             {/* Feedback overlay */}
             {showFeedback && activeFeedback && (
-              <div className="absolute inset-0 bg-white/98 rounded-3xl flex items-center justify-center p-6 animate-in fade-in duration-300">
-                <div className="text-center">
+              <div className="absolute inset-0 bg-white/98 rounded-3xl flex items-center justify-center p-6 animate-in fade-in duration-300 z-10">
+                <div className="text-center w-full">
                   <div className="text-6xl mb-4 animate-in zoom-in duration-500">
                     {isSkipped ? "⏭️" : feedbackIsCorrect ? gamePlay.feedbackCorrectIcon : gamePlay.feedbackWrongIcon}
                   </div>
                   <h3
-                    className={`text-xl font-bold mb-3 ${
+                    className={`text-2xl font-black mb-3 ${
                       isSkipped
                         ? "text-amber-500"
                         : feedbackIsCorrect
@@ -258,21 +340,25 @@ export default function GamePage() {
                   >
                     {activeFeedback.title}
                   </h3>
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {activeFeedback.message}
-                  </p>
+                  {activeFeedback.message && (
+                    <p className="text-gray-600 font-medium mb-4 leading-relaxed">
+                      {activeFeedback.message}
+                    </p>
+                  )}
 
-                  <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 mb-5 flex items-start gap-3 text-right">
-                    <span className="text-2xl flex-shrink-0">{gamePlay.feedbackTipIcon}</span>
-                    <span className="text-gray-700 text-sm">
-                      {activeFeedback.tip}
-                    </span>
-                  </div>
+                  {activeFeedback.tip && (
+                    <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 mb-5 flex items-start gap-3 text-right">
+                      <span className="text-2xl flex-shrink-0">{gamePlay.feedbackTipIcon}</span>
+                      <span className="text-gray-700 font-medium text-sm">
+                        {activeFeedback.tip}
+                      </span>
+                    </div>
+                  )}
 
                   <button
                     type="button"
                     onClick={nextScenario}
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full"
                   >
                     {currentScenarioIndex >= scenarios.length - 1
                       ? gamePlay.showResultsLabel
@@ -304,52 +390,34 @@ export default function GamePage() {
               <div className="text-7xl mb-4 animate-in zoom-in duration-700">
                 {resultData.badge}
               </div>
-              <h1 className="text-3xl font-bold text-emerald-600 mb-2">
+              <h1 className="text-3xl font-black text-emerald-600 mb-2">
                 {resultData.title}
               </h1>
-              <p className="text-gray-500 mb-6">{resultData.subtitle}</p>
+              <p className="text-gray-500 font-medium mb-6">{resultData.subtitle}</p>
 
-              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-5 mb-5">
-                <span className="block text-sm opacity-90 mb-1">
+              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-5 mb-5 shadow-inner">
+                <span className="block text-sm opacity-90 font-bold mb-1">
                   {results.finalScoreLabel}
                 </span>
-                <span className="text-5xl font-bold">{score}</span>
-                <span className="text-lg opacity-90"> / {maxScore} {results.pointsSuffix}</span>
+                <span className="text-5xl font-black">{score}</span>
+                <span className="text-lg opacity-90 font-bold"> / {maxScore} {results.pointsSuffix}</span>
               </div>
 
               <div className="bg-emerald-50 text-emerald-700 rounded-xl p-4 mb-5 font-bold">
                 {resultData.message}
               </div>
 
-              <div className="bg-gradient-to-br from-emerald-50 to-green-100 border-2 border-emerald-500 rounded-2xl p-5 mb-6">
-                <img
-                  src={app.logoUrl}
-                  alt={`شعار ${app.organizationName}`}
-                  className="w-16 h-16 mx-auto mb-2 object-contain"
-                />
-                <h3 className="text-emerald-700 font-bold mb-2">
-                  {results.organizationMessageTitle.replace("{organizationName}", app.organizationName)}
-                </h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {results.organizationMessage}
-                </p>
-              </div>
-
               <div className="flex flex-col gap-3">
                 <button
                   type="button"
-                  onClick={restartGame}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                >
-                  {results.playAgainLabel}
-                </button>
-                <button
-                  type="button"
                   onClick={handleShare}
-                  className="border-2 border-emerald-500 text-emerald-600 font-bold px-8 py-3 rounded-full hover:bg-emerald-500 hover:text-white transition-all duration-300"
+                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                 >
                   {results.shareLabel}
                 </button>
+                <div className="text-gray-400 font-medium text-sm mt-4">
+                  تم تسجيل النتيجة وحفظها بنجاح 🎯
+                </div>
               </div>
             </div>
           </div>

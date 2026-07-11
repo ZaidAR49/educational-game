@@ -239,7 +239,7 @@ export function GameWizard({
     });
   }
 
-  const gameUrl = `https://your-domain.com/game/${formData.slug || 'slug'}`
+  const gameUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${formData.slug || 'slug'}`
 
   const downloadQR = () => {
     const canvas = document.getElementById("qr-code-canvas") as HTMLCanvasElement

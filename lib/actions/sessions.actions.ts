@@ -139,3 +139,61 @@ export async function deleteSessionsAction(sessionIds: string[]) {
   }
   revalidatePath("/dashboard/sessions");
 }
+
+/**
+ * Fetches the currently live session and its players for a given game.
+ * Used for the real-time Live Session dashboard.
+ */
+export async function getLiveSessionDataAction(gameId: string) {
+  const user = await requireAuth();
+
+  const playResult = await db
+    .select({
+      id: classroomPlays.id,
+      date: classroomPlays.createdAt,
+      gameName: games.title,
+    })
+    .from(classroomPlays)
+    .innerJoin(games, eq(classroomPlays.gameId, games.id))
+    .where(
+      and(
+        eq(classroomPlays.gameId, gameId),
+        eq(classroomPlays.teacherId, user.id),
+        eq(classroomPlays.status, 'live')
+      )
+    )
+    .limit(1);
+
+  const sessionData = playResult[0];
+  if (!sessionData) {
+    return null;
+  }
+
+  const sessionPlayers = await db
+    .select()
+    .from(players)
+    .where(eq(players.classroomPlayId, sessionData.id))
+    .orderBy(desc(players.totalScore));
+
+  return {
+    session: {
+      id: sessionData.id,
+      gameName: sessionData.gameName,
+    },
+    players: sessionPlayers.map((p) => {
+      let duration = p.durationSeconds || 0;
+      if (!p.isFinished && !duration && p.startedAt) {
+        duration = Math.floor((new Date().getTime() - p.startedAt.getTime()) / 1000);
+      }
+      
+      return {
+        id: p.id,
+        name: p.name,
+        score: p.totalScore, // Map to score for the Live component
+        correct: p.totalCorrectAnswers,
+        wrong: p.totalWrongAnswers,
+        isConnected: !p.isFinished, // Using isFinished to determine if they are currently active
+      };
+    }),
+  };
+}
