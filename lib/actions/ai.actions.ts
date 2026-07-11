@@ -7,21 +7,27 @@ import { gameGeneratorConfig } from "../ai/game-generator.config"
 function getGenAIClient() {
   const projectId = process.env.VERTEX_AI_PROJECT_ID;
   const location = process.env.VERTEX_AI_LOCATION || "us-central1";
+  const clientEmail = process.env.VERTEX_AI_CLIENT_EMAIL;
+  // Handle literal '\n' strings that might be passed from .env
+  const privateKey = process.env.VERTEX_AI_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   if (!projectId) {
     console.warn("VERTEX_AI_PROJECT_ID is not set.");
   }
 
-  // To authenticate with Vertex AI, the system typically relies on the GOOGLE_APPLICATION_CREDENTIALS
-  // environment variable pointing to a service account JSON file, OR the GOOGLE_CREDENTIALS
-  // environment variable containing the raw JSON string.
-
   // Initialize the Vertex AI client
   return new GoogleGenAI({
-    vertexai: {
-      project: projectId as string,
-      location: location,
-    }
+    vertexai: true,
+    project: projectId as string,
+    location: location,
+    ...(clientEmail && privateKey ? {
+      googleAuthOptions: {
+        credentials: {
+          client_email: clientEmail,
+          private_key: privateKey,
+        }
+      }
+    } : {})
   });
 }
 
