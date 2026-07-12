@@ -4,7 +4,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter"
 import { db } from "@/lib/db"
 import { users, accounts, sessions, verificationToken } from "@/lib/db/schema"
 
-export const { handlers, signIn, signOut, auth, update } = NextAuth({
+const authResult = NextAuth({
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -79,4 +79,7 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
       return session
     },
   },
-})
+}) as any;
+
+export const { handlers, signIn, signOut, auth } = authResult;
+export const update = authResult.unstable_update || authResult.update;

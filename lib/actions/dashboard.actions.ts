@@ -8,36 +8,73 @@ import { requireAuth } from "./utils";
 export async function getDashboardOverviewAction() {
   const user = await requireAuth();
 
-  // 1. Fetch user's games
-  const userGames = await db
-    .select()
-    .from(games)
-    .where(eq(games.ownerId, user.id))
-    .orderBy(desc(games.createdAt));
+  // Fetch all dashboard stats in parallel
+  const [
+    userGames,
+    userOrgs,
+    scenariosResult,
+    teacherPlayers,
+    accuracyResult,
+    completionResult,
+  ] = await Promise.all([
+    // 1. Fetch user's games
+    db
+      .select()
+      .from(games)
+      .where(eq(games.ownerId, user.id))
+      .orderBy(desc(games.createdAt)),
 
-  const totalGames = userGames.length;
-  
-  // Calculate total players from games.playCount
-  const totalPlayers = userGames.reduce((sum, game) => sum + game.playCount, 0);
+    // 2. Fetch user's organizations
+    db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.ownerId, user.id)),
 
-  // 2. Fetch user's organizations
-  const userOrgs = await db
-    .select({ id: organizations.id })
-    .from(organizations)
-    .where(eq(organizations.ownerId, user.id));
-  
-  const totalOrgs = userOrgs.length;
-
-  // 3. Fetch total scenarios for these games
-  let totalScenarios = 0;
-  if (userGames.length > 0) {
-    const gameIds = userGames.map(g => g.id);
-    const scenariosResult = await db
+    // 3. Fetch scenarios using an inner join to decouple it from games query resolution
+    db
       .select({ id: scenarios.id })
       .from(scenarios)
-      .where(inArray(scenarios.gameId, gameIds));
-    totalScenarios = scenariosResult.length;
-  }
+      .innerJoin(games, eq(scenarios.gameId, games.id))
+      .where(eq(games.ownerId, user.id)),
+
+    // 5. Fetch score distribution
+    db
+      .select({
+        totalScore: players.totalScore,
+        maxPoints: games.maxPoints,
+      })
+      .from(players)
+      .innerJoin(classroomPlays, eq(players.classroomPlayId, classroomPlays.id))
+      .innerJoin(games, eq(classroomPlays.gameId, games.id))
+      .where(eq(games.ownerId, user.id)),
+
+    // 6. Fetch answer accuracy
+    db
+      .select({
+        correct: sql<number>`COALESCE(SUM(${players.totalCorrectAnswers}), 0)`,
+        wrong: sql<number>`COALESCE(SUM(${players.totalWrongAnswers}), 0)`,
+      })
+      .from(players)
+      .innerJoin(classroomPlays, eq(players.classroomPlayId, classroomPlays.id))
+      .innerJoin(games, eq(classroomPlays.gameId, games.id))
+      .where(eq(games.ownerId, user.id)),
+
+    // 7. Fetch completion vs drop-out
+    db
+      .select({
+        finished: sql<number>`COALESCE(COUNT(CASE WHEN ${players.isFinished} = true THEN 1 END), 0)`,
+        unfinished: sql<number>`COALESCE(COUNT(CASE WHEN ${players.isFinished} = false THEN 1 END), 0)`,
+      })
+      .from(players)
+      .innerJoin(classroomPlays, eq(players.classroomPlayId, classroomPlays.id))
+      .innerJoin(games, eq(classroomPlays.gameId, games.id))
+      .where(eq(games.ownerId, user.id)),
+  ]);
+
+  const totalGames = userGames.length;
+  const totalPlayers = userGames.reduce((sum, game) => sum + game.playCount, 0);
+  const totalOrgs = userOrgs.length;
+  const totalScenarios = scenariosResult.length;
 
   // 4. Format Recent Games (Top 5)
   const recentGames = userGames.slice(0, 5).map(game => ({
@@ -47,17 +84,6 @@ export async function getDashboardOverviewAction() {
     plays: game.playCount,
     date: game.createdAt.toISOString().split('T')[0]
   }));
-
-  // 5. Fetch score distribution
-  const teacherPlayers = await db
-    .select({
-      totalScore: players.totalScore,
-      maxPoints: games.maxPoints,
-    })
-    .from(players)
-    .innerJoin(classroomPlays, eq(players.classroomPlayId, classroomPlays.id))
-    .innerJoin(games, eq(classroomPlays.gameId, games.id))
-    .where(eq(games.ownerId, user.id));
 
   const scoreBrackets = {
     "0-20%": 0,
@@ -82,32 +108,10 @@ export async function getDashboardOverviewAction() {
     count,
   }));
 
-  // 6. Fetch answer accuracy
-  const accuracyResult = await db
-    .select({
-      correct: sql<number>`COALESCE(SUM(${players.totalCorrectAnswers}), 0)`,
-      wrong: sql<number>`COALESCE(SUM(${players.totalWrongAnswers}), 0)`,
-    })
-    .from(players)
-    .innerJoin(classroomPlays, eq(players.classroomPlayId, classroomPlays.id))
-    .innerJoin(games, eq(classroomPlays.gameId, games.id))
-    .where(eq(games.ownerId, user.id));
-
   const accuracyData = [
     { name: "إجابات صحيحة", value: Number(accuracyResult[0]?.correct || 0) },
     { name: "إجابات خاطئة", value: Number(accuracyResult[0]?.wrong || 0) },
   ];
-
-  // 7. Fetch completion vs drop-out
-  const completionResult = await db
-    .select({
-      finished: sql<number>`COALESCE(COUNT(CASE WHEN ${players.isFinished} = true THEN 1 END), 0)`,
-      unfinished: sql<number>`COALESCE(COUNT(CASE WHEN ${players.isFinished} = false THEN 1 END), 0)`,
-    })
-    .from(players)
-    .innerJoin(classroomPlays, eq(players.classroomPlayId, classroomPlays.id))
-    .innerJoin(games, eq(classroomPlays.gameId, games.id))
-    .where(eq(games.ownerId, user.id));
 
   const completionData = [
     { name: "أكملوا اللعب", value: Number(completionResult[0]?.finished || 0) },

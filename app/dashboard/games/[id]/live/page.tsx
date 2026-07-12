@@ -9,6 +9,7 @@ import { getLiveSessionDataAction } from "@/lib/actions/sessions.actions"
 import { toggleGamePublishStatusAction } from "@/lib/actions/games.actions"
 import { GameShareModal } from "@/components/games/GameShareModal"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase-client"
 
 export default function LiveSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -20,7 +21,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
   const [isPending, startTransition] = useTransition()
   const [showQrModal, setShowQrModal] = useState(false)
 
-  // Poll database for live updates
+  // Use Supabase Realtime for instant live updates
   useEffect(() => {
     let mounted = true;
     
@@ -33,7 +34,6 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
             setStudents(data.players);
           } else {
             // No live session found, maybe it was closed
-            // You could potentially redirect here, but we will just keep rendering an empty state
           }
           setIsLoading(false);
         }
@@ -42,14 +42,25 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
       }
     };
 
-    // Fetch immediately
+    // Fetch immediately on mount
     fetchLiveSession();
 
-    // Poll every 3 seconds
-    const interval = setInterval(fetchLiveSession, 3000);
+    // Subscribe to Realtime WebSocket updates for players
+    const subscription = supabase
+      .channel('live-players')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'players' 
+      }, () => {
+        // Fetch new leaderboard state instantly when any player updates
+        fetchLiveSession();
+      })
+      .subscribe();
+
     return () => {
       mounted = false;
-      clearInterval(interval);
+      supabase.removeChannel(subscription);
     };
   }, [id]);
 

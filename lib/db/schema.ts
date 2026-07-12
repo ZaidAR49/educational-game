@@ -144,8 +144,7 @@ export const games = pgTable("games", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
+    .references(() => organizations.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   description: text("description"),
   slug: text("slug").notNull().unique(),

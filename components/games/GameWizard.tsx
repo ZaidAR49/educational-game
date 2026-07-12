@@ -16,6 +16,9 @@ import { generateDefaultChoices } from "./wizard/constants"
 import { BasicInfoStep, OrganizationOption } from "./wizard/BasicInfoStep"
 import { ScenariosStep } from "./wizard/ScenariosStep"
 import { PublishStep } from "./wizard/PublishStep"
+import { GameWizardHeader } from "./wizard/GameWizardHeader"
+import { GameWizardFooter } from "./wizard/GameWizardFooter"
+import { GameSuccessModal } from "./wizard/GameSuccessModal"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { toast } from "sonner"
 import { createGameAction, updateGameAction, deleteGameAction } from "@/lib/actions/games.actions"
@@ -267,50 +270,12 @@ export function GameWizard({
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-28">
       
-      {/* Top Navigation */}
-      <div className="flex items-center gap-4">
-        <Link 
-          href="/dashboard/games" 
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100"
-        >
-          <ArrowRight className="w-4 h-4" />
-          <span>العودة للألعاب</span>
-        </Link>
-        {customTopActions}
-      </div>
-
-      {/* Wizard Header */}
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8">
-        <div>
-          <h1 className="text-4xl font-black text-gray-900 mb-6 tracking-tight">{isEdit ? "تعديل اللعبة" : "إنشاء لعبة جديدة"}</h1>
-          
-          {/* Stepper Progress */}
-          <div className="flex items-center gap-3 md:gap-4 overflow-x-auto pb-2 custom-scrollbar">
-            {[
-              { num: 1, label: "المعلومات الأساسية", icon: Gamepad2 },
-              { num: 2, label: "بناء الأسئلة", icon: ListChecks },
-              { num: 3, label: "النشر", icon: Send },
-            ].map((s, i) => (
-              <div key={s.num} className="flex items-center gap-3 md:gap-4 shrink-0">
-                <div className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl font-bold text-sm md:text-base transition-all
-                  ${step === s.num 
-                    ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20 scale-105" 
-                    : step > s.num 
-                      ? "bg-emerald-100 text-emerald-700" 
-                      : "bg-white text-gray-400 border-2 border-gray-100"
-                  }`}
-                >
-                  <s.icon className={`w-5 h-5 ${step === s.num ? "text-emerald-400" : ""}`} />
-                  <span>{s.label}</span>
-                </div>
-                {i < 2 && (
-                  <div className={`w-8 md:w-12 h-1.5 rounded-full transition-colors ${step > s.num ? "bg-emerald-300" : "bg-gray-200"}`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Top Navigation & Wizard Header */}
+      <GameWizardHeader 
+        isEdit={isEdit} 
+        step={step} 
+        customTopActions={customTopActions} 
+      />
 
       {/* Error Message Display */}
       <AnimatePresence>
@@ -362,131 +327,24 @@ export function GameWizard({
       </div>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 md:right-64 p-6 md:p-10 flex items-center justify-between z-30 pointer-events-none">
-        
-        <button 
-          onClick={() => { setStep(step - 1); setErrorMsg(null); }}
-          disabled={step === 1}
-          className={`pointer-events-auto flex items-center justify-center gap-2 w-full sm:w-[240px] px-6 py-4 rounded-xl font-bold text-lg transition-all
-            ${step === 1 
-              ? "opacity-0" 
-              : "bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 shadow-md hover:shadow-lg"
-            }`}
-        >
-          <ArrowRight className="w-5 h-5" />
-          <span>العودة للسابق</span>
-        </button>
-
-        {step < 3 ? (
-          <button 
-            onClick={handleNextStep}
-            className="pointer-events-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-[240px] px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-xl shadow-emerald-600/30 hover:scale-105 active:scale-95"
-          >
-            <span>التالي</span>
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-        ) : (
-          <button 
-            onClick={handleSave}
-            disabled={isPending}
-            className="pointer-events-auto flex items-center justify-center gap-3 bg-gray-900 hover:bg-black disabled:bg-gray-700 text-white w-full sm:w-[240px] px-6 py-4 rounded-xl font-black text-lg transition-all shadow-2xl shadow-gray-900/40 hover:scale-105 active:scale-95"
-          >
-            {isPending ? <Loader2 className="w-6 h-6 animate-spin text-emerald-400" /> : <Save className="w-6 h-6 text-emerald-400" />}
-            <span>{isPending ? "جاري الحفظ..." : "حفظ واعتماد اللعبة"}</span>
-          </button>
-        )}
-        
-      </div>
+      <GameWizardFooter 
+        step={step}
+        isPending={isPending}
+        onPrevStep={() => { setStep(step - 1); setErrorMsg(null); }}
+        onNextStep={handleNextStep}
+        onSave={handleSave}
+      />
 
       {/* Success Popup */}
-      <AnimatePresence>
-        {showSuccessPopup && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowSuccessPopup(false)}
-              className="absolute inset-0 bg-black/40 pointer-events-auto"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white rounded-3xl p-8 md:p-10 w-full max-w-xl shadow-2xl flex flex-col items-center text-center space-y-8 z-10 pointer-events-auto"
-            >
-              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-2">
-                <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-              </div>
-
-              <div>
-                <h3 className="text-2xl font-black text-gray-900 mb-2">تم نشر اللعبة بنجاح! 🎉</h3>
-                <p className="text-gray-500 font-medium text-base max-w-sm mx-auto">
-                  لعبتك "{formData.title}" أصبحت متاحة الآن للعب باستخدام الرابط أو رمز الاستجابة السريعة (QR).
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center gap-6 w-full">
-                <div className="p-4 rounded-2xl border-2 border-gray-100 flex justify-center items-center bg-white">
-                  <QRCodeCanvas
-                    id="qr-code-canvas"
-                    value={gameUrl}
-                    size={200}
-                    level="H"
-                    fgColor="#064e3b"
-                    bgColor="#ffffff"
-                    imageSettings={{
-                      src: qrLogo,
-                      height: 48,
-                      width: 48,
-                      excavate: true,
-                    }}
-                  />
-                </div>
-                
-                <button 
-                  onClick={downloadQR}
-                  className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 px-6 py-2.5 rounded-xl font-bold transition-colors w-full sm:w-auto justify-center"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>تحميل كصورة (QR)</span>
-                </button>
-              </div>
-
-              <div className="w-full space-y-2">
-                <label className="text-sm font-bold text-gray-500 block text-right">رابط اللعبة المباشر</label>
-                <div className="flex rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50">
-                  <div className="flex-1 px-4 py-3 bg-transparent text-gray-600 font-sans text-left min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" dir="ltr">
-                    {gameUrl}
-                  </div>
-                  <button 
-                    onClick={() => {
-                      if (finalGameId) {
-                        navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${finalGameId}`);
-                        toast.success("تم نسخ الرابط بنجاح!");
-                      }
-                    }}
-                    className="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-6 rounded-xl font-bold transition-colors shrink-0"
-                  >
-                    <LinkIcon className="w-4 h-4" />
-                    <span>نسخ</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="w-full pt-6">
-                <Link 
-                  href="/dashboard/games"
-                  className="flex items-center justify-center w-full bg-gray-900 hover:bg-black text-white px-8 py-4 rounded-xl font-black text-lg transition-all shadow-xl shadow-gray-900/20 hover:scale-105 active:scale-95"
-                >
-                  العودة لقائمة الألعاب
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
+      <GameSuccessModal 
+        show={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        gameTitle={formData.title}
+        gameSlug={formData.slug}
+        gameUrl={gameUrl}
+        qrLogo={qrLogo}
+        onDownloadQR={downloadQR}
+      />
     </div>
   )
 }

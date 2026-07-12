@@ -22,7 +22,7 @@ export default async function LoginLayout({ children }: { children: React.ReactN
     // Redirect authenticated, non-locked users directly to their destination.
     // We CANNOT redirect to /login/redirect here because that route is also
     // nested under this layout, which would cause an infinite redirect loop.
-    const role = dbUser?.role ?? session.user.role;
+    const role = dbUser?.role ?? (session.user as any).role;
     if (["super_admin", "admin", "viewer"].includes(role as string)) {
       redirect("/admin");
     }

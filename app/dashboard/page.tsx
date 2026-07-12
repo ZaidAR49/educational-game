@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 import Link from "next/link"
 import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks } from "lucide-react"
 import { getDashboardOverviewAction } from "@/lib/actions/dashboard.actions"

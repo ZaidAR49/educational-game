@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache, updateTag } from "next/cache";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { eq, inArray, desc, and } from "drizzle-orm";
+import { eq, inArray, desc, and, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { games, classroomPlays, players } from "@/lib/db/schema";
 import { requireAuth } from "./utils";
@@ -20,32 +20,20 @@ export async function getMySessionsAction() {
           id: classroomPlays.id,
           date: classroomPlays.createdAt,
           gameName: games.title,
+          playersCount: sql<number>`COUNT(${players.id})::int`,
         })
         .from(classroomPlays)
         .innerJoin(games, eq(classroomPlays.gameId, games.id))
+        .leftJoin(players, eq(classroomPlays.id, players.classroomPlayId))
         .where(eq(classroomPlays.teacherId, user.id))
+        .groupBy(classroomPlays.id, classroomPlays.createdAt, games.title)
         .orderBy(desc(classroomPlays.createdAt));
-
-      const playIds = plays.map((p) => p.id);
-      let countsMap: Record<string, number> = {};
-
-      if (playIds.length > 0) {
-        const allPlayers = await db
-          .select({ playId: players.classroomPlayId })
-          .from(players)
-          .where(inArray(players.classroomPlayId, playIds));
-
-        countsMap = allPlayers.reduce((acc, curr) => {
-          acc[curr.playId] = (acc[curr.playId] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-      }
 
       return plays.map((p) => ({
         id: p.id,
         gameName: p.gameName,
         date: p.date.toISOString(),
-        playersCount: countsMap[p.id] || 0,
+        playersCount: p.playersCount || 0,
       }));
     },
     [`sessions-${user.id}`],
@@ -134,9 +122,9 @@ export async function deleteSessionsAction(sessionIds: string[]) {
       )
     );
 
-  revalidateTag(`sessions-${user.id}`);
+  updateTag(`sessions-${user.id}`);
   for (const id of sessionIds) {
-    revalidateTag(`session-${id}`);
+    updateTag(`session-${id}`);
   }
   revalidatePath("/dashboard/sessions");
 

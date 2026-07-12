@@ -6,7 +6,6 @@ import { Sparkles, ArrowRight, Wand2, AlertCircle } from "lucide-react"
 import { GameWizard } from "./GameWizard"
 import { OrganizationOption } from "./wizard/BasicInfoStep"
 import { GameFormData, Scenario } from "./wizard/types"
-import { generateGameAction } from "@/lib/actions/ai.actions"
 
 interface AutoAiWizardProps {
   organizations: OrganizationOption[];
@@ -30,21 +29,50 @@ export function AutoAiWizard({ organizations, onBack }: AutoAiWizardProps) {
     
     // Simple mock text progression for UX
     const timers = [
-      setTimeout(() => setLoadingText("جاري كتابة الأسئلة والخيارات..."), 2000),
-      setTimeout(() => setLoadingText("جاري تجهيز التغذية الراجعة..."), 4000),
-      setTimeout(() => setLoadingText("اللمسات الأخيرة..."), 7000),
+      setTimeout(() => setLoadingText("جاري الاتصال بالذكاء الاصطناعي..."), 1000),
+      setTimeout(() => setLoadingText("جاري كتابة الأسئلة والخيارات..."), 3000),
     ]
     
     try {
-      const response = await generateGameAction(idea, questionCount);
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea, questionCount }),
+      });
       
       timers.forEach(clearTimeout) // Clear UX timers
       
-      if (!response.success || !response.data) {
-        throw new Error(response.error || "فشل التوليد، يرجى المحاولة مرة أخرى.");
+      if (!res.ok) {
+        throw new Error("فشل التوليد، يرجى المحاولة مرة أخرى.");
+      }
+      if (!res.body) {
+        throw new Error("لم يتم إرجاع أي بيانات.");
       }
 
-      const parsed = response.data;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let streamedJson = "";
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        streamedJson += chunk;
+        
+        // Update loading text to show progress
+        setLoadingText(`جاري توليد الأسئلة... (${streamedJson.length} حرف)`);
+      }
+
+      let parsed;
+      try {
+        const jsonMatch = streamedJson.match(/\{[\s\S]*\}/);
+        const cleanJson = jsonMatch ? jsonMatch[0] : streamedJson;
+        parsed = JSON.parse(cleanJson);
+      } catch (parseError) {
+        console.error("Failed to parse JSON:", streamedJson);
+        throw new Error("فشل في قراءة بيانات اللعبة. يرجى المحاولة مرة أخرى.");
+      }
 
       const newGameData: Partial<GameFormData> = {
         title: parsed.title || "بدون عنوان",

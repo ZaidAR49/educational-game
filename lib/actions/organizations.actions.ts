@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache, updateTag } from "next/cache";
 import * as organizationsService from "@/lib/services/organizations.service";
 import { NewOrganization } from "@/lib/db/schema";
 import { requireAuth, verifyOrganizationOwnership } from "./utils";
@@ -17,8 +17,8 @@ export async function createOrganizationAction(orgData: Omit<NewOrganization, "o
   });
 
   revalidatePath("/dashboard/settings");
-  revalidateTag(`organizations-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
+  updateTag(`organizations-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
   return newOrg;
 }
 
@@ -55,8 +55,8 @@ export async function updateOrganizationAction(orgId: string, orgData: Partial<N
   const updatedOrg = await organizationsService.updateOrganization(orgId, orgData);
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/organizations");
-  revalidateTag(`organizations-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
+  updateTag(`organizations-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
   return updatedOrg;
 }
 
@@ -70,6 +70,6 @@ export async function deleteOrganizationAction(orgId: string) {
   await organizationsService.deleteOrganization(orgId);
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/organizations");
-  revalidateTag(`organizations-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
+  updateTag(`organizations-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
 }

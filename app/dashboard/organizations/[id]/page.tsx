@@ -5,7 +5,7 @@ import { notFound } from "next/navigation"
 export default async function EditOrganizationPage({ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const org = await getOrganizationAction(id);
+    const org = (await getOrganizationAction(id)) as any;
     
     if (!org) return notFound();
 

@@ -11,7 +11,8 @@ import {
   LogOut,
   History,
   ShieldCheck,
-  Zap
+  Zap,
+  HelpCircle
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import uiContent from "@/data/ui-content-general.json"
@@ -26,6 +27,7 @@ export function Sidebar({ user }: { user?: any }) {
     { href: "/dashboard/organizations", label: "المؤسسات", icon: Building2 },
     { href: "/dashboard/games", label: "ألعابي", icon: Gamepad2 },
     { href: "/dashboard/sessions", label: "الجلسات", icon: History },
+    { href: "/dashboard/help", label: "دليل الاستخدام", icon: HelpCircle },
     { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
   ]
 

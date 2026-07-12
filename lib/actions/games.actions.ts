@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache, updateTag } from "next/cache";
 import { getPostHogClient } from "@/lib/posthog-server";
 import * as gamesService from "@/lib/services/games.service";
 import { NewGame } from "@/lib/db/schema";
@@ -18,8 +18,8 @@ export async function createGameAction(gameData: Omit<NewGame, "ownerId">) {
   });
 
   revalidatePath("/dashboard/games");
-  revalidateTag(`games-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
+  updateTag(`games-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
 
   const posthog = getPostHogClient();
   posthog.capture({
@@ -56,10 +56,10 @@ export async function deleteGameAction(gameId: string) {
 
   await gamesService.deleteGame(gameId);
   revalidatePath("/dashboard/games");
-  revalidateTag(`games-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
-  revalidateTag(`game-${gameId}`);
-  revalidateTag(`game-full-${gameId}`);
+  updateTag(`games-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
+  updateTag(`game-${gameId}`);
+  updateTag(`game-full-${gameId}`);
 
   const posthog = getPostHogClient();
   posthog.capture({
@@ -80,10 +80,10 @@ export async function updateGameAction(gameId: string, gameData: Partial<NewGame
   const updatedGame = await gamesService.updateGame(gameId, gameData);
   revalidatePath("/dashboard/games");
   revalidatePath(`/dashboard/games/${gameId}`); 
-  revalidateTag(`games-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
-  revalidateTag(`game-${gameId}`);
-  revalidateTag(`game-full-${gameId}`);
+  updateTag(`games-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
+  updateTag(`game-${gameId}`);
+  updateTag(`game-full-${gameId}`);
   return updatedGame;
 }
 
@@ -126,11 +126,11 @@ export async function toggleGamePublishStatusAction(gameId: string, publish: boo
   });
 
   revalidatePath("/dashboard/games");
-  revalidateTag(`games-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
-  revalidateTag(`game-${gameId}`);
-  revalidateTag(`game-full-${gameId}`);
-  revalidateTag(`sessions-${user.id}`); // Invalidate sessions list
+  updateTag(`games-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
+  updateTag(`game-${gameId}`);
+  updateTag(`game-full-${gameId}`);
+  updateTag(`sessions-${user.id}`); // Invalidate sessions list
 
   const posthog = getPostHogClient();
   posthog.capture({

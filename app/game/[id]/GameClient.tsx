@@ -15,6 +15,10 @@ import { joinPlayAction, updatePlayerAction } from "@/lib/actions/plays.actions"
 import posthog from "posthog-js"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { JoinScreen } from "./components/JoinScreen"
+import { StartScreen } from "./components/StartScreen"
+import { GameplayScreen } from "./components/GameplayScreen"
+import { ResultScreen } from "./components/ResultScreen"
 
 type GameScreen = "join" | "start" | "game" | "result"
 
@@ -42,18 +46,64 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
   const [isSkipped, setIsSkipped] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
+  const [isOffline, setIsOffline] = useState(false)
 
   const { app, gameStart, gamePlay, results } = uiContent
 
   useEffect(() => {
-    // Check local storage for existing name
+    // Check if there is a saved session for this play
+    const savedSessionStr = localStorage.getItem(`eduplay_session_${play.id}`);
+    if (savedSessionStr && !game.isDemo) {
+      try {
+        const saved = JSON.parse(savedSessionStr);
+        if (saved.playerId && saved.playerName) {
+          startTransition(async () => {
+            try {
+              // Validate and reconnect on backend
+              const player = await joinPlayAction(play.id, saved.playerName, saved.playerId);
+              
+              setPlayerId(player.id);
+              setPlayerName(player.name);
+              
+              // Restore values
+              const restoredScore = saved.score ?? player.totalScore;
+              const restoredCorrect = saved.correctAnswers ?? player.totalCorrectAnswers;
+              const restoredWrong = saved.wrongAnswers ?? player.totalWrongAnswers;
+              const restoredIndex = saved.currentScenarioIndex ?? (player.totalCorrectAnswers + player.totalWrongAnswers);
+              const restoredFinished = saved.isFinished || player.isFinished;
+
+              setScore(restoredScore);
+              setCorrectAnswers(restoredCorrect);
+              setWrongAnswers(restoredWrong);
+              setCurrentScenarioIndex(restoredIndex);
+              setScreen(restoredFinished ? "result" : "game");
+            } catch (err) {
+              console.error("Failed to auto-reconnect:", err);
+              // Clean up stale session
+              localStorage.removeItem(`eduplay_session_${play.id}`);
+              
+              const savedName = localStorage.getItem("drugGamePlayerName");
+              if (savedName) {
+                setPlayerName(savedName);
+              } else {
+                setPlayerName(generateRandomName());
+              }
+            }
+          });
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const savedName = localStorage.getItem("drugGamePlayerName");
     if (savedName) {
       setPlayerName(savedName);
     } else {
       setPlayerName(generateRandomName());
     }
-  }, []);
+  }, [play.id, game.isDemo]);
 
   const currentScenario = scenarios[currentScenarioIndex]
   // max score should ideally be derived from scenarios and choices, but we assume each correct is 10 points for now
@@ -84,11 +134,37 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
           return;
         }
 
-        const player = await joinPlayAction(play.id, playerName.trim());
+        // Retrieve any saved player ID for this play to support reconnection
+        const savedSessionStr = localStorage.getItem(`eduplay_session_${play.id}`);
+        let savedPlayerId: string | null = null;
+        if (savedSessionStr) {
+          try {
+            const data = JSON.parse(savedSessionStr);
+            if (data.playerName === playerName.trim()) {
+              savedPlayerId = data.playerId;
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        const player = await joinPlayAction(play.id, playerName.trim(), savedPlayerId);
         setPlayerId(player.id);
 
         // Save name for future sessions
         localStorage.setItem("drugGamePlayerName", playerName.trim());
+        
+        // Initialize localStorage session
+        localStorage.setItem(`eduplay_session_${play.id}`, JSON.stringify({
+          playerId: player.id,
+          playerName: playerName.trim(),
+          score: 0,
+          correctAnswers: 0,
+          wrongAnswers: 0,
+          currentScenarioIndex: 0,
+          isFinished: false
+        }));
+
         posthog.capture("game_joined", { game_id: game.id, is_demo: false });
 
         setScreen("start");
@@ -111,10 +187,95 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     setScreen("game")
   }
 
+  // Offline-First Sync Queue Worker
+  useEffect(() => {
+    setIsOffline(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+    
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    const flushQueue = async () => {
+      if (!navigator.onLine) return;
+      
+      const queueStr = localStorage.getItem('eduplay_sync_queue');
+      if (!queueStr) return;
+      
+      try {
+        const queue = JSON.parse(queueStr);
+        if (queue.length === 0) return;
+        
+        // Take the latest payload for each player to prevent redundant syncs
+        const latestPayloads = new Map();
+        for (const item of queue) {
+          latestPayloads.set(item.playerId, item);
+        }
+
+        const remainingQueue: any[] = [];
+        
+        for (const [pId, payload] of latestPayloads.entries()) {
+          try {
+            await updatePlayerAction(pId, {
+              totalScore: payload.score,
+              totalCorrectAnswers: payload.correctAnswers,
+              totalWrongAnswers: payload.wrongAnswers,
+              isFinished: payload.isFinished,
+              completedAt: payload.isFinished ? new Date() : undefined,
+            });
+          } catch (e) {
+            remainingQueue.push(payload);
+          }
+        }
+        
+        if (remainingQueue.length > 0) {
+          localStorage.setItem('eduplay_sync_queue', JSON.stringify(remainingQueue));
+        } else {
+          localStorage.removeItem('eduplay_sync_queue');
+        }
+      } catch (e) {
+        console.error("Failed to parse sync queue", e);
+      }
+    };
+
+    // Attempt flush when coming online and periodically every 5 seconds
+    window.addEventListener('online', flushQueue);
+    const interval = setInterval(flushQueue, 5000);
+    
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('online', flushQueue);
+      clearInterval(interval);
+    };
+  }, []);
+
   const syncProgress = async (newScore: number, newCorrect: number, newWrong: number, finished: boolean) => {
     if (game.isDemo) return; // Bypass DB for demo
     if (!playerId) return;
+
+    // Save state in localStorage
+    localStorage.setItem(`eduplay_session_${play.id}`, JSON.stringify({
+      playerId,
+      playerName,
+      score: newScore,
+      correctAnswers: newCorrect,
+      wrongAnswers: newWrong,
+      currentScenarioIndex,
+      isFinished: finished
+    }));
+
+    const syncPayload = {
+      playerId,
+      score: newScore,
+      correctAnswers: newCorrect,
+      wrongAnswers: newWrong,
+      isFinished: finished,
+    };
+
     try {
+      if (!navigator.onLine) throw new Error("Offline");
+      
       await updatePlayerAction(playerId, {
         totalScore: newScore,
         totalCorrectAnswers: newCorrect,
@@ -123,7 +284,10 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
         completedAt: finished ? new Date() : undefined,
       });
     } catch (error) {
-      console.error("Failed to sync progress");
+      console.warn("Failed to sync progress, queuing for background retry.");
+      const queue = JSON.parse(localStorage.getItem('eduplay_sync_queue') || '[]');
+      queue.push(syncPayload);
+      localStorage.setItem('eduplay_sync_queue', JSON.stringify(queue));
     }
   }
 
@@ -141,8 +305,15 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     const newWrong = wrongAnswers + (!choice.isCorrect ? 1 : 0);
     
     setScore(newScore);
-    if (choice.isCorrect) setCorrectAnswers(newCorrect);
-    else setWrongAnswers(newWrong);
+    if (choice.isCorrect) {
+      setCorrectAnswers(newCorrect);
+    } else {
+      setWrongAnswers(newWrong);
+      // Haptic Feedback for wrong answers
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+    }
 
     // Sync score after answering
     syncProgress(newScore, newCorrect, newWrong, false);
@@ -206,11 +377,25 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
       return
     }
 
-    setCurrentScenarioIndex((prev) => prev + 1)
+    const nextIndex = currentScenarioIndex + 1
+    setCurrentScenarioIndex(nextIndex)
     setHasAnswered(false)
     setSelectedChoiceIndex(null)
     setIsSkipped(false)
     setShowFeedback(false)
+
+    // Save incremented index to localStorage
+    if (!game.isDemo && playerId) {
+      localStorage.setItem(`eduplay_session_${play.id}`, JSON.stringify({
+        playerId,
+        playerName,
+        score,
+        correctAnswers,
+        wrongAnswers,
+        currentScenarioIndex: nextIndex,
+        isFinished: false
+      }));
+    }
   }
 
   const handleShare = () => {
@@ -236,289 +421,70 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
       dir="rtl"
     >
       <div className="w-full max-w-lg">
+        {/* ─── OFFLINE INDICATOR ─── */}
+        {isOffline && (
+          <div className="bg-amber-100 border border-amber-200 text-amber-800 text-sm font-bold text-center py-3 px-4 rounded-2xl mb-4 shadow-sm animate-in fade-in slide-in-from-top-4 flex items-center justify-center gap-2">
+            <span className="text-xl">⚠️</span>
+            <span>أنت غير متصل بالإنترنت. سيتم حفظ تقدمك تلقائياً.</span>
+          </div>
+        )}
+
         {/* ─── JOIN SCREEN ─── */}
         {screen === "join" && (
-          <form onSubmit={handleJoin} className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
-             <div className={`w-20 h-20 ${game.organization?.logoPath ? 'bg-transparent' : 'bg-indigo-50'} rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600 text-4xl overflow-hidden`}>
-               {game.organization?.logoPath ? (
-                 <img src={game.organization.logoPath} alt="Logo" className="w-full h-full object-contain" />
-               ) : (
-                 "🎮"
-               )}
-             </div>
-             <h1 className="text-3xl font-black text-gray-900 mb-2">
-               الانضمام للعبة
-             </h1>
-             <p className="text-gray-500 font-bold mb-8">{game.title}</p>
-             
-             <div className="mb-6 text-right">
-               <label className="block text-gray-700 font-bold mb-2">اسمك الأول</label>
-               <div className="relative">
-                 <input 
-                   type="text" 
-                   required
-                   value={playerName}
-                   onChange={(e) => setPlayerName(e.target.value)}
-                   className="w-full pl-16 pr-5 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-bold"
-                   placeholder="اكتب اسمك هنا..."
-                   autoFocus
-                 />
-                 <button
-                   type="button"
-                   onClick={() => setPlayerName(generateRandomName())}
-                   className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition-colors group"
-                   title="توليد اسم عشوائي"
-                 >
-                   <span className="text-xl group-hover:rotate-180 inline-block transition-transform duration-300">🎲</span>
-                 </button>
-               </div>
-             </div>
-
-             <button
-               type="submit"
-               disabled={isPending || !playerName.trim()}
-               className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-xl font-bold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
-             >
-               {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "دخول الآن"}
-             </button>
-          </form>
+          <JoinScreen
+            game={game}
+            playerName={playerName}
+            setPlayerName={setPlayerName}
+            isPending={isPending}
+            onJoin={handleJoin}
+            onGenerateRandomName={() => setPlayerName(generateRandomName())}
+          />
         )}
 
         {/* ─── START SCREEN ─── */}
         {screen === "start" && (
-          <div className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
-            {game.organization?.logoPath && (
-              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                 <img src={game.organization.logoPath} alt="Logo" className="w-full h-full object-contain" />
-              </div>
-            )}
-            <h1 className="text-3xl font-black text-emerald-600 mb-2">
-              {game.title}
-            </h1>
-            <p className="text-gray-500 mb-6 font-bold">مرحباً {playerName}! 👋</p>
-
-            <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl p-5 mb-6 text-right">
-              {game.description && (
-                <p className="text-gray-700 mb-4 leading-relaxed font-medium">
-                  {game.description}
-                </p>
-              )}
-              <p className="text-emerald-700 font-bold">{gameStart.ctaText}</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={startGame}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xl font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-pulse"
-            >
-              {gameStart.startButtonLabel}
-            </button>
-
-            <div className="flex justify-center gap-4 mt-6">
-              <span className="text-2xl animate-pulse">⭐</span>
-              <span className="text-2xl animate-pulse" style={{ animationDelay: "0.3s" }}>🌟</span>
-              <span className="text-2xl animate-pulse" style={{ animationDelay: "0.6s" }}>✨</span>
-            </div>
-          </div>
+          <StartScreen
+            game={game}
+            playerName={playerName}
+            gameStart={gameStart}
+            onStartGame={startGame}
+          />
         )}
 
         {/* ─── GAME SCREEN ─── */}
         {screen === "game" && currentScenario && (
-          <div className="bg-white rounded-3xl p-6 shadow-xl relative animate-in fade-in duration-500">
-            {/* Header row: score | skip | question counter */}
-            <div className="flex justify-between items-center mb-4 gap-2">
-              <div className="bg-gradient-to-br from-emerald-50 to-blue-50 px-4 py-2 rounded-xl text-center min-w-[80px]">
-                <span className="block text-xs text-gray-500 font-bold">{gamePlay.scoreLabel}</span>
-                <span className="text-2xl font-black text-emerald-600">{score}</span>
-              </div>
-
-              {/* Skip button — centre */}
-              <button
-                type="button"
-                onClick={skipQuestion}
-                disabled={hasAnswered}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all duration-200
-                  ${hasAnswered
-                    ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                    : "border-amber-400 text-amber-600 hover:bg-amber-50 hover:scale-105 active:scale-95"
-                  }`}
-              >
-                {gamePlay.skipButtonLabel}
-              </button>
-
-              <div className="bg-gradient-to-br from-emerald-50 to-blue-50 px-4 py-2 rounded-xl text-center min-w-[80px]">
-                <span className="block text-xs text-gray-500 font-bold">{gamePlay.questionLabel}</span>
-                <span className="text-xl font-black text-blue-600">
-                  {currentScenarioIndex + 1} / {scenarios.length}
-                </span>
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="bg-gray-200 rounded-full h-2 mb-6 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 rounded-full transition-all duration-500"
-                style={{ width: `${(currentScenarioIndex / scenarios.length) * 100}%` }}
-              />
-            </div>
-
-            {/* Scenario card */}
-            <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 rounded-2xl p-5 text-center mb-5 animate-in slide-in-from-right duration-500">
-              <div className="text-5xl mb-3">{currentScenario.icon || "❓"}</div>
-              <h2 className="text-xl font-black text-gray-800 mb-2">
-                {currentScenario.title}
-              </h2>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                {currentScenario.description}
-              </p>
-            </div>
-
-            {/* Choices */}
-            <div className="space-y-3">
-              {currentScenario.choices.map((choice: any, index: number) => (
-                <button
-                  key={choice.id || index}
-                  type="button"
-                  onClick={() => selectChoice(index)}
-                  disabled={hasAnswered}
-                  className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 text-right font-bold
-                    ${!hasAnswered ? "border-gray-200 hover:border-blue-400 hover:bg-gray-50 hover:-translate-x-1" : ""}
-                    ${hasAnswered && selectedChoiceIndex === index && choice.isCorrect ? "border-emerald-500 bg-emerald-50" : ""}
-                    ${hasAnswered && selectedChoiceIndex === index && !choice.isCorrect ? "border-amber-500 bg-amber-50 animate-shake" : ""}
-                    ${hasAnswered && selectedChoiceIndex !== index && choice.isCorrect ? "border-emerald-500 bg-emerald-50" : ""}
-                    ${hasAnswered ? "pointer-events-none" : "cursor-pointer"}
-                  `}
-                >
-                  {choice.icon && <span className="text-2xl flex-shrink-0">{choice.icon}</span>}
-                  <span className="text-gray-700">{choice.text}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Feedback overlay */}
-            {showFeedback && activeFeedback && (
-              <div className="absolute inset-0 bg-white/98 rounded-3xl flex items-center justify-center p-6 animate-in fade-in duration-300 z-10">
-                <div className="text-center w-full">
-                  <div className="text-6xl mb-4 animate-in zoom-in duration-500">
-                    {isSkipped ? "⏭️" : feedbackIsCorrect ? gamePlay.feedbackCorrectIcon : gamePlay.feedbackWrongIcon}
-                  </div>
-                  <h3
-                    className={`text-2xl font-black mb-3 ${
-                      isSkipped
-                        ? "text-amber-500"
-                        : feedbackIsCorrect
-                          ? "text-emerald-600"
-                          : "text-amber-600"
-                    }`}
-                  >
-                    {activeFeedback.title}
-                  </h3>
-                  {activeFeedback.message && (
-                    <p className="text-gray-600 font-medium mb-4 leading-relaxed">
-                      {activeFeedback.message}
-                    </p>
-                  )}
-
-                  {activeFeedback.tip && (
-                    <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 mb-5 flex items-start gap-3 text-right">
-                      <span className="text-2xl flex-shrink-0">{gamePlay.feedbackTipIcon}</span>
-                      <span className="text-gray-700 font-medium text-sm">
-                        {activeFeedback.tip}
-                      </span>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={nextScenario}
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full"
-                  >
-                    {currentScenarioIndex >= scenarios.length - 1
-                      ? gamePlay.showResultsLabel
-                      : gamePlay.nextButtonLabel}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <GameplayScreen
+            playerName={playerName}
+            score={score}
+            currentScenarioIndex={currentScenarioIndex}
+            totalScenarios={scenarios.length}
+            currentScenario={currentScenario}
+            gamePlay={gamePlay}
+            hasAnswered={hasAnswered}
+            selectedChoiceIndex={selectedChoiceIndex}
+            showFeedback={showFeedback}
+            isSkipped={isSkipped}
+            activeFeedback={activeFeedback}
+            feedbackIsCorrect={feedbackIsCorrect}
+            onSelectChoice={selectChoice}
+            onSkipQuestion={skipQuestion}
+            onNextScenario={nextScenario}
+          />
         )}
 
         {/* ─── RESULT SCREEN ─── */}
         {screen === "result" && (
-          <div className="bg-white rounded-3xl p-8 shadow-xl text-center relative overflow-hidden animate-in fade-in duration-500">
-            {confetti.map((piece) => (
-              <div
-                key={piece.id}
-                className="absolute w-3 h-3 rounded-sm animate-confetti"
-                style={{
-                  left: piece.left,
-                  backgroundColor: piece.color,
-                  animationDelay: piece.delay,
-                  animationDuration: piece.duration,
-                }}
-              />
-            ))}
-
-            <div className="relative z-10">
-              <div className="text-7xl mb-4 animate-in zoom-in duration-700 flex justify-center">
-                {game.organization?.logoPath ? (
-                  <img src={game.organization.logoPath} alt="Logo" className="w-24 h-24 object-contain" />
-                ) : (
-                  resultData.badge
-                )}
-              </div>
-              <h1 className="text-3xl font-black text-emerald-600 mb-2">
-                {resultData.title}
-              </h1>
-              <p className="text-gray-500 font-medium mb-6">{resultData.subtitle}</p>
-
-              <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-5 mb-5 shadow-inner">
-                <span className="block text-sm opacity-90 font-bold mb-1">
-                  {results.finalScoreLabel}
-                </span>
-                <span className="text-5xl font-black">{score}</span>
-                <span className="text-lg opacity-90 font-bold"> / {maxScore} {results.pointsSuffix}</span>
-              </div>
-
-              <div className="bg-emerald-50 text-emerald-700 rounded-xl p-4 mb-5 font-bold">
-                {resultData.message}
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                >
-                  {results.shareLabel}
-                </button>
-                
-                {game.isDemo && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={startGame}
-                      className="bg-white border-2 border-emerald-500 text-emerald-600 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-emerald-50 hover:scale-105 transition-all duration-300"
-                    >
-                      إعادة المحاولة 🔄
-                    </button>
-                    <Link
-                      href={game.id === '00000000-0000-0000-0000-000000000003' ? '/' : '/dashboard/games'}
-                      className="bg-gray-100 text-gray-700 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-gray-200 hover:scale-105 transition-all duration-300"
-                    >
-                      {game.id === '00000000-0000-0000-0000-000000000003' ? 'العودة للرئيسية 🏠' : 'العودة للوحة التحكم 🔙'}
-                    </Link>
-                  </>
-                )}
-
-                {!game.isDemo && (
-                  <div className="text-gray-400 font-medium text-sm mt-4">
-                    تم تسجيل النتيجة وحفظها بنجاح 🎯
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <ResultScreen
+            playerName={playerName}
+            score={score}
+            maxScore={maxScore}
+            game={game}
+            results={results}
+            resultData={resultData}
+            confetti={confetti}
+            onShare={handleShare}
+            onRetry={startGame}
+          />
         )}
       </div>
 

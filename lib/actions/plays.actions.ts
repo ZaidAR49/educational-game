@@ -51,20 +51,58 @@ export async function updatePlayStatusAction(playId: string, status: "draft" | "
 
 // --- PLAYER ACTIONS (No requireAuth usually, as players are guests) ---
 
-/**
- * Joins a classroom play (creates a new player).
- */
-export async function joinPlayAction(playId: string, playerName: string) {
+export async function joinPlayAction(playId: string, playerName: string, existingPlayerId?: string | null) {
   // Check if play is actually live
   const play = await playsService.getPlayById(playId);
   if (!play || play.status !== "live") {
     throw new Error("This game session is not currently live.");
   }
 
+  const { db } = await import("@/lib/db");
+  const { players } = await import("@/lib/db/schema");
+  const { eq, and, sql } = await import("drizzle-orm");
+
+  // SECURITY: Prevent Bot Flooding / Enforce Capacity
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(players)
+    .where(eq(players.classroomPlayId, playId));
+
+  if (count >= 200) {
+    throw new Error("عذراً، الجلسة ممتلئة (الحد الأقصى 200 لاعب).");
+  }
+
+  const existingPlayer = await db.query.players.findFirst({
+    where: and(
+      eq(players.classroomPlayId, playId),
+      eq(players.name, playerName)
+    )
+  });
+
+  if (existingPlayer) {
+    if (existingPlayerId && existingPlayer.id === existingPlayerId) {
+      // Reconnect existing player
+      const { cookies } = await import("next/headers");
+      (await cookies()).set('eduplay_student_id', existingPlayer.id, {
+        httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24
+      });
+      return existingPlayer;
+    } else {
+      throw new Error("هذا الاسم مستخدم بالفعل في هذه الجلسة، يرجى اختيار اسم آخر.");
+    }
+  }
+
   const newPlayer = await playsService.createPlayer({
     classroomPlayId: playId,
     name: playerName,
   });
+
+  if (newPlayer) {
+    const { cookies } = await import("next/headers");
+    (await cookies()).set('eduplay_student_id', newPlayer.id, {
+      httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24
+    });
+  }
 
   // Depending on how players are displayed, you might revalidate the teacher's live view.
   revalidatePath(`/dashboard/games/${play.gameId}/live`);
@@ -85,8 +123,14 @@ export async function joinPlayAction(playId: string, playerName: string) {
  * Updates a player's score or status.
  */
 export async function updatePlayerAction(playerId: string, playerData: Partial<NewPlayer>) {
-  // In a real app you might want some security token for players
-  // so they can only update their own score.
+  // SECURITY: Prevent IDOR (Student Cheating) by verifying HttpOnly cookie
+  const { cookies } = await import("next/headers");
+  const securePlayerId = (await cookies()).get('eduplay_student_id')?.value;
+  
+  if (!securePlayerId || securePlayerId !== playerId) {
+    throw new Error("Unauthorized: Invalid student session.");
+  }
+
   const updatedPlayer = await playsService.updatePlayer(playerId, playerData);
   
   // Revalidate the teacher's live view

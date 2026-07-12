@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   Sparkles,
   TrendingUp,
-  Monitor,
   Share2,
   Trash2,
   Play,
@@ -19,28 +18,12 @@ import {
   LogIn,
   XCircle,
 } from "lucide-react"
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Line,
-  LineChart,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from "@/components/ui/chart"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { TrafficCharts } from "./components/charts/TrafficCharts"
+import { TeacherActivityCharts } from "./components/charts/TeacherActivityCharts"
+import { PlayerJourneyCharts } from "./components/charts/PlayerJourneyCharts"
+import { ErrorTrackingCharts } from "./components/charts/ErrorTrackingCharts"
+
 export type CustomEventName =
   | "game_created"
   | "game_published"
@@ -254,300 +237,35 @@ export function AnalyticsClient({
       </section>
 
       {/* Traffic Charts */}
-      <section>
-        <SectionTitle title="تحليل الزيارات" />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>مشاهدات الصفحات</CardDescription>
-              <CardTitle className="text-3xl font-bold">{traffic.totalPageviews.toLocaleString()}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{ visits: { label: "مشاهدات", color: "hsl(217.2 91.2% 59.8%)" } }} className="h-[280px] w-full">
-                <AreaChart data={visits} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="fillVisits" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-visits)" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="var(--color-visits)" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatDateTick} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="visits" stroke="var(--color-visits)" fill="url(#fillVisits)" strokeWidth={2} />
-                </AreaChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>الزوار الفريدون</CardDescription>
-              <CardTitle className="text-3xl font-bold">{traffic.uniqueVisitors.toLocaleString()}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{ visitors: { label: "زوار فريدون", color: "hsl(262.1 83.3% 57.8%)" } }} className="h-[280px] w-full">
-                <AreaChart data={uniqueVisitors} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="fillVisitors" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-visitors)" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="var(--color-visitors)" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatDateTick} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="visitors" stroke="var(--color-visitors)" fill="url(#fillVisitors)" strokeWidth={2} />
-                </AreaChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Monitor className="h-5 w-5 text-indigo-500" />
-                نوع الجهاز
-              </CardTitle>
-              <CardDescription>توزيع الأجهزة المستخدمة للزيارة</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  desktop: { label: "سطح المكتب", color: "#6366f1" },
-                  mobile: { label: "جوال", color: "#10b981" },
-                  tablet: { label: "جهاز لوحي", color: "#f59e0b" },
-                }}
-                className="mx-auto h-[280px] w-full max-w-[320px]"
-              >
-                <PieChart>
-                  <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                  <Pie data={deviceTypes} dataKey="value" nameKey="name" innerRadius={65} outerRadius={95} paddingAngle={4}>
-                    {deviceTypes.map((_, i) => (
-                      <Cell key={i} fill={DEVICE_COLORS[i % DEVICE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
-                </PieChart>
-              </ChartContainer>
-              {deviceTypes.length === 0 && (
-                <p className="py-8 text-center text-sm text-slate-400">لا توجد بيانات أجهزة بعد</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-teal-500" />
-                متوسط مدة الجلسة
-              </CardDescription>
-              <CardTitle className="text-3xl font-bold">{formatDuration(traffic.avgSessionDurationSeconds)}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{ duration: { label: "مدة (ث)", color: "hsl(173 58% 39%)" } }} className="h-[280px] w-full">
-                <LineChart data={sessionDuration} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatDateTick} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(v) => `${v}ث`} />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent formatter={(value) => [formatDuration(Number(value)), "مدة الجلسة"]} />
-                    }
-                  />
-                  <Line type="monotone" dataKey="duration" stroke="var(--color-duration)" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>التوزيع الجغرافي</CardTitle>
-              <CardDescription>أعلى 10 دول حسب عدد الزيارات</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{ visits: { label: "زيارات", color: "hsl(142.1 76.2% 36.3%)" } }} className="h-[280px] w-full">
-                <BarChart layout="vertical" data={geoVisits} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="country" tickLine={false} axisLine={false} width={100} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="visits" fill="var(--color-visits)" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      <TrafficCharts 
+        traffic={traffic}
+        visits={visits}
+        uniqueVisitors={uniqueVisitors}
+        deviceTypes={deviceTypes}
+        sessionDuration={sessionDuration}
+        geoVisits={geoVisits}
+      />
 
       {/* Teacher Activity */}
-      <section>
-        <SectionTitle title="نشاط المعلمين" description="أحداث إنشاء وإدارة الألعاب" />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>اتجاه نشاط المعلمين</CardTitle>
-              <CardDescription>جميع أحداث المعلم خلال 30 يوم</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={teacherChartConfig} className="h-[320px] w-full">
-                <LineChart data={teacherActivity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatDateTick} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <ChartLegend content={<ChartLegendContent />} />
-                  {Object.keys(teacherChartConfig).map((key) => (
-                    <Line key={key} type="monotone" dataKey={key} stroke={`var(--color-${key})`} strokeWidth={2} dot={false} />
-                  ))}
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-
-
-          <Card>
-            <CardHeader>
-              <CardTitle>حالة الألعاب</CardTitle>
-              <CardDescription>توزيع حالة الألعاب في قاعدة البيانات</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  draft: { label: "مسودة", color: STATUS_COLORS.draft },
-                  published: { label: "منشورة", color: STATUS_COLORS.published },
-                  archived: { label: "مؤرشفة", color: STATUS_COLORS.archived },
-                }}
-                className="mx-auto h-[260px] w-full max-w-[280px]"
-              >
-                <PieChart>
-                  <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                  <Pie
-                    data={gameStatus.map((s) => ({ ...s, fill: STATUS_COLORS[s.key] ?? "#94a3b8" }))}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={4}
-                  />
-                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
-                </PieChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      <TeacherActivityCharts 
+        teacherActivity={teacherActivity}
+        gameStatus={gameStatus}
+        teacherChartConfig={teacherChartConfig}
+      />
 
       {/* Player Journey */}
-      <section>
-        <SectionTitle title="رحلة اللاعب" description="أحداث اللعب من الانضمام إلى المشاركة" />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>اتجاه أحداث اللاعب</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={playerChartConfig} className="h-[320px] w-full">
-                <LineChart data={playerJourney} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatDateTick} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <ChartLegend content={<ChartLegendContent />} />
-                  {Object.keys(playerChartConfig).map((key) => (
-                    <Line key={key} type="monotone" dataKey={key} stroke={`var(--color-${key})`} strokeWidth={2} dot={false} />
-                  ))}
-                </LineChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>قمع اللاعب</CardTitle>
-              <CardDescription>انضمام ← بدء ← إكمال</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{ count: { label: "عدد", color: "hsl(221.2 83.2% 53.3%)" } }} className="h-[320px] w-full">
-                <BarChart data={playerFunnel} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="step" tickLine={false} axisLine={false} width={80} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="var(--color-count)" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-
-        </div>
-      </section>
+      <PlayerJourneyCharts 
+        playerJourney={playerJourney}
+        playerFunnel={playerFunnel}
+        playerChartConfig={playerChartConfig}
+      />
 
       {/* Error Tracking */}
-      <section>
-        <SectionTitle title="تتبع الأخطاء" description="أحداث $exception من PostHog" />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-                أخطاء مسجّلة
-              </CardDescription>
-              <CardTitle className="text-3xl font-bold">{traffic.totalErrors.toLocaleString()}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={{ errors: { label: "أخطاء", color: "hsl(0 84.2% 60.2%)" } }} className="h-[280px] w-full">
-                <AreaChart data={errorsPerDay} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="fillErrors" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-errors)" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="var(--color-errors)" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatDateTick} />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area type="monotone" dataKey="errors" stroke="var(--color-errors)" fill="url(#fillErrors)" strokeWidth={2} />
-                </AreaChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>أكثر الأخطاء شيوعاً</CardTitle>
-              <CardDescription>أعلى 8 رسائل خطأ</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {errorBreakdown.length > 0 ? (
-                <div className="space-y-3">
-                  {errorBreakdown.map((err, i) => (
-                    <div key={i} className="flex items-start justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3">
-                      <p className="flex-1 truncate text-sm text-slate-700" title={err.message}>
-                        {err.message}
-                      </p>
-                      <span className="shrink-0 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">
-                        {err.count}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-                  <AlertTriangle className="mb-2 h-8 w-8 opacity-40" />
-                  <p className="text-sm">لا توجد أخطاء مسجّلة</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+      <ErrorTrackingCharts 
+        totalErrors={traffic.totalErrors}
+        errorsPerDay={errorsPerDay}
+        errorBreakdown={errorBreakdown}
+      />
     </div>
   )
 }

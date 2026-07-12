@@ -6,7 +6,7 @@ import { getPostHogClient } from "@/lib/posthog-server"
 import { auth } from "@/auth"
 
 // Helper function to initialize the client safely
-function getGenAIClient() {
+export function getGenAIClient() {
   const projectId = process.env.VERTEX_AI_PROJECT_ID;
   const location = process.env.VERTEX_AI_LOCATION || "us-central1";
   const clientEmail = process.env.VERTEX_AI_CLIENT_EMAIL;
@@ -41,15 +41,14 @@ export async function generateGameAction(idea: string, questionCount: number) {
     try {
       const ai = getGenAIClient();
       
-      // Construct the full prompt
-      const systemPrompt = gameGeneratorConfig.getSystemPrompt(questionCount);
-      const finalPrompt = `${systemPrompt}\n\nGame Topic / Idea: "${idea}"`;
-
-      // Call the model
+      // Call the model with separated user contents and native systemInstruction config for prompt caching
       const response = await ai.models.generateContent({
         model: gameGeneratorConfig.model,
-        contents: finalPrompt,
-        config: gameGeneratorConfig.config,
+        contents: `Game Topic / Idea: "${idea}"`,
+        config: {
+          ...gameGeneratorConfig.config,
+          systemInstruction: gameGeneratorConfig.getSystemPrompt(questionCount),
+        },
       });
 
       const responseText = response.text;

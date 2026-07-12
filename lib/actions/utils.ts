@@ -34,7 +34,7 @@ export async function requireAuth() {
 
   return {
     ...session.user,
-    role: dbUser?.role || session.user.role,
+    role: dbUser?.role || (session.user as any).role,
     isLocked: !!dbUser?.isLocked,
     isSubscribed,
     subscriptionPlan: isSubscribed ? (dbUser?.subscriptionPlan ?? "pro") : null,

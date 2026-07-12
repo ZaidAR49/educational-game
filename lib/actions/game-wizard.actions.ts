@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, unstable_cache, updateTag } from "next/cache";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
@@ -13,7 +13,7 @@ export type SaveGameData = {
   slug: string;
   icon: string;
   status: "draft" | "published" | "archived";
-  organizationId: string;
+  organizationId: string | null;
   language?: string;
 };
 
@@ -111,7 +111,7 @@ export async function saveFullGameAction(
         feedbackTitle: choiceInput.feedback.title,
         feedbackMessage: choiceInput.feedback.message,
         feedbackTip: choiceInput.feedback.tip,
-        points: choiceInput.isCorrect ? 100 : 0, // Default 100 points for correct
+        points: choiceInput.isCorrect ? 10 : 0, // Default 10 points for correct
       }));
 
       if (choicesToInsert.length > 0) {
@@ -119,17 +119,24 @@ export async function saveFullGameAction(
       }
     }
 
+    // 4. Update game maxPoints
+    const calculatedMaxPoints = scenariosData.length * 10;
+    await tx
+      .update(games)
+      .set({ maxPoints: calculatedMaxPoints })
+      .where(eq(games.id, targetGameId!));
+
     return targetGameId;
   });
 
   revalidatePath("/dashboard/games");
   if (gameId) {
     revalidatePath(`/dashboard/games/${gameId}`);
-    revalidateTag(`game-${gameId}`);
-    revalidateTag(`game-full-${gameId}`);
+    updateTag(`game-${gameId}`);
+    updateTag(`game-full-${gameId}`);
   }
-  revalidateTag(`games-${user.id}`);
-  revalidateTag(`dashboard-${user.id}`);
+  updateTag(`games-${user.id}`);
+  updateTag(`dashboard-${user.id}`);
 
   if (!gameId) {
     const posthog = getPostHogClient();
