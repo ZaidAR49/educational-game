@@ -4,6 +4,7 @@ import { GoogleGenAI } from "@google/genai"
 import { gameGeneratorConfig } from "../ai/game-generator.config"
 import { getPostHogClient } from "@/lib/posthog-server"
 import { auth } from "@/auth"
+import { getAiUsageAndLimit, recordAiUsage } from "@/lib/services/usage.service"
 
 // Helper function to initialize the client safely
 export function getGenAIClient() {
@@ -34,7 +35,18 @@ export function getGenAIClient() {
 }
 
 export async function generateGameAction(idea: string, questionCount: number) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "يجب تسجيل الدخول لاستخدام هذه الميزة." };
+  }
+
+  const usage = await getAiUsageAndLimit(session.user.id);
+  if (usage.isOverLimit) {
+    return { success: false, error: "عذراً، لقد استنفدت الحد المسموح به من الذكاء الاصطناعي لهذا الشهر." };
+  }
+
   const maxRetries = 3;
+
   let lastError: any = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -81,7 +93,12 @@ export async function generateGameAction(idea: string, questionCount: number) {
         throw new Error("MISSING_FIELDS_ERROR");
       }
 
-      const session = await auth();
+      // Record tokens used
+      const tokensUsed = response.usageMetadata?.totalTokenCount || 0;
+      if (tokensUsed > 0) {
+        await recordAiUsage(session.user.id, tokensUsed, { feature: "scenario_generation" });
+      }
+
       if (session?.user?.id) {
         const posthog = getPostHogClient();
         posthog.capture({

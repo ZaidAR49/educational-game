@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 import Link from "next/link"
-import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks } from "lucide-react"
+import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks, Zap } from "lucide-react"
 import { getDashboardOverviewAction } from "@/lib/actions/dashboard.actions"
 import { requireAuth } from "@/lib/actions/utils"
 import DashboardCharts from "./DashboardCharts"
@@ -61,6 +61,41 @@ export default async function OverviewPage() {
             </div>
           )
         })}
+      </div>
+
+      {/* AI Token Usage */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-8 mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">استهلاك الذكاء الاصطناعي</h2>
+              <p className="text-sm text-gray-500">الرصيد المستخدم هذا الشهر لتوليد الألعاب</p>
+            </div>
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-gray-500">الطلبات</p>
+            <p className="text-xl font-black text-gray-900">{data.aiUsage.requests}</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm font-bold">
+            <span className="text-gray-900">{data.aiUsage.used.toLocaleString()} توكن</span>
+            <span className="text-gray-500">من أصل {data.aiUsage.limit.toLocaleString()}</span>
+          </div>
+          <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${data.aiUsage.isOverLimit ? 'bg-red-500' : 'bg-purple-600'}`}
+              style={{ width: `${Math.min((data.aiUsage.used / data.aiUsage.limit) * 100, 100)}%` }}
+            />
+          </div>
+          {data.aiUsage.isOverLimit && (
+            <p className="text-xs text-red-500 font-bold mt-2">لقد استنفدت الحد المسموح به لهذا الشهر.</p>
+          )}
+        </div>
       </div>
 
       {/* Student Behavior Analytics Charts */}

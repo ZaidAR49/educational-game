@@ -17,6 +17,7 @@ import {
   getTeacherActivityTrendAction,
   getPlayerJourneyTrendAction,
   getPlayerFunnelAction,
+  getPlatformAiUsageAction,
 } from "@/lib/actions/analytics.actions"
 
 export default async function AdminPage() {
@@ -35,6 +36,7 @@ export default async function AdminPage() {
     playerJourney,
     playerFunnel,
     geoVisits,
+    platformAiUsage,
   ] = await Promise.all([
     getAdminKpiAction(),
     getTrafficOverviewAction(),
@@ -50,6 +52,7 @@ export default async function AdminPage() {
     getPlayerJourneyTrendAction(),
     getPlayerFunnelAction(),
     getGeoVisitsAction(),
+    getPlatformAiUsageAction(),
   ])
 
   return (
@@ -68,6 +71,7 @@ export default async function AdminPage() {
       playerJourney={playerJourney}
       playerFunnel={playerFunnel}
       geoVisits={geoVisits}
+      platformAiUsage={platformAiUsage}
     />
   )
 }

@@ -23,4 +23,10 @@ export const config = {
       good: 50,
     },
   },
+  ai: {
+    limits: {
+      free: 100_000,
+      subscribed: 1_000_000,
+    },
+  },
 } as const

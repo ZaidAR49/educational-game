@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { users, games, classroomPlays, players } from "@/lib/db/schema";
-import { eq, count, and } from "drizzle-orm";
+import { users, games, classroomPlays, players, usageEvents } from "@/lib/db/schema";
+import { eq, count, and, sql } from "drizzle-orm";
 import { requireDashboardAccess } from "@/lib/auth/rbac";
 
 const POSTHOG_API = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com";
@@ -451,4 +451,18 @@ export async function getPlayerFunnelAction() {
     { step: "بدء اللعب", count: counts.game_started ?? 0 },
     { step: "إكمال", count: counts.game_completed ?? 0 },
   ];
+}
+
+/** Total AI tokens used platform-wide */
+export async function getPlatformAiUsageAction() {
+  await requireDashboardAccess();
+
+  const data = await db
+    .select({
+      totalTokens: sql<number>`COALESCE(SUM(${usageEvents.tokensUsed}), 0)`,
+    })
+    .from(usageEvents)
+    .where(eq(usageEvents.activity, "ai_generation"));
+
+  return data[0]?.totalTokens || 0;
 }

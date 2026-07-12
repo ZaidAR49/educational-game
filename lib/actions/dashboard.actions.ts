@@ -4,12 +4,14 @@ import { eq, inArray, desc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { games, organizations, scenarios, classroomPlays, players } from "@/lib/db/schema";
 import { requireAuth } from "./utils";
+import { getAiUsageAndLimit } from "@/lib/services/usage.service";
 
 export async function getDashboardOverviewAction() {
   const user = await requireAuth();
 
   // Fetch all dashboard stats in parallel
   const [
+    aiUsage,
     userGames,
     userOrgs,
     scenariosResult,
@@ -17,6 +19,9 @@ export async function getDashboardOverviewAction() {
     accuracyResult,
     completionResult,
   ] = await Promise.all([
+    // 0. Fetch AI Usage
+    getAiUsageAndLimit(user.id),
+
     // 1. Fetch user's games
     db
       .select()
@@ -129,6 +134,7 @@ export async function getDashboardOverviewAction() {
     scoreDistribution,
     accuracyData,
     completionData,
+    aiUsage,
   };
 }
 

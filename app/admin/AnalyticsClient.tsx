@@ -66,6 +66,7 @@ interface AnalyticsClientProps {
   playerJourney: Record<string, string | number>[]
   playerFunnel: { step: string; count: number }[]
   geoVisits: { country: string; visits: number }[]
+  platformAiUsage: number
 }
 
 const DEVICE_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#94a3b8"]
@@ -161,6 +162,7 @@ export function AnalyticsClient({
   playerJourney,
   playerFunnel,
   geoVisits,
+  platformAiUsage,
 }: AnalyticsClientProps) {
   const teacherChartConfig = {
     game_created: { label: "إنشاء لعبة", color: "hsl(142.1 76.2% 36.3%)" },
@@ -213,7 +215,20 @@ export function AnalyticsClient({
         </div>
       </section>
 
-
+      {/* AI Token Usage Platform-wide */}
+      <section>
+        <SectionTitle title="استهلاك الذكاء الاصطناعي" description="إجمالي الاستهلاك على مستوى المنصة" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <KpiCard 
+            icon={Sparkles} 
+            value={platformAiUsage.toLocaleString()} 
+            label="إجمالي التوكنز المستخدمة" 
+            sub="لتوليد الألعاب"
+            iconBg="bg-purple-50" 
+            iconColor="text-purple-600" 
+          />
+        </div>
+      </section>
 
       {/* All PostHog Events Summary */}
       <section>

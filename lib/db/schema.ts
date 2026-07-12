@@ -17,6 +17,7 @@ import { relations } from "drizzle-orm";
 export const userRoleEnum = pgEnum("user_role", ["user", "admin", "viewer", "super_admin"]);
 export const gameStatusEnum = pgEnum("game_status", ["draft", "published", "archived"]);
 export const playStatusEnum = pgEnum("play_status", ["draft", "live", "closed"]);
+export const usageActivityEnum = pgEnum("usage_activity", ["ai_generation", "game_play"]);
 
 // users table
 export const users = pgTable("users", {
@@ -36,6 +37,10 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
   deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
+  aiTokensUsedCurrentPeriod: integer("ai_tokens_used_current_period").default(0),
+  aiRequestsCurrentPeriod: integer("ai_requests_current_period").default(0),
+  gamePlaysCurrentPeriod: integer("game_plays_current_period").default(0),
+  usagePeriodStartedAt: timestamp("usage_period_started_at", { mode: "date", withTimezone: true }).defaultNow(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -44,6 +49,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   organizations: many(organizations),
   games: many(games),
   classroomPlays: many(classroomPlays),
+  usageEvents: many(usageEvents),
 }));
 
 // accounts table (Auth.js)
@@ -278,6 +284,35 @@ export const playersRelations = relations(players, ({ one }) => ({
   }),
 }));
 
+// usage_events table
+export const usageEvents = pgTable("usage_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  activity: usageActivityEnum("activity").notNull(),
+  tokensUsed: integer("tokens_used").default(0),
+  gameId: uuid("game_id").references(() => games.id, { onDelete: "set null" }),
+  organizationId: uuid("organization_id").references(() => organizations.id, { onDelete: "set null" }),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow(),
+});
+
+export const usageEventsRelations = relations(usageEvents, ({ one }) => ({
+  user: one(users, {
+    fields: [usageEvents.userId],
+    references: [users.id],
+  }),
+  game: one(games, {
+    fields: [usageEvents.gameId],
+    references: [games.id],
+  }),
+  organization: one(organizations, {
+    fields: [usageEvents.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
 // Export Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -299,3 +334,6 @@ export type NewClassroomPlay = typeof classroomPlays.$inferInsert;
 
 export type Player = typeof players.$inferSelect;
 export type NewPlayer = typeof players.$inferInsert;
+
+export type UsageEvent = typeof usageEvents.$inferSelect;
+export type NewUsageEvent = typeof usageEvents.$inferInsert;
