@@ -1,8 +1,11 @@
 import Link from "next/link"
 import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks } from "lucide-react"
 import { getDashboardOverviewAction } from "@/lib/actions/dashboard.actions"
+import { requireAuth } from "@/lib/actions/utils"
+import DashboardCharts from "./DashboardCharts"
 
 export default async function OverviewPage() {
+  const user = await requireAuth();
   const data = await getDashboardOverviewAction();
 
   const STATS = [
@@ -17,9 +20,18 @@ export default async function OverviewPage() {
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-gray-900 mb-2">نظرة عامة</h1>
-          <p className="text-gray-500">مرحباً بك مجدداً! إليك ملخص لأداء ألعابك ونشاط الطلاب.</p>
+        <div className="flex items-center gap-4">
+          {user.image ? (
+            <img src={user.image} alt={user.name || "Profile"} className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm">
+              {user.name?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          )}
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 mb-0.5">مرحباً بك، {user.name} 👋</h1>
+            <p className="text-gray-500 font-medium text-sm">إليك ملخص لأداء ألعابك ونشاط الطلاب اليوم.</p>
+          </div>
         </div>
         <Link 
           href="/dashboard/games/new"
@@ -46,6 +58,16 @@ export default async function OverviewPage() {
             </div>
           )
         })}
+      </div>
+
+      {/* Student Behavior Analytics Charts */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">تحليل سلوك الطلاب</h2>
+        <DashboardCharts
+          scoreDistribution={data.scoreDistribution}
+          accuracyData={data.accuracyData}
+          completionData={data.completionData}
+        />
       </div>
 
       {/* Recent Games & Activity */}

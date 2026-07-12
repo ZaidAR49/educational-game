@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { eq, inArray, desc, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { games, classroomPlays, players } from "@/lib/db/schema";
@@ -138,6 +139,14 @@ export async function deleteSessionsAction(sessionIds: string[]) {
     revalidateTag(`session-${id}`);
   }
   revalidatePath("/dashboard/sessions");
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: user.id,
+    event: "sessions_deleted",
+    properties: { count: sessionIds.length },
+  });
+  await posthog.shutdown();
 }
 
 /**

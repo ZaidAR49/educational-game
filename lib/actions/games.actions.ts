@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { getPostHogClient } from "@/lib/posthog-server";
 import * as gamesService from "@/lib/services/games.service";
 import { NewGame } from "@/lib/db/schema";
 import { requireAuth, verifyGameOwnership } from "./utils";
@@ -19,6 +20,15 @@ export async function createGameAction(gameData: Omit<NewGame, "ownerId">) {
   revalidatePath("/dashboard/games");
   revalidateTag(`games-${user.id}`);
   revalidateTag(`dashboard-${user.id}`);
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: user.id,
+    event: "game_created",
+    properties: { game_id: newGame?.id || 'unknown' },
+  });
+  await posthog.shutdown();
+
   return newGame;
 }
 
@@ -50,6 +60,14 @@ export async function deleteGameAction(gameId: string) {
   revalidateTag(`dashboard-${user.id}`);
   revalidateTag(`game-${gameId}`);
   revalidateTag(`game-full-${gameId}`);
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: user.id,
+    event: "game_deleted",
+    properties: { game_id: gameId },
+  });
+  await posthog.shutdown();
 }
 
 /**
@@ -113,4 +131,12 @@ export async function toggleGamePublishStatusAction(gameId: string, publish: boo
   revalidateTag(`game-${gameId}`);
   revalidateTag(`game-full-${gameId}`);
   revalidateTag(`sessions-${user.id}`); // Invalidate sessions list
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: user.id,
+    event: publish ? "game_published" : "game_session_closed",
+    properties: { game_id: gameId },
+  });
+  await posthog.shutdown();
 }

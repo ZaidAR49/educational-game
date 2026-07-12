@@ -12,6 +12,7 @@ import {
   type ConfettiPiece,
 } from "@/lib/game"
 import { joinPlayAction, updatePlayerAction } from "@/lib/actions/plays.actions"
+import posthog from "posthog-js"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -78,16 +79,18 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
           // Bypass DB for demo
           setPlayerId("demo-player-id");
           localStorage.setItem("drugGamePlayerName", playerName.trim());
+          posthog.capture("game_joined", { game_id: game.id, is_demo: true });
           setScreen("start");
           return;
         }
 
         const player = await joinPlayAction(play.id, playerName.trim());
         setPlayerId(player.id);
-        
+
         // Save name for future sessions
         localStorage.setItem("drugGamePlayerName", playerName.trim());
-        
+        posthog.capture("game_joined", { game_id: game.id, is_demo: false });
+
         setScreen("start");
       } catch (error: any) {
         toast.error("هذا الاسم مستخدم بالفعل في هذه الجلسة، يرجى اختيار اسم آخر.");
@@ -104,6 +107,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     setSelectedChoiceIndex(null)
     setIsSkipped(false)
     setShowFeedback(false)
+    posthog.capture("game_started", { game_id: game.id, scenario_count: scenarios.length })
     setScreen("game")
   }
 
@@ -142,6 +146,12 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
 
     // Sync score after answering
     syncProgress(newScore, newCorrect, newWrong, false);
+    posthog.capture("choice_selected", {
+      game_id: game.id,
+      scenario_index: currentScenarioIndex,
+      is_correct: choice.isCorrect,
+      points_earned: choice.points || 0,
+    });
 
     setTimeout(() => {
       setShowFeedback(true)
@@ -154,11 +164,15 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     setHasAnswered(true)
     setIsSkipped(true)
     setSelectedChoiceIndex(null)
-    
+
     const newWrong = wrongAnswers + 1; // Count skip as wrong
     setWrongAnswers(newWrong);
 
     syncProgress(score, correctAnswers, newWrong, false);
+    posthog.capture("question_skipped", {
+      game_id: game.id,
+      scenario_index: currentScenarioIndex,
+    });
 
     setTimeout(() => {
       setShowFeedback(true)
@@ -168,9 +182,17 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
   const showResults = () => {
     setScreen("result")
     const resultPercentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
-    
+
     // Final sync
     syncProgress(score, correctAnswers, wrongAnswers, true);
+    posthog.capture("game_completed", {
+      game_id: game.id,
+      score,
+      max_score: maxScore,
+      percentage: Math.round(resultPercentage),
+      correct_answers: correctAnswers,
+      wrong_answers: wrongAnswers,
+    });
 
     if (resultPercentage >= config.game.resultThresholds.good) {
       setConfetti(createConfettiPieces())
@@ -193,6 +215,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
 
   const handleShare = () => {
     const gameUrl = typeof window !== "undefined" ? window.location.href : ""
+    posthog.capture("game_result_shared", { game_id: game.id, score })
     void shareGameResult(score, gameUrl)
   }
 

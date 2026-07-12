@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;   -- gen_random_uuid()
 -- =====================================================================
 -- ENUM TYPES
 -- =====================================================================
-CREATE TYPE user_role AS ENUM ('user', 'admin');
+CREATE TYPE user_role AS ENUM ('user', 'admin', 'viewer', 'super_admin');
 CREATE TYPE game_status AS ENUM ('draft', 'published', 'archived');
 CREATE TYPE play_status AS ENUM ('draft', 'live', 'closed');
 

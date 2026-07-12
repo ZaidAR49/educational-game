@@ -14,7 +14,7 @@ export async function updateUserAction(data: { name: string }) {
   await db
     .update(users)
     .set({ name: data.name, updatedAt: new Date() })
-    .where(eq(users.id, sessionUser.id));
+    .where(eq(users.id, sessionUser.id!));
 
   // Update JWT session
   // Note: This requires auth callback configuration to handle session updates if NextAuth v5.

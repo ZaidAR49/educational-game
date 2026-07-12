@@ -2,6 +2,8 @@
 
 import { GoogleGenAI } from "@google/genai"
 import { gameGeneratorConfig } from "../ai/game-generator.config"
+import { getPostHogClient } from "@/lib/posthog-server"
+import { auth } from "@/auth"
 
 // Helper function to initialize the client safely
 function getGenAIClient() {
@@ -32,55 +34,102 @@ function getGenAIClient() {
 }
 
 export async function generateGameAction(idea: string, questionCount: number) {
-  try {
-    const ai = getGenAIClient();
-    
-    // Construct the full prompt
-    const systemPrompt = gameGeneratorConfig.getSystemPrompt(questionCount);
-    const finalPrompt = `${systemPrompt}\n\nGame Topic / Idea: "${idea}"`;
+  const maxRetries = 3;
+  let lastError: any = null;
 
-    // Call the model
-    const response = await ai.models.generateContent({
-      model: gameGeneratorConfig.model,
-      contents: finalPrompt,
-      config: gameGeneratorConfig.config,
-    });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const ai = getGenAIClient();
+      
+      // Construct the full prompt
+      const systemPrompt = gameGeneratorConfig.getSystemPrompt(questionCount);
+      const finalPrompt = `${systemPrompt}\n\nGame Topic / Idea: "${idea}"`;
 
-    const responseText = response.text;
-    
-    if (!responseText) {
-      throw new Error("لم يقم الذكاء الاصطناعي بتوليد أي محتوى.");
-    }
+      // Call the model
+      const response = await ai.models.generateContent({
+        model: gameGeneratorConfig.model,
+        contents: finalPrompt,
+        config: gameGeneratorConfig.config,
+      });
 
-    // Clean up potential markdown wrappers
-    let cleanJson = responseText.trim();
-    if (cleanJson.startsWith('```json')) {
-      cleanJson = cleanJson.replace(/```json/g, '');
-    }
-    if (cleanJson.startsWith('```')) {
-      cleanJson = cleanJson.replace(/```/g, '');
-    }
-    if (cleanJson.endsWith('```')) {
-      cleanJson = cleanJson.replace(/```/g, '');
-    }
+      const responseText = response.text;
+      
+      if (!responseText) {
+        throw new Error("لم يقم الذكاء الاصطناعي بتوليد أي محتوى.");
+      }
 
-    // Parse and validate
-    const parsed = JSON.parse(cleanJson.trim());
-    
-    if (!parsed.title || !parsed.scenarios || !Array.isArray(parsed.scenarios)) {
-      throw new Error("المخرجات لا تحتوي على الحقول الأساسية المطلوبة.");
-    }
+      // Clean up potential markdown wrappers
+      let cleanJson = responseText.trim();
+      if (cleanJson.startsWith('```json')) {
+        cleanJson = cleanJson.replace(/```json/g, '');
+      }
+      if (cleanJson.startsWith('```')) {
+        cleanJson = cleanJson.replace(/```/g, '');
+      }
+      if (cleanJson.endsWith('```')) {
+        cleanJson = cleanJson.replace(/```/g, '');
+      }
 
-    return {
-      success: true,
-      data: parsed,
-    };
-    
-  } catch (error: any) {
-    console.error("AI Generation Error:", error);
-    return {
-      success: false,
-      error: error.message || "حدث خطأ غير متوقع أثناء التوليد."
-    };
+      // Parse and validate
+      let parsed;
+      try {
+        parsed = JSON.parse(cleanJson.trim());
+      } catch (parseError) {
+        throw new Error("JSON_PARSE_ERROR");
+      }
+      
+      if (!parsed.title || !parsed.scenarios || !Array.isArray(parsed.scenarios)) {
+        throw new Error("MISSING_FIELDS_ERROR");
+      }
+
+      const session = await auth();
+      if (session?.user?.id) {
+        const posthog = getPostHogClient();
+        posthog.capture({
+          distinctId: session.user.id,
+          event: "ai_game_generated",
+          properties: {
+            question_count: questionCount,
+            scenario_count: parsed.scenarios?.length ?? 0,
+          },
+        });
+        await posthog.shutdown();
+      }
+
+      return {
+        success: true,
+        data: parsed,
+      };
+
+    } catch (error: any) {
+      console.error(`AI Generation Error (Attempt ${attempt}):`, error);
+      lastError = error;
+      
+      // Wait before retrying (exponential backoff)
+      if (attempt < maxRetries) {
+        await new Promise(res => setTimeout(res, 1500 * attempt));
+      }
+    }
   }
+
+  // If we reach here, all retries failed. We provide a clear Arabic reason.
+  let arabicReason = "حدث خطأ غير متوقع أثناء التوليد. يرجى المحاولة مرة أخرى.";
+  const errorMsg = lastError?.message || "";
+
+  if (errorMsg === "JSON_PARSE_ERROR") {
+    arabicReason = "فشل الذكاء الاصطناعي في صياغة اللعبة بالشكل الصحيح. قد تكون الفكرة معقدة جداً، جرب تبسيطها.";
+  } else if (errorMsg === "MISSING_FIELDS_ERROR") {
+    arabicReason = "لم يقم الذكاء الاصطناعي بتوليد جميع الحقول المطلوبة (مثل الأسئلة أو العنوان). يرجى توضيح الفكرة أكثر.";
+  } else if (errorMsg.includes("quota") || errorMsg.includes("429")) {
+    arabicReason = "تم تجاوز الحد المسموح للاستخدام في الذكاء الاصطناعي. يرجى المحاولة لاحقاً.";
+  } else if (errorMsg.includes("timeout") || errorMsg.includes("fetch")) {
+    arabicReason = "انتهى وقت الاتصال بالخادم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.";
+  } else if (errorMsg.includes("لم يقم الذكاء الاصطناعي")) {
+    arabicReason = errorMsg;
+  }
+
+  return {
+    success: false,
+    error: arabicReason
+  };
 }

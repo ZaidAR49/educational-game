@@ -1,13 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { LogIn, Menu, X, Gamepad2, LayoutDashboard } from "lucide-react"
+import { LogIn, Menu, X, Gamepad2, LayoutDashboard, Shield } from "lucide-react"
 import { useState } from "react"
 import Image from "next/image"
 import { config } from "@/lib/config"
 import uiContent from "@/data/ui-content-general.json"
 import AppLogo from "@/app/icon.png"
 import { signOut } from "next-auth/react"
+import posthog from "posthog-js"
 
 export function NavbarClient({ session }: { session: any }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -36,10 +37,18 @@ export function NavbarClient({ session }: { session: any }) {
               كيف تعمل؟
             </Link>
             {session && (
-              <Link href="/dashboard" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors flex items-center gap-1">
-                <LayoutDashboard className="w-4 h-4" />
-                لوحة التحكم
-              </Link>
+              <>
+                <Link href="/dashboard" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors flex items-center gap-1">
+                  <LayoutDashboard className="w-4 h-4" />
+                  لوحة التحكم
+                </Link>
+                {['admin', 'super_admin', 'viewer'].includes(session.user?.role) && (
+                  <Link href="/admin" className="text-purple-600 hover:text-purple-700 font-bold transition-colors flex items-center gap-1">
+                    <Shield className="w-4 h-4" />
+                    لوحة الإدارة
+                  </Link>
+                )}
+              </>
             )}
           </nav>
 
@@ -49,7 +58,7 @@ export function NavbarClient({ session }: { session: any }) {
               <div className="flex items-center gap-3">
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-bold text-gray-900">{session.user?.name}</span>
-                  <button onClick={() => signOut()} className="text-xs text-gray-500 hover:text-red-500">
+                  <button onClick={() => { posthog.reset(); signOut() }} className="text-xs text-gray-500 hover:text-red-500">
                     تسجيل الخروج
                   </button>
                 </div>
@@ -114,14 +123,26 @@ export function NavbarClient({ session }: { session: any }) {
               <span>جرب اللعبة كطالب</span>
             </Link>
             {session && (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 text-emerald-700 font-bold"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <LayoutDashboard className="w-5 h-5" />
-                <span>لوحة التحكم</span>
-              </Link>
+              <>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 text-emerald-700 font-bold"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <LayoutDashboard className="w-5 h-5" />
+                  <span>لوحة التحكم</span>
+                </Link>
+                {['admin', 'super_admin', 'viewer'].includes(session.user?.role) && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 p-3 rounded-xl bg-purple-50 text-purple-700 font-bold mt-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Shield className="w-5 h-5" />
+                    <span>لوحة الإدارة</span>
+                  </Link>
+                )}
+              </>
             )}
             {!session && (
               <Link
@@ -135,7 +156,7 @@ export function NavbarClient({ session }: { session: any }) {
             )}
             {session && (
                <button
-                 onClick={() => signOut()}
+                 onClick={() => { posthog.reset(); signOut() }}
                  className="flex items-center gap-2 p-3 rounded-xl hover:bg-red-50 text-red-600 font-medium transition-colors"
                >
                  <span>تسجيل الخروج</span>

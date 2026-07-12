@@ -14,7 +14,7 @@ import {
 import { relations } from "drizzle-orm";
 
 // Enums
-export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+export const userRoleEnum = pgEnum("user_role", ["user", "admin", "viewer", "super_admin"]);
 export const gameStatusEnum = pgEnum("game_status", ["draft", "published", "archived"]);
 export const playStatusEnum = pgEnum("play_status", ["draft", "live", "closed"]);
 
@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   name: text("name"),
   email: text("email").unique(),
   emailVerified: timestamp("emailVerified", { mode: "date", withTimezone: true }),
+  image: text("image"),
   passwordHash: text("password_hash"),
   role: userRoleEnum("role").notNull().default("user"),
   isLocked: boolean("is_locked").notNull().default(false),
@@ -58,7 +59,7 @@ export const accounts = pgTable(
     providerAccountId: text("providerAccountId").notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: bigint("expires_at", { mode: "number" }),
+    expires_at: integer("expires_at"),
     token_type: text("token_type"),
     scope: text("scope"),
     id_token: text("id_token"),
@@ -76,8 +77,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 
 // sessions table (Auth.js)
 export const sessions = pgTable("sessions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sessionToken: text("sessionToken").notNull().unique(),
+  sessionToken: text("sessionToken").primaryKey(),
   userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

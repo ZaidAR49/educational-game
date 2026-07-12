@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Save, UserCircle2, Mail, Loader2 } from "lucide-react"
+import { Save, UserCircle2, Mail, Loader2, Zap, Star } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -10,9 +10,11 @@ import { useSession } from "next-auth/react"
 
 interface SettingsClientProps {
   session: any
+  isSubscribed: boolean
+  subscriptionPlan: string | null
 }
 
-export default function SettingsClient({ session }: SettingsClientProps) {
+export default function SettingsClient({ session, isSubscribed, subscriptionPlan }: SettingsClientProps) {
   const router = useRouter()
   const { update: updateSession } = useSession()
   const [isPending, startTransition] = useTransition()
@@ -74,6 +76,41 @@ export default function SettingsClient({ session }: SettingsClientProps) {
           <span>{isPending ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
         </button>
       </div>
+
+      {/* ── Subscription Status Card ── */}
+      {isSubscribed ? (
+        <div className="relative overflow-hidden rounded-2xl p-6 flex items-center gap-5 bg-gradient-to-l from-amber-50 to-orange-50 border border-amber-200 shadow-sm">
+          {/* Decorative glow */}
+          <div className="absolute -top-6 -right-6 w-32 h-32 bg-amber-300/20 rounded-full blur-2xl" />
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-orange-300/20 rounded-full blur-2xl" />
+
+          <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-lg shadow-amber-200 shrink-0">
+            <Zap className="w-7 h-7 text-white fill-white" />
+          </div>
+
+          <div className="relative flex-1">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h3 className="text-lg font-black text-amber-900">باقة Pro مفعّلة</h3>
+              <span className="inline-flex items-center gap-1 text-[11px] font-black bg-gradient-to-r from-amber-400 to-orange-400 text-white px-2 py-0.5 rounded-full">
+                <Zap className="w-3 h-3 fill-white" /> PRO
+              </span>
+            </div>
+            <p className="text-sm text-amber-700">أنت تستمتع بكامل مميزات المنصة بدون قيود.</p>
+          </div>
+
+          <Star className="w-6 h-6 text-amber-400 fill-amber-200 shrink-0" />
+        </div>
+      ) : (
+        <div className="relative overflow-hidden rounded-2xl p-6 flex items-center gap-5 bg-gradient-to-l from-slate-50 to-gray-50 border border-gray-200 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-300 to-gray-400 flex items-center justify-center shadow-sm shrink-0">
+            <Zap className="w-7 h-7 text-white" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-black text-gray-800 mb-0.5">الباقة المجانية</h3>
+            <p className="text-sm text-gray-500">تواصل مع المسؤول للترقية إلى Pro والوصول لكامل المميزات.</p>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-10">
         

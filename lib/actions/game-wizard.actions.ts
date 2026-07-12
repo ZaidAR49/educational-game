@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { games, scenarios, choices, NewGame } from "@/lib/db/schema";
@@ -129,6 +130,20 @@ export async function saveFullGameAction(
   }
   revalidateTag(`games-${user.id}`);
   revalidateTag(`dashboard-${user.id}`);
+
+  if (!gameId) {
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: user.id,
+      event: "game_created",
+      properties: {
+        game_id: finalGameId,
+        scenario_count: scenariosData.length,
+        status: gameData.status,
+      },
+    });
+    await posthog.shutdown();
+  }
 
   return { success: true, gameId: finalGameId };
 }

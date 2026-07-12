@@ -68,6 +68,16 @@ export async function joinPlayAction(playId: string, playerName: string) {
 
   // Depending on how players are displayed, you might revalidate the teacher's live view.
   revalidatePath(`/dashboard/games/${play.gameId}/live`);
+
+  const { getPostHogClient } = await import("@/lib/posthog-server");
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: newPlayer?.id || playerName,
+    event: "game_joined",
+    properties: { play_id: playId, game_id: play.gameId },
+  });
+  await posthog.shutdown();
+
   return newPlayer;
 }
 
@@ -83,6 +93,17 @@ export async function updatePlayerAction(playerId: string, playerData: Partial<N
   const play = await playsService.getPlayById(updatedPlayer.classroomPlayId);
   if (play) {
     revalidatePath(`/dashboard/games/${play.gameId}/live`);
+    
+    if (playerData.isFinished) {
+      const { getPostHogClient } = await import("@/lib/posthog-server");
+      const posthog = getPostHogClient();
+      posthog.capture({
+        distinctId: playerId,
+        event: "game_completed",
+        properties: { play_id: updatedPlayer.classroomPlayId, game_id: play.gameId, score: updatedPlayer.totalScore },
+      });
+      await posthog.shutdown();
+    }
   }
   
   return updatedPlayer;

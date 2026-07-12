@@ -1,18 +1,19 @@
-import { auth } from "@/auth"
 import SettingsClient from "./SettingsClient"
-import { redirect } from "next/navigation"
+import { requireAuth } from "@/lib/actions/utils"
 import { SessionProvider } from "next-auth/react"
+import { auth } from "@/auth"
 
 export default async function SettingsPage() {
+  const user = await requireAuth()
   const session = await auth()
-  
-  if (!session?.user) {
-    redirect("/login")
-  }
 
   return (
     <SessionProvider session={session}>
-      <SettingsClient session={session} />
+      <SettingsClient
+        session={session}
+        isSubscribed={user.isSubscribed}
+        subscriptionPlan={user.subscriptionPlan}
+      />
     </SessionProvider>
   )
 }

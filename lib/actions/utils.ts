@@ -3,16 +3,42 @@ import * as gamesService from "@/lib/services/games.service";
 import * as scenariosService from "@/lib/services/scenarios.service";
 import * as organizationsService from "@/lib/services/organizations.service";
 
+import { redirect } from "next/navigation";
+
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
 /**
- * Ensures the user is authenticated, throwing an error if not.
+ * Ensures the user is authenticated, redirecting to sign in if not.
  * Returns the authenticated user object.
  */
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user?.id) {
-    throw new Error("Unauthorized: You must be logged in.");
+    redirect("/api/auth/signin");
   }
-  return session.user;
+  
+  // Fetch fresh user from DB to check for real-time locks and subscription
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.id, session.user.id),
+    columns: { isLocked: true, role: true, isSubscribed: true, subscriptionPlan: true }
+  });
+
+  if (dbUser?.isLocked) {
+    redirect("/blocked");
+  }
+
+  const isAdmin = ["super_admin", "admin", "viewer"].includes(dbUser?.role ?? "")
+  const isSubscribed = isAdmin || !!dbUser?.isSubscribed
+
+  return {
+    ...session.user,
+    role: dbUser?.role || session.user.role,
+    isLocked: !!dbUser?.isLocked,
+    isSubscribed,
+    subscriptionPlan: isSubscribed ? (dbUser?.subscriptionPlan ?? "pro") : null,
+  } as typeof session.user & { id: string, role: string, isLocked: boolean, isSubscribed: boolean, subscriptionPlan: string | null };
 }
 
 /**

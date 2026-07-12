@@ -156,7 +156,7 @@ export function AutoAiWizard({ organizations, onBack }: AutoAiWizardProps) {
                 <textarea
                   value={idea}
                   onChange={(e) => setIdea(e.target.value)}
-                  placeholder="أدخل موضوع اللعبة أو الدرس، مثلاً: 'أساسيات البرمجة بلغة بايثون للمبتدئين'..."
+                  placeholder="أدخل موضوع اللعبة أو الدرس، مثلاً: 'جدول الضرب'، 'أجزاء النبات'، 'عواصم الدول العربية'..."
                   className="w-full px-6 py-5 rounded-2xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all font-medium resize-none min-h-[150px] shadow-sm text-lg leading-relaxed"
                 />
               </div>
