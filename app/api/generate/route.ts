@@ -1,4 +1,4 @@
-import { getGenAIClient } from "@/lib/actions/ai.actions";
+import { getGenAIClient } from "@/lib/ai/genai-client";
 import { gameGeneratorConfig } from "@/lib/ai/game-generator.config";
 import { auth } from "@/auth";
 

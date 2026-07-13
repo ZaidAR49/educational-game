@@ -262,3 +262,44 @@ CREATE TRIGGER trg_increment_user_usage_counters
 AFTER INSERT ON usage_events
 FOR EACH ROW
 EXECUTE FUNCTION increment_user_usage_counters();
+
+-- =========================================================
+-- CLEANUP FUNCTION (scheduled via pg_cron)
+-- Deletes stale records older than 30 days.
+-- Schedule: daily at 03:00 UTC via pg_cron.
+-- =========================================================
+
+CREATE OR REPLACE FUNCTION cleanup_old_records()
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  cutoff         timestamptz := now() - interval '30 days';
+  deleted_plays  integer;
+  deleted_tokens integer;
+BEGIN
+  -- Delete closed classroom_plays older than 30 days
+  -- players rows deleted automatically via ON DELETE CASCADE
+  DELETE FROM classroom_plays
+  WHERE status = 'closed'
+    AND created_at < cutoff;
+  GET DIAGNOSTICS deleted_plays = ROW_COUNT;
+
+  -- Delete expired verification tokens
+  DELETE FROM verification_token
+  WHERE expires < now();
+  GET DIAGNOSTICS deleted_tokens = ROW_COUNT;
+
+  RETURN jsonb_build_object(
+    'ran_at',         now(),
+    'cutoff',         cutoff,
+    'deleted_plays',  deleted_plays,
+    'deleted_tokens', deleted_tokens
+  );
+END;
+$$;
+
+-- pg_cron schedule (run once in Supabase SQL Editor):
+-- SELECT cron.schedule('cleanup_old_records', '0 3 * * *', $$SELECT cleanup_old_records()$$);
