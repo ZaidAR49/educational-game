@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -8,7 +9,7 @@ import { redirect } from "next/navigation";
  * Retrieves the freshest user record from the database.
  * Useful for checking real-time status like isLocked or role changes.
  */
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const session = await auth();
   if (!session?.user?.id) return null;
 
@@ -17,7 +18,7 @@ export async function getCurrentUser() {
   });
 
   return dbUser || null;
-}
+});
 
 /**
  * Ensures the user has at least viewer access to the dashboard.

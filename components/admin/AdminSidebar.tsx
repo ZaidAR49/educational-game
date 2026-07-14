@@ -16,8 +16,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname()
 
   const navItems = [
-    { name: "الإحصائيات", href: "/admin", icon: LayoutDashboard },
     { name: "الحسابات", href: "/admin/accounts", icon: Users },
+    { name: "الإحصائيات", href: "/admin/analytics", icon: LayoutDashboard },
     { name: "الإعدادات", href: "/admin/settings", icon: Settings },
   ]
 

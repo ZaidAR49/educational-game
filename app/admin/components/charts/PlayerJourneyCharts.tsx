@@ -1,3 +1,5 @@
+"use client"
+
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

@@ -101,9 +101,9 @@ export function GameplayScreen({
             disabled={hasAnswered}
             className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 text-right font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300
               ${!hasAnswered ? "border-gray-200 hover:border-blue-400 hover:bg-gray-50 hover:-translate-x-1" : ""}
-              ${hasAnswered && selectedChoiceIndex === index && choice.isCorrect ? "border-emerald-500 bg-emerald-50" : ""}
-              ${hasAnswered && selectedChoiceIndex === index && !choice.isCorrect ? "border-amber-500 bg-amber-50 animate-shake" : ""}
-              ${hasAnswered && selectedChoiceIndex !== index && choice.isCorrect ? "border-emerald-500 bg-emerald-50" : ""}
+              ${hasAnswered && selectedChoiceIndex === index && (choice.isCorrect ?? (choice.points > 0)) ? "border-emerald-500 bg-emerald-50" : ""}
+              ${hasAnswered && selectedChoiceIndex === index && !(choice.isCorrect ?? (choice.points > 0)) ? "border-amber-500 bg-amber-50 animate-shake" : ""}
+              ${hasAnswered && selectedChoiceIndex !== index && (choice.isCorrect ?? (choice.points > 0)) ? "border-emerald-500 bg-emerald-50" : ""}
               ${hasAnswered ? "pointer-events-none" : "cursor-pointer"}
             `}
           >

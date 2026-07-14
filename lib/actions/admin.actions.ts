@@ -88,18 +88,17 @@ export async function getUsersListAction() {
     isSubscribed: users.isSubscribed,
     plan: users.subscriptionPlan,
     createdAt: users.createdAt,
-    // Bug #17 Fix: use Drizzle typed subqueries instead of raw SQL strings
     organizations: sql<number>`(
-      SELECT count(*)::int FROM ${organizations} WHERE ${organizations.ownerId} = ${users.id}
+      SELECT count(*)::int FROM "organizations" WHERE "owner_id" = "users"."id"
     )`,
     games: sql<number>`(
-      SELECT count(*)::int FROM ${games} WHERE ${games.ownerId} = ${users.id}
+      SELECT count(*)::int FROM "games" WHERE "owner_id" = "users"."id"
     )`,
     totalPlayers: sql<number>`(
       SELECT count(*)::int
-      FROM ${players} p
-      JOIN ${classroomPlays} cp ON p.classroom_play_id = cp.id
-      WHERE cp.teacher_id = ${users.id}
+      FROM "players" p
+      JOIN "classroom_plays" cp ON p.classroom_play_id = cp.id
+      WHERE cp.teacher_id = "users"."id"
     )`,
   })
   .from(users)
