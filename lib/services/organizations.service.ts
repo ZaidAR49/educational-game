@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, count, ilike, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { organizations, Organization, NewOrganization } from "@/lib/db/schema";
 
@@ -11,14 +11,47 @@ export async function getOrganizationById(id: string): Promise<Organization | un
 }
 
 /**
- * Fetch all organizations owned by a specific user.
+ * Fetch the absolute total count of organizations belonging to a specific user (ignores filters).
  */
-export async function getOrganizationsByOwnerId(ownerId: string): Promise<Organization[]> {
-  return db
+export async function getTotalOrganizationsCount(ownerId: string): Promise<number> {
+  const [totalCount] = await db
+    .select({ count: count() })
+    .from(organizations)
+    .where(eq(organizations.ownerId, ownerId));
+  return totalCount.count;
+}
+
+/**
+ * Fetch all organizations owned by a specific user with pagination and filters.
+ */
+export async function getOrganizationsByOwnerId(ownerId: string, page: number = 1, limit: number = 3, search?: string) {
+  const offset = (page - 1) * limit;
+
+  const conditions = [eq(organizations.ownerId, ownerId)];
+  
+  if (search) {
+    conditions.push(ilike(organizations.name, `%${search}%`));
+  }
+
+  const whereClause = and(...conditions);
+
+  const [totalCount] = await db
+    .select({ count: count() })
+    .from(organizations)
+    .where(whereClause);
+
+  const data = await db
     .select()
     .from(organizations)
-    .where(eq(organizations.ownerId, ownerId))
-    .orderBy(desc(organizations.createdAt));
+    .where(whereClause)
+    .orderBy(desc(organizations.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return {
+    data,
+    total: totalCount.count
+  };
 }
 
 /**

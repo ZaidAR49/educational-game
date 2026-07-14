@@ -4,9 +4,11 @@ import { eq, inArray, desc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { games, organizations, scenarios, classroomPlays, players } from "@/lib/db/schema";
 import { requireAuth } from "./utils";
+import { unstable_noStore as noStore } from "next/cache";
 import { getAiUsageAndLimit } from "@/lib/services/usage.service";
 
 export async function getDashboardOverviewAction() {
+  noStore();
   const user = await requireAuth();
 
   // Fetch all dashboard stats in parallel

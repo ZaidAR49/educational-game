@@ -12,12 +12,17 @@ interface LivePreviewProps {
   buttonText: string
   icon: string
   // Result screen props
-  resultTitle: string
-  resultSubtitle: string
-  resultMessage: string
+  resultTitlePass: string
+  resultSubtitlePass: string
+  resultMessagePass: string
+  resultTitleFail: string
+  resultSubtitleFail: string
+  resultMessageFail: string
   orgMessage: string
   resultPrimaryButtonText: string
   resultSecondaryButtonText: string
+  resultPreviewState?: "pass" | "fail"
+  onResultPreviewStateChange?: (state: "pass" | "fail") => void
 }
 
 export function LivePreview({
@@ -29,12 +34,17 @@ export function LivePreview({
   welcomeMessage,
   buttonText,
   icon,
-  resultTitle,
-  resultSubtitle,
-  resultMessage,
+  resultTitlePass,
+  resultSubtitlePass,
+  resultMessagePass,
+  resultTitleFail,
+  resultSubtitleFail,
+  resultMessageFail,
   orgMessage,
   resultPrimaryButtonText,
   resultSecondaryButtonText,
+  resultPreviewState = "pass",
+  onResultPreviewStateChange,
 }: LivePreviewProps) {
   return (
     <div className="flex flex-col items-center">
@@ -122,33 +132,52 @@ export function LivePreview({
                   exit={{ opacity: 0, x: -20 }}
                   className="flex flex-col h-full gap-4 pt-2"
                 >
+                  {/* Preview Toggle */}
+                  <div className="flex justify-center mb-2">
+                    <div className="bg-gray-100 rounded-lg p-1 flex text-[10px] font-bold">
+                      <button 
+                        onClick={() => onResultPreviewStateChange?.("pass")}
+                        className={`px-3 py-1 rounded-md ${resultPreviewState === "pass" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500"}`}
+                      >
+                        نجاح
+                      </button>
+                      <button 
+                        onClick={() => onResultPreviewStateChange?.("fail")}
+                        className={`px-3 py-1 rounded-md ${resultPreviewState === "fail" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500"}`}
+                      >
+                        رسوب
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Result Header icon */}
                   <div className="text-center">
-                    <span className="text-5xl">🌱</span>
+                    <span className="text-5xl">{resultPreviewState === "pass" ? "🏆" : "🌱"}</span>
                   </div>
 
                   {/* Title & Subtitle */}
                   <div className="text-center mb-2">
-                    <h1 className="text-2xl font-black text-emerald-600 mb-1 leading-tight">
-                      {resultTitle || "لا بأس، استمر!"}
+                    <h1 className={`text-2xl font-black mb-1 leading-tight ${resultPreviewState === "pass" ? "text-emerald-600" : "text-amber-600"}`}>
+                      {resultPreviewState === "pass" ? (resultTitlePass || "ممتاز!") : (resultTitleFail || "لا بأس، استمر!")}
                     </h1>
                     <p className="text-gray-500 font-medium text-xs">
-                      {resultSubtitle || "كل محاولة تعلّم جديد!"}
+                      {resultPreviewState === "pass" ? (resultSubtitlePass || "لقد أثبتّ جدارتك!") : (resultSubtitleFail || "كل محاولة تعلّم جديد!")}
                     </p>
                   </div>
 
                   {/* Score Box */}
-                  <div className="bg-emerald-600 text-white rounded-2xl p-4 text-center shadow-md">
+                  <div className={`${resultPreviewState === "pass" ? "bg-emerald-600" : "bg-amber-500"} text-white rounded-2xl p-4 text-center shadow-md`}>
                     <div className="text-xs font-bold mb-1 opacity-90">نتيجتك النهائية</div>
                     <div className="flex items-baseline justify-center gap-1 dir-ltr">
-                      <span className="text-3xl font-black tracking-tighter">10</span>
+                      <span className="text-3xl font-black tracking-tighter">{resultPreviewState === "pass" ? "100" : "10"}</span>
                       <span className="text-lg opacity-80">/ 110 نقطة</span>
                     </div>
                   </div>
 
                   {/* Message Box */}
-                  <div className="bg-emerald-50 text-emerald-800 rounded-xl p-3 text-center text-xs font-bold leading-relaxed shadow-sm">
-                    📚 {resultMessage || "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!"}
+                  <div className={`bg-gray-50 text-gray-800 rounded-xl p-3 text-center text-xs font-bold leading-relaxed shadow-sm border ${resultPreviewState === "pass" ? "border-emerald-200" : "border-amber-200"}`}>
+                    {resultPreviewState === "pass" ? "🌟 " : "📚 "} 
+                    {resultPreviewState === "pass" ? (resultMessagePass || "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر.") : (resultMessageFail || "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!")}
                   </div>
 
                   {/* Org Message Box */}

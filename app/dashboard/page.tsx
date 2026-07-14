@@ -25,14 +25,14 @@ export default async function OverviewPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {user.image ? (
-            <img src={user.image} alt={user.name || "Profile"} className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
+            <img src={user.image} alt={user.name || "Profile"} className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
               {user.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-black text-gray-900 mb-0.5">مرحباً بك، {user.name} 👋</h1>
+            <h1 className="text-xl font-black text-gray-900 mb-0.5">مرحباً بك، {user.name} 👋</h1>
             <p className="text-gray-500 font-medium text-sm">إليك ملخص لأداء ألعابك ونشاط الطلاب اليوم.</p>
           </div>
         </div>
@@ -50,13 +50,13 @@ export default async function OverviewPage() {
         {STATS.map((stat, i) => {
           const Icon = stat.icon
           return (
-            <div key={i} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${stat.color}`}>
-                <Icon className="w-7 h-7" />
+            <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.color}`}>
+                <Icon className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-500 mb-1">{stat.label}</p>
-                <h3 className="text-2xl font-black text-gray-900">{stat.value}</h3>
+                <h3 className="text-xl font-black text-gray-900">{stat.value}</h3>
               </div>
             </div>
           )
@@ -64,20 +64,20 @@ export default async function OverviewPage() {
       </div>
 
       {/* AI Token Usage */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-8 mt-8">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 mt-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
               <Zap className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">استهلاك الذكاء الاصطناعي</h2>
+              <h2 className="text-lg font-bold text-gray-900">استهلاك الذكاء الاصطناعي</h2>
               <p className="text-sm text-gray-500">الرصيد المستخدم هذا الشهر لتوليد الألعاب</p>
             </div>
           </div>
           <div className="text-left">
             <p className="text-sm font-bold text-gray-500">الطلبات</p>
-            <p className="text-xl font-black text-gray-900">{data.aiUsage.requests}</p>
+            <p className="text-lg font-black text-gray-900">{data.aiUsage.requests}</p>
           </div>
         </div>
 
@@ -100,7 +100,7 @@ export default async function OverviewPage() {
 
       {/* Student Behavior Analytics Charts */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">تحليل سلوك الطلاب</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">تحليل سلوك الطلاب</h2>
         <DashboardCharts
           scoreDistribution={data.scoreDistribution}
           accuracyData={data.accuracyData}
@@ -112,9 +112,9 @@ export default async function OverviewPage() {
       <div className="grid grid-cols-1 gap-8">
         
         {/* Recent Games Table */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">أحدث الألعاب</h2>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-gray-50 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-gray-900">أحدث الألعاب</h2>
             <Link href="/dashboard/games" className="text-sm font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
               <span>عرض الكل</span>
               <ArrowLeft className="w-4 h-4" />

@@ -149,7 +149,7 @@ export function GameplayScreen({
             <button
               type="button"
               onClick={onNextScenario}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full"
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-lg font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full"
             >
               {currentScenarioIndex >= totalScenarios - 1
                 ? gamePlay.showResultsLabel

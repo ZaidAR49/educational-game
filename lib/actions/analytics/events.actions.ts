@@ -1,10 +1,12 @@
 "use server";
 
 import { requireDashboardAccess } from "@/lib/auth/rbac";
+import { unstable_noStore as noStore } from "next/cache";
 import { runHogQL, CUSTOM_EVENTS, EVENT_LABELS, CustomEventName, ANALYTICS_DAYS, eventListSql, lastNDays } from "./core";
 
 /** Total counts for all custom PostHog events */
 export async function getAllEventsSummaryAction() {
+  noStore();
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -32,6 +34,7 @@ export async function getAllEventsSummaryAction() {
 
 /** Multi-event daily trend (pivoted for charts) */
 export async function getEventsTrendAction(events: CustomEventName[]) {
+  noStore();
   await requireDashboardAccess();
 
   const invalidEvents = events.filter((e) => !CUSTOM_EVENTS.includes(e));
@@ -67,6 +70,7 @@ export async function getEventsTrendAction(events: CustomEventName[]) {
 
 /** Teacher activity trend */
 export async function getTeacherActivityTrendAction() {
+  noStore();
   await requireDashboardAccess();
   return getEventsTrendAction([
     "game_created",
@@ -80,6 +84,7 @@ export async function getTeacherActivityTrendAction() {
 
 /** Player journey trend */
 export async function getPlayerJourneyTrendAction() {
+  noStore();
   await requireDashboardAccess();
   return getEventsTrendAction([
     "game_joined",
@@ -93,6 +98,7 @@ export async function getPlayerJourneyTrendAction() {
 
 /** Player funnel totals (joined → started → completed) */
 export async function getPlayerFunnelAction() {
+  noStore();
   await requireDashboardAccess();
 
   const data = await runHogQL(`

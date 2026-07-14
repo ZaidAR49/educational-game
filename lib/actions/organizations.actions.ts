@@ -31,18 +31,20 @@ export async function getOrganizationAction(orgId: string) {
 }
 
 /**
- * Fetches all organizations for the logged-in user.
+ * Fetches all organizations for the logged-in user with pagination and filters.
  */
-export async function getMyOrganizationsAction() {
+export async function getMyOrganizationsAction(page: number = 1, search?: string) {
   const user = await requireAuth();
   
-  const getCachedOrgs = unstable_cache(
-    async () => organizationsService.getOrganizationsByOwnerId(user.id),
-    [`organizations-${user.id}`],
-    { tags: [`organizations-${user.id}`] }
-  );
+  return organizationsService.getOrganizationsByOwnerId(user.id, page, 3, search);
+}
 
-  return getCachedOrgs();
+/**
+ * Fetches the absolute total count of organizations for the logged-in user.
+ */
+export async function getTotalOrganizationsCountAction() {
+  const user = await requireAuth();
+  return organizationsService.getTotalOrganizationsCount(user.id);
 }
 
 /**

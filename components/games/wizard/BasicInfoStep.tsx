@@ -21,14 +21,14 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
       key="step1"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-[2rem] p-8 md:p-12 border border-gray-100 shadow-sm space-y-8 max-w-4xl mx-auto"
+      className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm space-y-6 max-w-4xl mx-auto"
     >
       <div className="text-center mb-8">
-        <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2rem] mx-auto flex items-center justify-center mb-6 text-5xl shadow-inner border border-emerald-100/50">
+        <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[1.5rem] mx-auto flex items-center justify-center mb-4 text-4xl shadow-inner border border-emerald-100/50">
           {formData.icon}
         </div>
-        <h2 className="text-3xl font-black text-gray-900 mb-2">المعلومات الأساسية</h2>
-        <p className="text-gray-500 font-medium text-lg">ابدأ بإعطاء لعبتك اسماً ووصفاً جذاباً للطلاب.</p>
+        <h2 className="text-2xl font-black text-gray-900 mb-2">المعلومات الأساسية</h2>
+        <p className="text-gray-500 font-medium text-base">ابدأ بإعطاء لعبتك اسماً ووصفاً جذاباً للطلاب.</p>
       </div>
 
       <div className="space-y-8">
@@ -41,7 +41,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
               value={formData.title}
               onChange={onChange}
               placeholder="مثال: تحدي المسار المهني"
-              className={`w-full px-6 py-4 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right font-black text-xl placeholder:text-gray-300 ${
+              className={`w-full px-5 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right font-black text-lg placeholder:text-gray-300 ${
                 errors.title 
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                   : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
@@ -56,7 +56,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
               name="icon"
               value={formData.icon}
               onChange={onChange}
-              className={`w-full px-4 py-4 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-center text-3xl ${
+              className={`w-full px-4 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-center text-2xl ${
                 errors.icon 
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                   : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
@@ -74,7 +74,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
                 name="organizationId"
                 value={formData.organizationId}
                 onChange={onChange}
-                className={`w-full px-6 py-4 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right font-black text-xl text-gray-700 bg-white appearance-none cursor-pointer placeholder:text-gray-300 ${
+                className={`w-full px-5 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right font-black text-lg text-gray-700 bg-white appearance-none cursor-pointer placeholder:text-gray-300 ${
                   errors.organizationId 
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                     : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
@@ -104,7 +104,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
                 value={formData.slug}
                 onChange={onChange}
                 placeholder="career-path"
-                className={`flex-1 min-w-0 px-4 py-4 focus:ring-4 outline-none transition-all font-sans font-bold text-emerald-700 text-lg placeholder:text-gray-300 ${
+                className={`flex-1 min-w-0 px-4 py-3.5 focus:ring-4 outline-none transition-all font-sans font-bold text-emerald-700 text-base placeholder:text-gray-300 ${
                   errors.slug ? 'focus:ring-red-500/10 bg-red-50/10' : 'focus:ring-emerald-500/10'
                 }`}
               />
@@ -121,7 +121,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
             onChange={onChange}
             rows={4}
             placeholder="اكتب وصفاً مختصراً يشرح للطالب ما سيتعلمه من هذه اللعبة..."
-            className={`w-full px-6 py-4 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right text-gray-600 resize-none leading-relaxed text-lg placeholder:text-gray-300 ${
+            className={`w-full px-5 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-right text-gray-600 resize-none leading-relaxed text-base placeholder:text-gray-300 ${
               errors.description 
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                 : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'

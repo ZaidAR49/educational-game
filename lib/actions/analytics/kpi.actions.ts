@@ -4,9 +4,11 @@ import { db } from "@/lib/db";
 import { users, games, classroomPlays, players, usageEvents } from "@/lib/db/schema";
 import { eq, count, and, sql } from "drizzle-orm";
 import { requireDashboardAccess } from "@/lib/auth/rbac";
+import { unstable_noStore as noStore } from "next/cache";
 
 /** KPI stat cards (DB for absolute totals) */
 export async function getAdminKpiAction() {
+  noStore();
   await requireDashboardAccess();
 
   const totalUsers = await db.select({ count: count() }).from(users).where(eq(users.role, "user"));
@@ -33,6 +35,7 @@ export async function getAdminKpiAction() {
 
 /** Game status breakdown (DB) */
 export async function getGameStatusBreakdownAction() {
+  noStore();
   await requireDashboardAccess();
 
   const rows = await db
@@ -55,6 +58,7 @@ export async function getGameStatusBreakdownAction() {
 
 /** Total AI tokens used platform-wide */
 export async function getPlatformAiUsageAction() {
+  noStore();
   await requireDashboardAccess();
 
   const data = await db

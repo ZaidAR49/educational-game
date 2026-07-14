@@ -1,19 +1,32 @@
 import Link from "next/link"
 import { Plus, Building2, Pencil, Trash2 } from "lucide-react"
-import { getMyOrganizationsAction, deleteOrganizationAction } from "@/lib/actions/organizations.actions"
-import { getMyGamesAction } from "@/lib/actions/games.actions"
+import { getMyOrganizationsAction, deleteOrganizationAction, getTotalOrganizationsCountAction } from "@/lib/actions/organizations.actions"
+import { getGameCountByOrganizationId } from "@/lib/services/games.service"
+import { PaginationControls } from "@/components/shared/PaginationControls"
+import { SearchAndFilter } from "@/components/shared/SearchAndFilter"
 
-export default async function OrganizationsPage() {
-  const organizations = await getMyOrganizationsAction();
-  const games = await getMyGamesAction();
+export default async function OrganizationsPage(props: {
+  searchParams: Promise<{ page?: string; search?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const currentPage = Number(searchParams?.page) || 1;
+  const search = searchParams?.search;
 
-  const orgsWithStats = organizations.map((org) => {
-    return {
-      ...org,
-      gamesCount: games.filter(g => g.organizationId === org.id).length,
-      formattedDate: org.createdAt ? new Date(org.createdAt).toISOString().split('T')[0] : "غير معروف",
-    }
-  });
+  const absoluteTotal = await getTotalOrganizationsCountAction();
+  const { data: organizations, total } = await getMyOrganizationsAction(currentPage, search);
+  
+  const orgsWithStats = await Promise.all(
+    organizations.map(async (org) => {
+      const count = await getGameCountByOrganizationId(org.id);
+      return {
+        ...org,
+        gamesCount: count,
+        formattedDate: org.createdAt ? new Date(org.createdAt).toISOString().split('T')[0] : "غير معروف",
+      }
+    })
+  );
+
+  const totalPages = Math.ceil(total / 3);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -33,6 +46,13 @@ export default async function OrganizationsPage() {
           <span>إضافة مؤسسة جديدة</span>
         </Link>
       </div>
+
+      {absoluteTotal > 10 && (
+        <SearchAndFilter 
+          placeholder="ابحث عن مؤسسة..." 
+          showStatusFilter={false} 
+        />
+      )}
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -84,16 +104,20 @@ export default async function OrganizationsPage() {
         ))}
 
         {/* Empty State / Add Card */}
-        <Link 
-          href="/dashboard/organizations/new"
-          className="bg-emerald-50/50 rounded-3xl p-6 border-2 border-dashed border-emerald-200 flex flex-col items-center justify-center gap-3 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer min-h-[200px]"
-        >
-          <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center">
-            <Plus className="w-6 h-6" />
-          </div>
-          <span className="font-bold">إنشاء مؤسسة جديدة</span>
-        </Link>
+        {organizations.length === 0 && (
+          <Link 
+            href="/dashboard/organizations/new"
+            className="bg-emerald-50/50 rounded-3xl p-6 border-2 border-dashed border-emerald-200 flex flex-col items-center justify-center gap-3 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 transition-all cursor-pointer min-h-[200px]"
+          >
+            <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center">
+              <Plus className="w-6 h-6" />
+            </div>
+            <span className="font-bold">إنشاء مؤسسة جديدة</span>
+          </Link>
+        )}
       </div>
+
+      <PaginationControls currentPage={currentPage} totalPages={totalPages} />
     </div>
   )
 }

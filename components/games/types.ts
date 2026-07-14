@@ -7,4 +7,5 @@ export type Game = {
   playCount: number
   questionsCount: number
   createdAt: string
+  organizationName?: string
 }

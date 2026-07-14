@@ -57,7 +57,7 @@ export function JoinScreen({
        <button
          type="submit"
          disabled={isPending || !playerName.trim()}
-         className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-xl font-bold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+         className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
        >
          {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "دخول الآن"}
        </button>

@@ -20,9 +20,12 @@ export type OrganizationFormData = {
   subtitle: string
   welcomeMessage: string
   buttonText: string
-  resultTitle: string
-  resultSubtitle: string
-  resultMessage: string
+  resultTitlePass: string
+  resultSubtitlePass: string
+  resultMessagePass: string
+  resultTitleFail: string
+  resultSubtitleFail: string
+  resultMessageFail: string
   orgMessage: string
   resultPrimaryButtonText: string
   resultSecondaryButtonText: string
@@ -36,6 +39,7 @@ interface OrganizationFormProps {
 export function OrganizationForm({ initialData, organizationId }: OrganizationFormProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"welcome" | "result">("welcome")
+  const [resultView, setResultView] = useState<"pass" | "fail">("pass")
   const [isSaving, setIsSaving] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -48,9 +52,12 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
     subtitle: initialData?.subtitle || "لعبة تفاعلية تعليمية للجميع",
     welcomeMessage: initialData?.welcomeMessage || "مرحباً بك! 👋\n\nستواجه في هذا الاختبار مجموعة من الأسئلة المتنوعة.\n\nاختر الإجابة الصحيحة في كل سؤال واجمع أكبر عدد من النقاط!\n\nهل أنت مستعد لاختبار معلوماتك؟",
     buttonText: initialData?.buttonText || "ابدأ الاختبار 🚀",
-    resultTitle: initialData?.resultTitle || "لا بأس، استمر!",
-    resultSubtitle: initialData?.resultSubtitle || "كل محاولة تعلّم جديد!",
-    resultMessage: initialData?.resultMessage || "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
+    resultTitlePass: initialData?.resultTitlePass || "ممتاز!",
+    resultSubtitlePass: initialData?.resultSubtitlePass || "لقد أثبتّ جدارتك!",
+    resultMessagePass: initialData?.resultMessagePass || "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر.",
+    resultTitleFail: initialData?.resultTitleFail || "لا بأس، استمر!",
+    resultSubtitleFail: initialData?.resultSubtitleFail || "كل محاولة تعلّم جديد!",
+    resultMessageFail: initialData?.resultMessageFail || "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
     orgMessage: initialData?.orgMessage || "أحسنت على مشاركتك! كل سؤال هو فرصة جديدة للتعلم والنمو. استمر في تطوير معلوماتك ومهاراتك، ونحن واثقون من قدراتك! 🌟",
     resultPrimaryButtonText: initialData?.resultPrimaryButtonText || "العب مرة أخرى 🔄",
     resultSecondaryButtonText: initialData?.resultSecondaryButtonText || "شارك نتيجتك 📊",
@@ -69,16 +76,19 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
     if (!formData.subtitle.trim()) newErrors.subtitle = "الرجاء إدخال العنوان الفرعي"
     if (!formData.welcomeMessage.trim()) newErrors.welcomeMessage = "الرجاء إدخال رسالة الترحيب"
     if (!formData.buttonText.trim()) newErrors.buttonText = "الرجاء إدخال نص الزر"
-    if (!formData.resultTitle.trim()) newErrors.resultTitle = "الرجاء إدخال عنوان النتيجة"
-    if (!formData.resultSubtitle.trim()) newErrors.resultSubtitle = "الرجاء إدخال الوصف القصير"
-    if (!formData.resultMessage.trim()) newErrors.resultMessage = "الرجاء إدخال رسالة التشجيع"
+    if (!formData.resultTitlePass.trim()) newErrors.resultTitlePass = "مطلوب"
+    if (!formData.resultSubtitlePass.trim()) newErrors.resultSubtitlePass = "مطلوب"
+    if (!formData.resultMessagePass.trim()) newErrors.resultMessagePass = "مطلوب"
+    if (!formData.resultTitleFail.trim()) newErrors.resultTitleFail = "مطلوب"
+    if (!formData.resultSubtitleFail.trim()) newErrors.resultSubtitleFail = "مطلوب"
+    if (!formData.resultMessageFail.trim()) newErrors.resultMessageFail = "مطلوب"
     if (!formData.orgMessage.trim()) newErrors.orgMessage = "الرجاء إدخال رسالة المؤسسة"
     if (!formData.resultPrimaryButtonText.trim()) newErrors.resultPrimaryButtonText = "مطلوب"
     if (!formData.resultSecondaryButtonText.trim()) newErrors.resultSecondaryButtonText = "مطلوب"
 
     setErrors(newErrors)
     // Auto-switch tab to the one containing errors
-    const hasResultErrors = newErrors.resultTitle || newErrors.resultSubtitle || newErrors.resultMessage || newErrors.orgMessage || newErrors.resultPrimaryButtonText || newErrors.resultSecondaryButtonText
+    const hasResultErrors = newErrors.resultTitlePass || newErrors.resultSubtitlePass || newErrors.resultMessagePass || newErrors.resultTitleFail || newErrors.resultSubtitleFail || newErrors.resultMessageFail || newErrors.orgMessage || newErrors.resultPrimaryButtonText || newErrors.resultSecondaryButtonText
     const hasWelcomeErrors = newErrors.mainTitle || newErrors.subtitle || newErrors.welcomeMessage || newErrors.buttonText || newErrors.icon
     if (hasResultErrors && !hasWelcomeErrors) setActiveTab("result")
     else if (hasWelcomeErrors) setActiveTab("welcome")
@@ -113,9 +123,16 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
           back_link_text: "العودة للرئيسية",
         },
         resultScreen: {
-          title: formData.resultTitle,
-          small_description: formData.resultSubtitle,
-          message: formData.resultMessage,
+          pass: {
+            title: formData.resultTitlePass,
+            small_description: formData.resultSubtitlePass,
+            message: formData.resultMessagePass,
+          },
+          fail: {
+            title: formData.resultTitleFail,
+            small_description: formData.resultSubtitleFail,
+            message: formData.resultMessageFail,
+          }
         },
       }
 
@@ -152,14 +169,6 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
             أكمل إعداد ملفك التعريفي لتتمكن من إنشاء الألعاب. هذه الإعدادات ستظهر للطلاب في جميع ألعابك.
           </p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0"
-        >
-          {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-          <span>{isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -214,8 +223,26 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
             <WelcomeTabFields formData={formData} errors={errors} onChange={handleChange} />
           )}
           {activeTab === "result" && (
-            <ResultTabFields formData={formData} errors={errors} onChange={handleChange} />
+            <ResultTabFields 
+              formData={formData} 
+              errors={errors} 
+              onChange={handleChange} 
+              resultView={resultView}
+              onResultViewChange={setResultView}
+            />
           )}
+
+          {/* Action Buttons */}
+          <div className="pt-6 border-t border-gray-100 flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md w-full md:w-auto text-lg"
+            >
+              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              <span>{isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
+            </button>
+          </div>
         </div>
 
         {/* Live Preview */}
@@ -229,12 +256,17 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
             welcomeMessage={formData.welcomeMessage}
             buttonText={formData.buttonText}
             icon={formData.icon}
-            resultTitle={formData.resultTitle}
-            resultSubtitle={formData.resultSubtitle}
-            resultMessage={formData.resultMessage}
+            resultTitlePass={formData.resultTitlePass}
+            resultSubtitlePass={formData.resultSubtitlePass}
+            resultMessagePass={formData.resultMessagePass}
+            resultTitleFail={formData.resultTitleFail}
+            resultSubtitleFail={formData.resultSubtitleFail}
+            resultMessageFail={formData.resultMessageFail}
             orgMessage={formData.orgMessage}
             resultPrimaryButtonText={formData.resultPrimaryButtonText}
             resultSecondaryButtonText={formData.resultSecondaryButtonText}
+            resultPreviewState={resultView}
+            onResultPreviewStateChange={setResultView}
           />
         </div>
       </div>

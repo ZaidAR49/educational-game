@@ -126,9 +126,16 @@ export const organizations = pgTable("organizations", {
     back_link_text: "العودة للرئيسية"
   }),
   resultScreen: jsonb("result_screen").notNull().default({
-    title: "لا بأس، استمر!",
-    small_description: "كل محاولة تعلّم جديد!",
-    message: "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!"
+    pass: {
+      title: "ممتاز!",
+      small_description: "لقد أثبتّ جدارتك!",
+      message: "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر."
+    },
+    fail: {
+      title: "لا بأس، استمر!",
+      small_description: "كل محاولة تعلّم جديد!",
+      message: "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!"
+    }
   }),
   createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).defaultNow(),

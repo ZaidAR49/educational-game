@@ -25,7 +25,7 @@ export function GameWizardHeader({ isEdit, step, customTopActions }: GameWizardH
       {/* Wizard Header */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-4xl font-black text-gray-900 mb-6 tracking-tight">
+          <h1 className="text-3xl font-black text-gray-900 mb-6 tracking-tight">
             {isEdit ? "تعديل اللعبة" : "إنشاء لعبة جديدة"}
           </h1>
           

@@ -24,6 +24,28 @@ export function ResultScreen({
   onShare,
   onRetry
 }: ResultScreenProps) {
+  const isPass = maxScore > 0 && (score / maxScore) >= 0.5;
+  const orgResultScreen = game.organization?.resultScreen;
+  
+  let title = resultData.title;
+  let subtitle = resultData.subtitle;
+  let message = resultData.message;
+  let badge = resultData.badge;
+
+  if (orgResultScreen) {
+    if (isPass) {
+      title = orgResultScreen.pass?.title || orgResultScreen.title || title;
+      subtitle = orgResultScreen.pass?.small_description || orgResultScreen.small_description || subtitle;
+      message = orgResultScreen.pass?.message || orgResultScreen.message || message;
+      badge = "🏆";
+    } else {
+      title = orgResultScreen.fail?.title || orgResultScreen.title || title;
+      subtitle = orgResultScreen.fail?.small_description || orgResultScreen.small_description || subtitle;
+      message = orgResultScreen.fail?.message || orgResultScreen.message || message;
+      badge = "🌱";
+    }
+  }
+
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl text-center relative overflow-hidden animate-in fade-in duration-500">
       {/* Player Name Badge */}
@@ -52,15 +74,15 @@ export function ResultScreen({
           {game.organization?.logoPath ? (
             <img src={game.organization.logoPath} alt="Logo" className="w-24 h-24 object-contain" />
           ) : (
-            resultData.badge
+            badge
           )}
         </div>
-        <h1 className="text-3xl font-black text-emerald-600 mb-2">
-          {resultData.title}
+        <h1 className={`text-3xl font-black mb-2 ${isPass ? 'text-emerald-600' : 'text-amber-600'}`}>
+          {title}
         </h1>
-        <p className="text-gray-500 font-medium mb-6">{resultData.subtitle}</p>
+        <p className="text-gray-500 font-medium mb-6">{subtitle}</p>
 
-        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-5 mb-5 shadow-inner">
+        <div className={`text-white rounded-2xl p-5 mb-5 shadow-inner ${isPass ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'}`}>
           <span className="block text-sm opacity-90 font-bold mb-1">
             {results.finalScoreLabel}
           </span>
@@ -68,15 +90,15 @@ export function ResultScreen({
           <span className="text-lg opacity-90 font-bold"> / {maxScore} {results.pointsSuffix}</span>
         </div>
 
-        <div className="bg-emerald-50 text-emerald-700 rounded-xl p-4 mb-5 font-bold">
-          {resultData.message}
+        <div className={`rounded-xl p-4 mb-5 font-bold ${isPass ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`}>
+          {message}
         </div>
 
         <div className="flex flex-col gap-3">
           <button
             type="button"
             onClick={onShare}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-lg font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
           >
             {results.shareLabel}
           </button>
@@ -86,13 +108,13 @@ export function ResultScreen({
               <button
                 type="button"
                 onClick={onRetry}
-                className="bg-white border-2 border-emerald-500 text-emerald-600 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-emerald-50 hover:scale-105 transition-all duration-300"
+                className="bg-white border-2 border-emerald-500 text-emerald-600 text-lg font-bold px-6 py-3 rounded-xl shadow-sm hover:bg-emerald-50 hover:scale-105 transition-all duration-300"
               >
                 إعادة المحاولة 🔄
               </button>
               <Link
                 href={game.id === 'demo' ? '/' : '/dashboard/games'}
-                className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 px-6 rounded-2xl font-bold transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-2xl text-lg font-bold transition-colors"
               >
                 {game.id === 'demo' ? 'العودة للرئيسية 🏠' : 'العودة للوحة التحكم 🔙'}
               </Link>

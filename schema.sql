@@ -90,9 +90,16 @@ CREATE TABLE organizations (
     "decorative_emojis": ["✨", "☀️", "⭐"]
   }'::jsonb,
   result_screen jsonb NOT NULL DEFAULT '{
-    "title": "لا بأس، استمر!",
-    "message": "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
-    "small_description": "كل محاولة تعلّم جديد!"
+    "pass": {
+      "title": "ممتاز!",
+      "message": "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر.",
+      "small_description": "لقد أثبتّ جدارتك!"
+    },
+    "fail": {
+      "title": "لا بأس، استمر!",
+      "message": "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
+      "small_description": "كل محاولة تعلّم جديد!"
+    }
   }'::jsonb,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),

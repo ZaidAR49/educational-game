@@ -11,25 +11,36 @@ interface GameCardProps {
 
 export function GameCard({ game, onToggleStatus, onShare, onDelete }: GameCardProps) {
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group">
-      <div className="p-6 flex-1 flex flex-col">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group">
+      <div className="p-5 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-4">
-          <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-gray-100">
+          <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-100">
             {game.icon}
           </div>
-          {game.status === 'published' ? (
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
-              منشورة
-            </span>
-          ) : (
-            <span className="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full">
-              مسودة
-            </span>
+          <div className="flex items-center gap-2">
+            {game.status === 'published' ? (
+              <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shrink-0">
+                منشورة
+              </span>
+            ) : (
+              <span className="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full shrink-0">
+                مسودة
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <div className="mb-2">
+          <h3 className="text-lg font-bold text-gray-900 leading-tight">{game.title}</h3>
+          {game.organizationName && (
+            <div className="flex items-center gap-1.5 mt-1.5 text-indigo-500 font-bold text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <span>مقدمة من: {game.organizationName}</span>
+            </div>
           )}
         </div>
         
-        <h3 className="text-xl font-bold text-gray-900 mb-2">{game.title}</h3>
-        <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed mb-6 flex-1">
+        <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed mb-4 flex-1">
           {game.description}
         </p>
 
