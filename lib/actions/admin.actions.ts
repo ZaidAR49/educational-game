@@ -3,10 +3,14 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, organizations, games, players, classroomPlays } from "@/lib/db/schema";
-import { requireSuperAdmin } from "@/lib/auth/rbac";
+import { requireSuperAdmin, requireDashboardAccess, requireAdmin } from "@/lib/auth/rbac";
 import { revalidatePath } from "next/cache";
 
 export async function getAdminsAction() {
+  // Bug #1 Fix: require at least dashboard/viewer access
+  await requireDashboardAccess();
+
+  // Per product requirement: return only id, name, email, and role for admin list
   const allAdmins = await db
     .select({
       id: users.id,
@@ -20,7 +24,10 @@ export async function getAdminsAction() {
     .where(inArray(users.role, ["super_admin", "admin", "viewer"]));
 
   return allAdmins.map(admin => ({
-    ...admin,
+    id: admin.id,
+    name: admin.name,
+    email: admin.email,
+    role: admin.role,
     status: admin.isLocked ? "blocked" : "active",
     addedAt: admin.addedAt.toISOString().split('T')[0]
   }));
@@ -69,6 +76,9 @@ export async function toggleAdminBlockAction(userId: string, isLocked: boolean) 
 }
 
 export async function getUsersListAction() {
+  // Bug #2 Fix: only admin+ can list all platform users
+  await requireAdmin();
+
   const result = await db.select({
     id: users.id,
     name: users.name,
@@ -78,14 +88,19 @@ export async function getUsersListAction() {
     isSubscribed: users.isSubscribed,
     plan: users.subscriptionPlan,
     createdAt: users.createdAt,
-    organizations: sql<number>`(SELECT count(*) FROM organizations WHERE owner_id = "users"."id")::int`,
-    games: sql<number>`(SELECT count(*) FROM games WHERE owner_id = "users"."id")::int`,
+    // Bug #17 Fix: use Drizzle typed subqueries instead of raw SQL strings
+    organizations: sql<number>`(
+      SELECT count(*)::int FROM ${organizations} WHERE ${organizations.ownerId} = ${users.id}
+    )`,
+    games: sql<number>`(
+      SELECT count(*)::int FROM ${games} WHERE ${games.ownerId} = ${users.id}
+    )`,
     totalPlayers: sql<number>`(
-      SELECT count(*) 
-      FROM players p 
-      JOIN classroom_plays cp ON p.classroom_play_id = cp.id 
-      WHERE cp.teacher_id = "users"."id"
-    )::int`,
+      SELECT count(*)::int
+      FROM ${players} p
+      JOIN ${classroomPlays} cp ON p.classroom_play_id = cp.id
+      WHERE cp.teacher_id = ${users.id}
+    )`,
   })
   .from(users)
   .where(eq(users.role, "user"));
@@ -145,18 +160,19 @@ export async function deleteUserAction(userId: string) {
 export async function removeAdminAction(userId: string) {
   await requireSuperAdmin();
 
-  // Guard: ensure at least one super_admin will remain after removal
-  const target = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
-  if (target[0]?.role === "super_admin") {
-    const superAdmins = await db.select({ id: users.id }).from(users).where(eq(users.role, "super_admin"));
-    if (superAdmins.length <= 1) {
-      throw new Error("لا يمكن حذف مدير النظام الوحيد. يجب أن يبقى على الأقل مدير نظام واحد.");
+  // Bug #10 Fix: wrap guard + update in a transaction to prevent TOCTOU race
+  await db.transaction(async (tx) => {
+    const target = await tx.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+    if (target[0]?.role === "super_admin") {
+      const superAdmins = await tx.select({ id: users.id }).from(users).where(eq(users.role, "super_admin"));
+      if (superAdmins.length <= 1) {
+        throw new Error("لا يمكن حذف مدير النظام الوحيد. يجب أن يبقى على الأقل مدير نظام واحد.");
+      }
     }
-  }
-
-  await db.update(users)
-    .set({ role: "user" })
-    .where(eq(users.id, userId));
+    await tx.update(users)
+      .set({ role: "user" })
+      .where(eq(users.id, userId));
+  });
 
   revalidatePath("/admin/settings");
 }
@@ -173,20 +189,21 @@ export async function editAdminAction(formData: FormData) {
   const validRoles = ["super_admin", "admin", "viewer"] as const;
   const role = validRoles.includes(roleInput as typeof validRoles[number]) ? roleInput as typeof validRoles[number] : "admin";
 
-  // If we are downgrading a super_admin, ensure at least one remains
-  if (role !== "super_admin") {
-    const current = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
-    if (current[0]?.role === "super_admin") {
-      const superAdmins = await db.select({ id: users.id }).from(users).where(eq(users.role, "super_admin"));
-      if (superAdmins.length <= 1) {
-        throw new Error("لا يمكن تخفيض صلاحية مدير النظام الوحيد.");
+  // Bug #10 Fix: wrap guard + update in a transaction to prevent TOCTOU race
+  await db.transaction(async (tx) => {
+    if (role !== "super_admin") {
+      const current = await tx.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+      if (current[0]?.role === "super_admin") {
+        const superAdmins = await tx.select({ id: users.id }).from(users).where(eq(users.role, "super_admin"));
+        if (superAdmins.length <= 1) {
+          throw new Error("لا يمكن تخفيض صلاحية مدير النظام الوحيد.");
+        }
       }
     }
-  }
-
-  await db.update(users)
-    .set({ name, role })
-    .where(eq(users.id, userId));
+    await tx.update(users)
+      .set({ name, role })
+      .where(eq(users.id, userId));
+  });
 
   revalidatePath("/admin/settings");
 }

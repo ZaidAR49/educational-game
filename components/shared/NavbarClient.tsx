@@ -77,7 +77,7 @@ export function NavbarClient({ session }: { session: any }) {
             )}
             <div className="w-px h-6 bg-gray-200"></div>
             <Link 
-              href="/game/00000000-0000-0000-0000-000000000003"
+              href="/game/demo"
               className="flex items-center gap-2 text-gray-700 hover:text-emerald-600 font-bold transition-colors"
             >
               <Gamepad2 className="w-5 h-5" />
@@ -115,7 +115,7 @@ export function NavbarClient({ session }: { session: any }) {
             </Link>
             <hr className="border-gray-100" />
             <Link 
-              href="/game/00000000-0000-0000-0000-000000000003"
+              href="/game/demo"
               className="p-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-bold transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >

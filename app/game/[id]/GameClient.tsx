@@ -19,8 +19,35 @@ import { JoinScreen } from "./components/JoinScreen"
 import { StartScreen } from "./components/StartScreen"
 import { GameplayScreen } from "./components/GameplayScreen"
 import { ResultScreen } from "./components/ResultScreen"
+import type { Game, ClassroomPlay } from "@/lib/db/schema"
 
 type GameScreen = "join" | "start" | "game" | "result"
+
+// Fix #18: Proper types for scenario choices (isCorrect stripped by server before sending)
+type SanitizedChoice = {
+  id: string;
+  scenarioId: string;
+  orderIndex: number;
+  text: string;
+  icon: string | null;
+  feedbackTitle: string | null;
+  feedbackMessage: string | null;
+  feedbackTip: string | null;
+  points: number;
+  createdAt: Date;
+};
+
+type SanitizedScenario = {
+  id: string;
+  gameId: string;
+  orderIndex: number;
+  icon: string | null;
+  title: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  choices: SanitizedChoice[];
+};
 
 const generateRandomName = () => {
   const noun = nicknames.nouns[Math.floor(Math.random() * nicknames.nouns.length)];
@@ -28,8 +55,13 @@ const generateRandomName = () => {
   return `${noun} ${adj}`;
 };
 
-export default function GameClient({ game, play, scenarios }: { game: any, play: any, scenarios: any[] }) {
-  const [screen, setScreen] = useState<GameScreen>("join")
+// Fix #18: typed props — game is a full Game, play is ClassroomPlay or preview stub, scenarios are sanitized (no isCorrect)
+export default function GameClient({ game, play, scenarios }: {
+  game: Game & { isDemo?: boolean };
+  play: Pick<ClassroomPlay, 'id'> | { id: string };
+  scenarios: SanitizedScenario[];
+}) {
+  const [screen, setScreen] = useState<GameScreen>(game.isDemo ? "start" : "join")
   const [playerName, setPlayerName] = useState("")
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -47,6 +79,12 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
   const [showFeedback, setShowFeedback] = useState(false)
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
   const [isOffline, setIsOffline] = useState(false)
+
+  const trackEvent = (eventName: string, properties?: any) => {
+    if (!game.isDemo) {
+      posthog.capture(eventName, properties);
+    }
+  };
 
   const { app, gameStart, gamePlay, results } = uiContent
 
@@ -108,7 +146,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
   const currentScenario = scenarios[currentScenarioIndex]
   // max score should ideally be derived from scenarios and choices, but we assume each correct is 10 points for now
   const maxScore = scenarios.reduce((acc, scenario) => {
-    const maxChoicePoints = Math.max(...scenario.choices.map((c: any) => c.points || 0), 0);
+    const maxChoicePoints = Math.max(...scenario.choices.map((c: SanitizedChoice) => c.points || 0), 0);
     return acc + maxChoicePoints;
   }, 0) || scenarios.length * 10;
   
@@ -129,7 +167,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
           // Bypass DB for demo
           setPlayerId("demo-player-id");
           localStorage.setItem("drugGamePlayerName", playerName.trim());
-          posthog.capture("game_joined", { game_id: game.id, is_demo: true });
+          trackEvent("game_joined", { game_id: game.id, is_demo: true });
           setScreen("start");
           return;
         }
@@ -165,7 +203,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
           isFinished: false
         }));
 
-        posthog.capture("game_joined", { game_id: game.id, is_demo: false });
+        trackEvent("game_joined", { game_id: game.id, is_demo: false });
 
         setScreen("start");
       } catch (error: any) {
@@ -175,15 +213,19 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
   }
 
   const startGame = () => {
-    setCurrentScenarioIndex(0)
-    setScore(0)
-    setCorrectAnswers(0)
-    setWrongAnswers(0)
+    // Bug #14 Fix: only reset state for a fresh start
+    // If the player already has a reconnected session (playerId is set), don't wipe their progress
+    if (!playerId) {
+      setCurrentScenarioIndex(0)
+      setScore(0)
+      setCorrectAnswers(0)
+      setWrongAnswers(0)
+    }
     setHasAnswered(false)
     setSelectedChoiceIndex(null)
     setIsSkipped(false)
     setShowFeedback(false)
-    posthog.capture("game_started", { game_id: game.id, scenario_count: scenarios.length })
+    trackEvent("game_started", { game_id: game.id, scenario_count: scenarios.length })
     setScreen("game")
   }
 
@@ -250,7 +292,9 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     };
   }, []);
 
-  const syncProgress = async (newScore: number, newCorrect: number, newWrong: number, finished: boolean) => {
+  // Bug #13 Fix: accept scenarioIndex as a parameter to avoid stale closure
+  // (React state updates are async; closed-over `currentScenarioIndex` may lag by one step)
+  const syncProgress = async (newScore: number, newCorrect: number, newWrong: number, finished: boolean, scenarioIndex: number) => {
     if (game.isDemo) return; // Bypass DB for demo
     if (!playerId) return;
 
@@ -261,7 +305,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
       score: newScore,
       correctAnswers: newCorrect,
       wrongAnswers: newWrong,
-      currentScenarioIndex,
+      currentScenarioIndex: scenarioIndex,
       isFinished: finished
     }));
 
@@ -315,9 +359,9 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
       }
     }
 
-    // Sync score after answering
-    syncProgress(newScore, newCorrect, newWrong, false);
-    posthog.capture("choice_selected", {
+    // Sync score after answering — pass current index explicitly to avoid stale closure (#13)
+    syncProgress(newScore, newCorrect, newWrong, false, currentScenarioIndex);
+    trackEvent("choice_selected", {
       game_id: game.id,
       scenario_index: currentScenarioIndex,
       is_correct: choice.isCorrect,
@@ -339,8 +383,8 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     const newWrong = wrongAnswers + 1; // Count skip as wrong
     setWrongAnswers(newWrong);
 
-    syncProgress(score, correctAnswers, newWrong, false);
-    posthog.capture("question_skipped", {
+    syncProgress(score, correctAnswers, newWrong, false, currentScenarioIndex);
+    trackEvent("question_skipped", {
       game_id: game.id,
       scenario_index: currentScenarioIndex,
     });
@@ -355,8 +399,8 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
     const resultPercentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
 
     // Final sync
-    syncProgress(score, correctAnswers, wrongAnswers, true);
-    posthog.capture("game_completed", {
+    syncProgress(score, correctAnswers, wrongAnswers, true, currentScenarioIndex);
+    trackEvent("game_completed", {
       game_id: game.id,
       score,
       max_score: maxScore,
@@ -365,7 +409,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
       wrong_answers: wrongAnswers,
     });
 
-    if (resultPercentage >= config.game.resultThresholds.good) {
+    if (game.isDemo || resultPercentage >= config.game.resultThresholds.good) {
       setConfetti(createConfettiPieces())
       setTimeout(() => setConfetti([]), config.game.confettiClearMs)
     }
@@ -400,7 +444,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
 
   const handleShare = () => {
     const gameUrl = typeof window !== "undefined" ? window.location.href : ""
-    posthog.capture("game_result_shared", { game_id: game.id, score })
+    trackEvent("game_result_shared", { game_id: game.id, score })
     void shareGameResult(score, gameUrl)
   }
 
@@ -488,7 +532,7 @@ export default function GameClient({ game, play, scenarios }: { game: any, play:
         )}
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes confetti {
           0% {
             transform: translateY(-100%) rotate(0deg);

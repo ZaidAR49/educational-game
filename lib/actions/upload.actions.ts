@@ -13,6 +13,17 @@ const getBucketName = () => {
   return bucket;
 };
 
+// Bug #6 Fix: strict allowlist of accepted MIME types and their safe extensions
+const ALLOWED_MIME_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/svg+xml": "svg",
+  "image/gif": "gif",
+};
+
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+
 /**
  * Uploads a file to Supabase S3 Storage.
  * Generates a unique key and returns the public URL.
@@ -27,16 +38,28 @@ export async function uploadLogoAction(formData: FormData) {
     throw new Error("No valid file provided.");
   }
 
-  // 3. Prepare File Data
+  // 3. Bug #6 Fix: Validate file type against allowlist
+  const fileExtension = ALLOWED_MIME_TYPES[file.type];
+  if (!fileExtension) {
+    throw new Error(
+      `Invalid file type "${file.type}". Only JPEG, PNG, WebP, SVG, and GIF images are allowed.`
+    );
+  }
+
+  // 4. Bug #6 Fix: Validate file size
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error(`File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is 2 MB.`);
+  }
+
+  // 5. Prepare File Data
   const buffer = Buffer.from(await file.arrayBuffer());
   
   // Generate a unique file name using native Node crypto 
-  // (or Next.js server-side webcrypto)
   const uniqueId = crypto.randomUUID();
-  const fileExtension = file.name.split(".").pop();
+  // Extension is derived from trusted MIME type, NOT from user-supplied filename
   const key = `${uniqueId}.${fileExtension}`;
 
-  // 4. Upload to S3
+  // 6. Upload to S3
   const bucketName = getBucketName();
   const command = new PutObjectCommand({
     Bucket: bucketName,
@@ -48,7 +71,7 @@ export async function uploadLogoAction(formData: FormData) {
 
   await s3Client.send(command);
 
-  // 5. Construct Public URL
+  // 7. Construct Public URL
   const endpoint = process.env.SUPABASE_S3_ENDPOINT!;
   const urlParts = new URL(endpoint);
   const projectId = urlParts.hostname.split('.')[0]; 
@@ -57,3 +80,4 @@ export async function uploadLogoAction(formData: FormData) {
 
   return publicUrl;
 }
+

@@ -91,10 +91,10 @@ export function ResultScreen({
                 إعادة المحاولة 🔄
               </button>
               <Link
-                href={game.id === '00000000-0000-0000-0000-000000000003' ? '/' : '/dashboard/games'}
-                className="bg-gray-100 text-gray-700 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-gray-200 hover:scale-105 transition-all duration-300"
+                href={game.id === 'demo' ? '/' : '/dashboard/games'}
+                className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 px-6 rounded-2xl font-bold transition-colors"
               >
-                {game.id === '00000000-0000-0000-0000-000000000003' ? 'العودة للرئيسية 🏠' : 'العودة للوحة التحكم 🔙'}
+                {game.id === 'demo' ? 'العودة للرئيسية 🏠' : 'العودة للوحة التحكم 🔙'}
               </Link>
             </>
           )}

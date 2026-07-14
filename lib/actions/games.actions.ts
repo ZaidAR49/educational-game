@@ -32,19 +32,18 @@ export async function createGameAction(gameData: Omit<NewGame, "ownerId">) {
   return newGame;
 }
 
+const getCachedGames = (userId: string) => unstable_cache(
+  async () => gamesService.getGamesByUserId(userId),
+  [`games-${userId}`],
+  { tags: [`games-${userId}`] }
+)();
+
 /**
  * Fetches all games for the logged-in user.
  */
 export async function getMyGamesAction() {
   const user = await requireAuth();
-  
-  const getCachedGames = unstable_cache(
-    async () => gamesService.getGamesByUserId(user.id),
-    [`games-${user.id}`],
-    { tags: [`games-${user.id}`] }
-  );
-
-  return getCachedGames();
+  return getCachedGames(user.id);
 }
 
 /**

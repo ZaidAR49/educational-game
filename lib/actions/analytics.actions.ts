@@ -331,6 +331,13 @@ export async function getAllEventsSummaryAction() {
 export async function getEventsTrendAction(events: CustomEventName[]) {
   await requireDashboardAccess();
 
+  // Bug #7 Fix: runtime validation — ensure all event names are in the allowlist
+  // This prevents injection even if TypeScript types are bypassed via `as any`
+  const invalidEvents = events.filter(e => !CUSTOM_EVENTS.includes(e));
+  if (invalidEvents.length > 0) {
+    throw new Error(`Invalid event name(s): ${invalidEvents.join(', ')}`);
+  }
+
   const eventSql = events.map((e) => `'${e}'`).join(", ");
   const data = await runHogQL(`
     SELECT toDate(timestamp) as day, event, count() as cnt

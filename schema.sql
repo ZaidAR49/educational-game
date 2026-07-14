@@ -105,7 +105,7 @@ CREATE TABLE organizations (
 CREATE TABLE games (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id uuid NOT NULL REFERENCES users(id),
-  organization_id uuid NOT NULL REFERENCES organizations(id),
+  organization_id uuid REFERENCES organizations(id),
   title text NOT NULL,
   description text,
   slug text NOT NULL UNIQUE,
@@ -196,6 +196,23 @@ CREATE TABLE usage_events (
 CREATE INDEX idx_usage_events_user_id ON usage_events(user_id);
 CREATE INDEX idx_usage_events_created_at ON usage_events(created_at);
 CREATE INDEX idx_usage_events_organization_id ON usage_events(organization_id);
+
+-- Bug #15 Fix: Add missing indexes on foreign key and commonly filtered columns
+-- These prevent full sequential scans on joins and WHERE clauses
+CREATE INDEX idx_games_owner_id ON games(owner_id);
+CREATE INDEX idx_games_status ON games(status);
+CREATE INDEX idx_games_organization_id ON games(organization_id);
+
+CREATE INDEX idx_scenarios_game_id ON scenarios(game_id);
+
+CREATE INDEX idx_choices_scenario_id ON choices(scenario_id);
+
+CREATE INDEX idx_classroom_plays_game_id ON classroom_plays(game_id);
+CREATE INDEX idx_classroom_plays_teacher_id ON classroom_plays(teacher_id);
+CREATE INDEX idx_classroom_plays_status ON classroom_plays(status);
+
+CREATE INDEX idx_players_classroom_play_id ON players(classroom_play_id);
+CREATE INDEX idx_players_is_finished ON players(is_finished);
 
 -- =========================================================
 -- ROW LEVEL SECURITY

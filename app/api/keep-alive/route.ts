@@ -5,10 +5,10 @@ import { sql } from "drizzle-orm"
 export const dynamic = "force-dynamic"
 
 export async function GET(req: Request) {
-  // Protect endpoint — only allow Vercel Cron (or manual calls with the secret)
+  // Bug #5 Fix: fail-closed — always require CRON_SECRET to be present and match
   const authHeader = req.headers.get("authorization")
   if (
-    process.env.CRON_SECRET &&
+    !process.env.CRON_SECRET ||
     authHeader !== `Bearer ${process.env.CRON_SECRET}`
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

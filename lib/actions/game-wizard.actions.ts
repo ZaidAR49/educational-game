@@ -155,6 +155,32 @@ export async function saveFullGameAction(
   return { success: true, gameId: finalGameId };
 }
 
+const getCachedFullGame = (gameId: string) => unstable_cache(
+  async () => {
+    const gameResult = await db.select().from(games).where(eq(games.id, gameId)).limit(1);
+    const game = gameResult[0];
+    if (!game) return null;
+
+    // Bug #12 Fix: replaced N+1 loop (1 + N queries) with a single relational query
+    const scenariosResult = await db.query.scenarios.findMany({
+      where: eq(scenarios.gameId, gameId),
+      orderBy: [scenarios.orderIndex],
+      with: {
+        choices: {
+          orderBy: [choices.orderIndex],
+        },
+      },
+    });
+
+    return {
+      game,
+      scenarios: scenariosResult,
+    };
+  },
+  [`game-full-${gameId}`],
+  { tags: [`game-full-${gameId}`] }
+)();
+
 /**
  * Fetches a complete game with all its scenarios and choices.
  * Used to populate the Game Wizard for editing.
@@ -163,41 +189,5 @@ export async function getFullGameDataAction(gameId: string) {
   const user = await requireAuth();
   await verifyGameOwnership(gameId, user.id);
 
-  const getCachedFullGame = unstable_cache(
-    async () => {
-      const gameResult = await db.select().from(games).where(eq(games.id, gameId)).limit(1);
-      const game = gameResult[0];
-      if (!game) return null;
-
-      const scenariosResult = await db
-        .select()
-        .from(scenarios)
-        .where(eq(scenarios.gameId, gameId))
-        .orderBy(scenarios.orderIndex);
-
-      const fullScenarios = await Promise.all(
-        scenariosResult.map(async (scenario) => {
-          const choicesResult = await db
-            .select()
-            .from(choices)
-            .where(eq(choices.scenarioId, scenario.id))
-            .orderBy(choices.orderIndex);
-
-          return {
-            ...scenario,
-            choices: choicesResult,
-          };
-        })
-      );
-
-      return {
-        game,
-        scenarios: fullScenarios,
-      };
-    },
-    [`game-full-${gameId}`],
-    { tags: [`game-full-${gameId}`] }
-  );
-
-  return getCachedFullGame();
+  return getCachedFullGame(gameId);
 }

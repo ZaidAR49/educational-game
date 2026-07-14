@@ -5,8 +5,8 @@ import { Save, UserCircle2, Mail, Loader2, Zap, Star } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { updateUserAction } from "@/lib/actions/users.actions"
-import { useSession } from "next-auth/react"
+import { updateUserAction, deleteUserAccountAction } from "@/lib/actions/users.actions"
+import { useSession, signOut } from "next-auth/react"
 
 interface SettingsClientProps {
   session: any
@@ -18,8 +18,12 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
   const router = useRouter()
   const { update: updateSession } = useSession()
   const [isPending, startTransition] = useTransition()
+  const [isDeleting, startDeleteTransition] = useTransition()
 
   const [error, setError] = useState<string>("")
+  const [deleteError, setDeleteError] = useState<string>("")
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState("")
 
   // Use session data if available, fallback to mock data
   const [formData, setFormData] = useState({
@@ -50,6 +54,30 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
       } catch (error) {
         console.error("Failed to save settings", error);
         toast.error("حدث خطأ أثناء الحفظ.");
+      }
+    });
+  }
+
+  const handleDeleteAccount = () => {
+    const expectedName = session?.user?.name || "";
+    if (deleteConfirmation !== expectedName) {
+      setDeleteError(`الرجاء كتابة '${expectedName}' للتأكيد`)
+      return;
+    }
+    
+    startDeleteTransition(async () => {
+      try {
+        const result = await deleteUserAccountAction();
+        if (result && !result.success) {
+          setDeleteError(result.error || "حدث خطأ أثناء محاولة حذف الحساب.");
+          return;
+        }
+        toast.success("تم حذف حسابك بنجاح");
+        await signOut({ callbackUrl: '/' });
+      } catch (error: any) {
+        console.error("Failed to delete account", error);
+        setDeleteError("حدث خطأ أثناء محاولة حذف الحساب.");
+        toast.error("حدث خطأ أثناء حذف الحساب.");
       }
     });
   }
@@ -172,7 +200,72 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
           </div>
         </div>
 
+        {/* Danger Zone */}
+        <div className="space-y-6 pt-8 border-t border-red-100">
+          <div className="bg-red-50/50 rounded-3xl p-6 border border-red-100">
+            <h3 className="text-lg font-bold text-red-900 mb-2">منطقة الخطر</h3>
+            <p className="text-sm text-red-700 mb-6">
+              بمجرد حذف حسابك، سيتم مسح جميع بياناتك، والمنظمات التي تمتلكها، والألعاب التي قمت بإنشائها نهائياً ولن تتمكن من استعادتها.
+            </p>
+            <button
+              onClick={() => {
+                setIsDeleteModalOpen(true);
+                setDeleteError("");
+                setDeleteConfirmation("");
+              }}
+              className="bg-white border-2 border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm"
+            >
+              حذف الحساب نهائياً
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200" dir="rtl">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 transform transition-all animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-black text-gray-900 mb-4">هل أنت متأكد من حذف الحساب؟</h3>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              هذا الإجراء <strong>نهائي ولا يمكن التراجع عنه</strong>. سيتم حذف جميع الألعاب والمنظمات التابعة لك.<br/><br/>
+              لتأكيد الحذف، الرجاء كتابة اسمك <strong>{session?.user?.name}</strong> أدناه.
+            </p>
+            
+            <div className="space-y-4 mb-8">
+              <input 
+                type="text" 
+                value={deleteConfirmation}
+                onChange={(e) => {
+                  setDeleteConfirmation(e.target.value);
+                  setDeleteError("");
+                }}
+                placeholder={`اكتب '${session?.user?.name}' هنا...`}
+                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-right ${deleteError ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200'}`}
+              />
+              {deleteError && <p className="text-red-500 text-sm font-bold">{deleteError}</p>}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting || deleteConfirmation !== (session?.user?.name || "")}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-3 rounded-xl font-bold transition-all shadow-md"
+              >
+                {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                <span>{isDeleting ? "جاري الحذف..." : "نعم، احذف حسابي"}</span>
+              </button>
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-bold transition-all"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

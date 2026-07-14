@@ -1,5 +1,6 @@
 import { getLiveGameForStudentAction, getGameForPreviewAction } from "@/lib/actions/plays.actions";
 import GameClient from "./GameClient";
+import { DEMO_GAME, DEMO_PLAY, DEMO_SCENARIOS } from "@/data/demo-game";
 
 export default async function GamePage({ 
   params,
@@ -10,6 +11,10 @@ export default async function GamePage({
 }) {
   const { id } = await params;
   const { preview } = await searchParams;
+  
+  if (id === 'demo') {
+    return <GameClient game={DEMO_GAME} play={DEMO_PLAY} scenarios={DEMO_SCENARIOS} />;
+  }
   
   const data = preview === 'true' 
     ? await getGameForPreviewAction(id)

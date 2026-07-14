@@ -84,7 +84,7 @@ export async function joinPlayAction(playId: string, playerName: string, existin
       // Reconnect existing player
       const { cookies } = await import("next/headers");
       (await cookies()).set('eduplay_student_id', existingPlayer.id, {
-        httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24
+        httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/', maxAge: 60 * 60 * 24
       });
       return existingPlayer;
     } else {
@@ -95,12 +95,22 @@ export async function joinPlayAction(playId: string, playerName: string, existin
   const newPlayer = await playsService.createPlayer({
     classroomPlayId: playId,
     name: playerName,
+  }).catch((err: any) => {
+    // Bug #4 Fix: unique-constraint violation means concurrent join with same name
+    const isUniqueViolation =
+      err?.code === '23505' || // PostgreSQL unique_violation
+      err?.message?.includes('unique') ||
+      err?.message?.includes('duplicate');
+    if (isUniqueViolation) {
+      throw new Error("هذا الاسم مستخدم بالفعل في هذه الجلسة، يرجى اختيار اسم آخر.");
+    }
+    throw err;
   });
 
   if (newPlayer) {
     const { cookies } = await import("next/headers");
     (await cookies()).set('eduplay_student_id', newPlayer.id, {
-      httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24
+      httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/', maxAge: 60 * 60 * 24
     });
   }
 
@@ -197,10 +207,17 @@ export async function getLiveGameForStudentAction(gameId: string) {
     }
   });
 
+  // Bug #11 Fix: strip `isCorrect` from choices before sending to the student client
+  // Answer validation must happen server-side — students should not see correct answers in the payload
+  const sanitizedScenarios = gameScenarios.map(scenario => ({
+    ...scenario,
+    choices: scenario.choices.map(({ isCorrect, ...rest }) => rest),
+  }));
+
   return {
     game,
     play: livePlay,
-    scenarios: gameScenarios,
+    scenarios: sanitizedScenarios,
   };
 }
 

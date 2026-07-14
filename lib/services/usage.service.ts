@@ -8,7 +8,8 @@ function isResetNeeded(startedAt: Date | null) {
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - startedAt.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-  return diffDays > 30;
+  // Bug #9 Fix: was `> 30`, which never triggered on exactly the 30th day
+  return diffDays >= 30;
 }
 
 export async function checkAndResetAiUsage(userId: string) {
