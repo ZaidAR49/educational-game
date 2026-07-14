@@ -90,4 +90,4 @@ const authResult = NextAuth({
 }) 
 
 export const { handlers, signIn, signOut, auth } = authResult;
-export const update = authResult.unstable_update || authResult.update;
+export const update = (authResult as any).unstable_update || (authResult as any).update;
