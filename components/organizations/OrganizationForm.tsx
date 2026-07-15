@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Building2, Save, Loader2, ArrowRight } from "lucide-react"
+import { Building2, Save, Loader2, ArrowRight, Sparkles } from "lucide-react"
 import { LivePreview } from "@/components/dashboard/LivePreview"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { uploadLogoAction } from "@/lib/actions/upload.actions"
 import { createOrganizationAction, updateOrganizationAction } from "@/lib/actions/organizations.actions"
+import { improveOrganizationFormAction } from "@/lib/actions/ai.actions"
 import { toast } from "sonner"
 import { LogoUploader } from "./LogoUploader"
 import { WelcomeTabFields } from "./WelcomeTabFields"
@@ -41,6 +42,7 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
   const [activeTab, setActiveTab] = useState<"welcome" | "result">("welcome")
   const [resultView, setResultView] = useState<"pass" | "fail">("pass")
   const [isSaving, setIsSaving] = useState(false)
+  const [isGlobalAiLoading, setIsGlobalAiLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -197,7 +199,10 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
 
               <LogoUploader
                 logo={formData.logo}
-                onLogoChange={(dataUrl) => setFormData({ ...formData, logo: dataUrl })}
+                onLogoChange={(dataUrl, file) => { 
+                  setFormData({ ...formData, logo: dataUrl });
+                  setSelectedFile(file);
+                }}
                 onLogoRemove={() => { setFormData({ ...formData, logo: null }); setSelectedFile(null) }}
               />
             </div>
@@ -220,15 +225,25 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
           </div>
 
           {activeTab === "welcome" && (
-            <WelcomeTabFields formData={formData} errors={errors} onChange={handleChange} />
+            <WelcomeTabFields 
+              formData={formData} 
+              errors={errors} 
+              onChange={handleChange} 
+              onBulkChange={(newData) => setFormData(prev => ({ ...prev, ...newData }))}
+              isGlobalLoading={isGlobalAiLoading}
+              onGlobalLoadingChange={setIsGlobalAiLoading}
+            />
           )}
           {activeTab === "result" && (
             <ResultTabFields 
               formData={formData} 
               errors={errors} 
               onChange={handleChange} 
+              onBulkChange={(newData) => setFormData(prev => ({ ...prev, ...newData }))}
               resultView={resultView}
               onResultViewChange={setResultView}
+              isGlobalLoading={isGlobalAiLoading}
+              onGlobalLoadingChange={setIsGlobalAiLoading}
             />
           )}
 

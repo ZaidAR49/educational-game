@@ -24,7 +24,7 @@ export function StartScreen({
     <div className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500">
       {game.organization?.logoPath && (
         <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-           <img src={game.organization.logoPath} alt="Logo" className="w-full h-full object-contain" />
+           <img src={game.organization.logoPath} alt="Logo" className="w-full h-full border-2 border-black rounded-full object-contain" />
         </div>
       )}
       <h1 className="text-3xl font-black text-emerald-600 mb-2">

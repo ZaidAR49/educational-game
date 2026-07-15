@@ -4,6 +4,7 @@ import { getMyOrganizationsAction, deleteOrganizationAction, getTotalOrganizatio
 import { getGameCountByOrganizationId } from "@/lib/services/games.service"
 import { PaginationControls } from "@/components/shared/PaginationControls"
 import { SearchAndFilter } from "@/components/shared/SearchAndFilter"
+import { DeleteOrganizationButton } from "@/components/organizations/DeleteOrganizationButton"
 
 export default async function OrganizationsPage(props: {
   searchParams: Promise<{ page?: string; search?: string }>;
@@ -76,15 +77,7 @@ export default async function OrganizationsPage(props: {
                 >
                   <Pencil className="w-4 h-4" />
                 </Link>
-                <form action={deleteOrganizationAction.bind(null, org.id)}>
-                  <button 
-                    type="submit"
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                    title="حذف"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </form>
+                <DeleteOrganizationButton orgId={org.id} orgName={org.name} />
               </div>
             </div>
 

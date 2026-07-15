@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 type LogoUploaderProps = {
   logo: string | null
-  onLogoChange: (dataUrl: string) => void
+  onLogoChange: (dataUrl: string, file: File) => void
   onLogoRemove: () => void
 }
 
@@ -22,14 +22,14 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
       toast.warning("الرجاء رفع ملف صورة صالح (PNG, JPG, إلخ)")
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.warning("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت")
+    if (file.size > 2 * 1024 * 1024) {
+      toast.warning("حجم الصورة يجب أن لا يتجاوز 2 ميجابايت")
       return
     }
 
     const reader = new FileReader()
     reader.onload = (event) => {
-      if (event.target?.result) onLogoChange(event.target.result as string)
+      if (event.target?.result) onLogoChange(event.target.result as string, file)
     }
     reader.readAsDataURL(file)
   }
@@ -75,7 +75,7 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
         >
           <ImageIcon className="w-8 h-8 opacity-50" />
           <div className="text-sm font-bold">انقر لرفع صورة الشعار</div>
-          <div className="text-xs text-emerald-600/60 font-medium">PNG, JPG حتى 5MB</div>
+          <div className="text-xs text-emerald-600/60 font-medium">PNG, JPG حتى 2MB</div>
         </div>
       )}
     </div>

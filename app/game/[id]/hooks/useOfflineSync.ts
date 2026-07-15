@@ -59,8 +59,12 @@ export function useOfflineSync({ playId, playerId, playerName, isDemo }: SyncPay
               isFinished: payload.isFinished,
               completedAt: payload.isFinished ? new Date() : undefined,
             })
-          } catch {
-            remainingQueue.push(payload)
+          } catch (e: any) {
+            if (e?.message?.includes("Unauthorized")) {
+              console.warn("Discarding sync payload due to unauthorized error:", payload);
+            } else {
+              remainingQueue.push(payload)
+            }
           }
         }
 

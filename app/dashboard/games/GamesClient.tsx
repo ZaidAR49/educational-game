@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
 import { ConfirmModal } from "@/components/shared/ConfirmModal"
 import { Game } from "@/components/games/types"
@@ -21,6 +22,7 @@ interface GamesClientProps {
 }
 
 export function GamesClient({ initialGames, totalPages, currentPage, showSearchAndFilter }: GamesClientProps) {
+  const router = useRouter()
   const [shareGame, setShareGame] = useState<Game | null>(null)
   const [gameToDelete, setGameToDelete] = useState<Game | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -53,6 +55,7 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
         await deleteGameAction(gameToDelete.id);
         setGameToDelete(null);
         toast.success("تم حذف اللعبة بنجاح");
+        router.refresh()
       } catch (error) {
         console.error("Failed to delete game:", error);
         toast.error("حدث خطأ أثناء حذف اللعبة");

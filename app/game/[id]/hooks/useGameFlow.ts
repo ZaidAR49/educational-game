@@ -55,17 +55,31 @@ export function useGameFlow({
     selectedChoiceIndex !== null ? currentScenario?.choices[selectedChoiceIndex] : null
 
   const startGame = () => {
-    if (!playerId) {
-      setCurrentScenarioIndex(0)
-      setScore(0)
-      setCorrectAnswers(0)
-      setWrongAnswers(0)
-    }
+    setCurrentScenarioIndex(0)
+    setScore(0)
+    setCorrectAnswers(0)
+    setWrongAnswers(0)
     setHasAnswered(false)
     setSelectedChoiceIndex(null)
     setIsSkipped(false)
     setShowFeedback(false)
     trackEvent("game_started", { game_id: game.id, scenario_count: scenarios.length })
+
+    if (!game.isDemo && playerId) {
+      localStorage.setItem(
+        `eduplay_session_${playId}`,
+        JSON.stringify({
+          playerId,
+          playerName,
+          score: 0,
+          correctAnswers: 0,
+          wrongAnswers: 0,
+          currentScenarioIndex: 0,
+          isFinished: false,
+        })
+      )
+    }
+
     setScreen("game")
   }
 
