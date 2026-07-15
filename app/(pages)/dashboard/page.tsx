@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 import Link from "next/link"
-import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks, Zap } from "lucide-react"
+import { Gamepad2, Users, Target, Trophy, ArrowLeft, Plus, Building2, ListChecks, Zap, AlertTriangle } from "lucide-react"
 import { getDashboardOverviewAction } from "@/lib/actions/dashboard.actions"
 import { requireAuth } from "@/lib/actions/utils"
 import DashboardCharts from "@/components/dashboard/DashboardCharts"
@@ -64,37 +64,59 @@ export default async function OverviewPage() {
       </div>
 
       {/* AI Token Usage */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-              <Zap className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">استهلاك الذكاء الاصطناعي</h2>
-              <p className="text-sm text-gray-500">الرصيد المستخدم هذا الشهر لتوليد الألعاب</p>
-            </div>
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-bold text-gray-500">الطلبات</p>
-            <p className="text-lg font-black text-gray-900">{data.aiUsage.requests}</p>
-          </div>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-700 via-indigo-600 to-blue-600 text-white shadow-xl mb-10 mt-10 transition-all hover:shadow-2xl hover:scale-[1.01] border border-white/10 group">
+        <div className="absolute top-0 right-0 p-8 opacity-10 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-12">
+          <Zap className="w-56 h-56 -translate-y-12 translate-x-12" />
         </div>
+        <div className="relative z-10 p-8 md:p-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30 shadow-inner">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black drop-shadow-sm tracking-wide">استهلاك الذكاء الاصطناعي</h2>
+                <p className="text-indigo-100 font-medium mt-1 text-sm md:text-base">
+                  إجمالي الرصيد المستخدم هذا الشهر (توليد الألعاب، تحسين المؤسسات)
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 bg-white/10 px-6 py-4 rounded-2xl backdrop-blur-md border border-white/20">
+              <div className="text-center">
+                <p className="text-xs font-bold text-indigo-200 uppercase tracking-wider mb-1">الطلبات الكلية</p>
+                <p className="text-3xl font-black leading-none drop-shadow-md">{data.aiUsage.requests}</p>
+              </div>
+            </div>
+          </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm font-bold">
-            <span className="text-gray-900">{data.aiUsage.used.toLocaleString()} توكن</span>
-            <span className="text-gray-500">من أصل {data.aiUsage.limit.toLocaleString()}</span>
+          <div className="space-y-4 bg-black/20 p-6 md:p-8 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
+            <div className="flex justify-between items-end mb-2">
+              <div>
+                <span className="text-4xl md:text-5xl font-black drop-shadow-md">{data.aiUsage.used.toLocaleString()}</span>
+                <span className="text-lg font-bold text-indigo-200 mr-2">توكن مستخدم</span>
+              </div>
+              <div className="text-left bg-white/10 px-4 py-2 rounded-xl">
+                <span className="text-xs font-bold text-indigo-200 block mb-0.5">الحد الأقصى</span>
+                <div className="text-xl font-bold">{data.aiUsage.limit.toLocaleString()}</div>
+              </div>
+            </div>
+            
+            <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-white/10 shadow-inner relative">
+              <div 
+                className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${data.aiUsage.isOverLimit ? 'bg-gradient-to-l from-red-400 to-red-600' : 'bg-gradient-to-l from-emerald-400 to-emerald-500'}`}
+                style={{ width: `${Math.min((data.aiUsage.used / data.aiUsage.limit) * 100, 100)}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent w-full h-full animate-[shimmer_2s_infinite]" />
+              </div>
+            </div>
+            
+            {data.aiUsage.isOverLimit && (
+              <div className="inline-flex items-center gap-3 text-sm text-red-100 font-bold bg-red-500/30 px-4 py-2.5 rounded-xl border border-red-500/40 mt-4 backdrop-blur-md w-full md:w-auto">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <span>لقد استنفدت الحد المسموح به لهذا الشهر. יرجى الانتظار لتجديد الرصيد.</span>
+              </div>
+            )}
           </div>
-          <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-500 ${data.aiUsage.isOverLimit ? 'bg-red-500' : 'bg-purple-600'}`}
-              style={{ width: `${Math.min((data.aiUsage.used / data.aiUsage.limit) * 100, 100)}%` }}
-            />
-          </div>
-          {data.aiUsage.isOverLimit && (
-            <p className="text-xs text-red-500 font-bold mt-2">لقد استنفدت الحد المسموح به لهذا الشهر.</p>
-          )}
         </div>
       </div>
 

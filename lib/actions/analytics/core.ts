@@ -18,6 +18,7 @@ export const CUSTOM_EVENTS = [
   "question_skipped",
   "game_completed",
   "game_result_shared",
+  "ai_organization_improved",
 ] as const;
 
 export type CustomEventName = (typeof CUSTOM_EVENTS)[number];
@@ -35,6 +36,7 @@ export const EVENT_LABELS: Record<CustomEventName, string> = {
   question_skipped: "تخطي سؤال",
   game_completed: "إكمال اللعبة",
   game_result_shared: "مشاركة النتيجة",
+  ai_organization_improved: "تحسين المؤسسة بالذكاء الاصطناعي",
 };
 
 export type HogQLRow = unknown[];

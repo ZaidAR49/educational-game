@@ -31,6 +31,7 @@ import {
   Sparkles,
   TrendingUp,
   Gamepad2 as GameIcon,
+  Building2,
 } from "lucide-react"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -53,11 +54,13 @@ type CustomEventName =
   | "question_skipped"
   | "game_completed"
   | "game_result_shared"
+  | "ai_organization_improved"
 
 const EVENT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   game_created: Gamepad2,
   game_published: GameIcon,
   ai_game_generated: Sparkles,
+  ai_organization_improved: Building2,
 }
 
 // --- Helpers ---
@@ -139,16 +142,27 @@ export async function AiUsageSection() {
   return (
     <section>
       <SectionTitle title="استهلاك الذكاء الاصطناعي" description="إجمالي الاستهلاك على مستوى المنصة" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        <KpiCard 
-          icon={Sparkles} 
-          value={usage.toLocaleString()} 
-          label="إجمالي التوكنز المستخدمة" 
-          sub="لتوليد الألعاب"
-          iconBg="bg-purple-50" 
-          iconColor="text-purple-600" 
-        />
-      </div>
+      <Card className="w-full">
+        <CardContent className="flex flex-col md:flex-row items-center justify-between p-6 gap-6">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-purple-50">
+              <Sparkles className="h-8 w-8 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-3xl font-black text-slate-800 flex items-baseline gap-1">
+                {usage.toLocaleString()} <span className="text-sm font-bold text-slate-500">توكنز</span>
+              </div>
+              <div className="mt-1 text-sm font-medium text-slate-600">إجمالي الاستخدام الشامل</div>
+              <div className="mt-0.5 text-xs text-slate-400 max-w-md">يعكس هذا الرقم إجمالي التوكنز المستهلكة عبر جميع ميزات الذكاء الاصطناعي في المنصة (توليد الألعاب، تحسين المؤسسات).</div>
+            </div>
+          </div>
+          
+          <div className="hidden md:flex items-center gap-3 px-5 py-3 bg-slate-50 rounded-xl border border-slate-100 shrink-0">
+             <Activity className="h-5 w-5 text-slate-400" />
+             <div className="text-xs font-semibold text-slate-500">تتبع مباشر للاستخدام الكلي</div>
+          </div>
+        </CardContent>
+      </Card>
     </section>
   )
 }

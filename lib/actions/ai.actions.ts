@@ -2,6 +2,7 @@
 
 import { getGenAIClient } from "@/lib/ai/genai-client";
 import { auth } from "@/auth";
+import { getAiUsageAndLimit, recordAiUsage, checkAndResetAiUsage } from "@/lib/services/usage.service";
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -9,6 +10,12 @@ export async function improveTextAction(text: string, context: string): Promise<
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
+  }
+
+  await checkAndResetAiUsage(session.user.id);
+  const aiUsage = await getAiUsageAndLimit(session.user.id);
+  if (aiUsage.isOverLimit) {
+    throw new Error("AI usage limit reached for this period.");
   }
 
   const ai = getGenAIClient();
@@ -26,6 +33,27 @@ export async function improveTextAction(text: string, context: string): Promise<
         model: "gemini-2.5-flash",
         contents: prompt,
       });
+
+      if (response.text) {
+        const estimatedTokens = response.usageMetadata?.totalTokenCount || Math.ceil((prompt.length + response.text.length) / 4);
+        await recordAiUsage(session.user.id, estimatedTokens, { action: "improveTextAction", context }).catch(console.error);
+
+        try {
+          const { getPostHogClient } = await import("@/lib/posthog-server");
+          const posthog = getPostHogClient();
+          posthog.capture({
+            distinctId: session.user.id,
+            event: "ai_organization_improved",
+            properties: {
+              tokensUsed: estimatedTokens,
+              context: context
+            },
+          });
+          await posthog.shutdown();
+        } catch (err) {
+          console.error("Failed to track PostHog event:", err);
+        }
+      }
 
       return response.text || text;
     } catch (error) {
@@ -47,6 +75,12 @@ export async function improveOrganizationFormAction(formData: Record<string, str
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
+  }
+
+  await checkAndResetAiUsage(session.user.id);
+  const aiUsage = await getAiUsageAndLimit(session.user.id);
+  if (aiUsage.isOverLimit) {
+    throw new Error("AI usage limit reached for this period.");
   }
 
   const ai = getGenAIClient();
@@ -73,6 +107,24 @@ ${JSON.stringify(formData, null, 2)}`;
 
       if (!response.text) {
         throw new Error("لم يتم إرجاع أي نص من الذكاء الاصطناعي");
+      }
+
+      const estimatedTokens = response.usageMetadata?.totalTokenCount || Math.ceil((prompt.length + response.text.length) / 4);
+      await recordAiUsage(session.user.id, estimatedTokens, { action: "improveOrganizationFormAction" }).catch(console.error);
+
+      try {
+        const { getPostHogClient } = await import("@/lib/posthog-server");
+        const posthog = getPostHogClient();
+        posthog.capture({
+          distinctId: session.user.id,
+          event: "ai_organization_improved",
+          properties: {
+            tokensUsed: estimatedTokens,
+          },
+        });
+        await posthog.shutdown();
+      } catch (err) {
+        console.error("Failed to track PostHog event:", err);
       }
 
       let cleanJson = response.text.trim();

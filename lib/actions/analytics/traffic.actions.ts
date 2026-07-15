@@ -1,12 +1,11 @@
 "use server";
 
 import { requireDashboardAccess } from "@/lib/auth/rbac";
-import { unstable_noStore as noStore } from "next/cache";
 import { runHogQL, ANALYTICS_DAYS, fillDailySeries } from "./core";
 
 /** PostHog traffic overview — unique visitors, pageviews, session duration, errors */
 export async function getTrafficOverviewAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const [visitors, pageviews, duration, errors] = await Promise.all([
@@ -44,7 +43,7 @@ export async function getTrafficOverviewAction() {
 
 /** Unique visitors per day */
 export async function getUniqueVisitorsPerDayAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -65,7 +64,7 @@ export async function getUniqueVisitorsPerDayAction() {
 
 /** Pageviews per day */
 export async function getVisitsPerDayAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -86,7 +85,7 @@ export async function getVisitsPerDayAction() {
 
 /** Device type breakdown */
 export async function getDeviceTypeBreakdownAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -114,7 +113,7 @@ export async function getDeviceTypeBreakdownAction() {
 
 /** Average session duration per day (seconds) */
 export async function getSessionDurationPerDayAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -135,7 +134,7 @@ export async function getSessionDurationPerDayAction() {
 
 /** Errors per day */
 export async function getErrorsPerDayAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -156,7 +155,7 @@ export async function getErrorsPerDayAction() {
 
 /** Top error messages */
 export async function getErrorBreakdownAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`
@@ -178,7 +177,7 @@ export async function getErrorBreakdownAction() {
 
 /** Geographic visits — top 10 countries */
 export async function getGeoVisitsAction() {
-  noStore();
+  // Cached via Next.js
   await requireDashboardAccess();
 
   const data = await runHogQL(`

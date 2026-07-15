@@ -17,7 +17,7 @@ const CLIENT_VERSION = 2;
 function createClient() {
   return postgres(connectionString, {
     prepare: false,       // required for transaction-mode poolers (Supabase port 6543)
-    max: 3,               // enough for concurrent auth adapter + app queries
+    max: 20,              // increased to 20 for concurrent React Server Components and fast refreshes
     idle_timeout: 20,     // close idle connections after 20s
     connect_timeout: 15,  // 15s TCP connect timeout
     max_lifetime: 1800,   // recycle connections every 30 min to avoid stale state
