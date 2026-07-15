@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
@@ -12,7 +13,9 @@ import {
   History,
   ShieldCheck,
   Zap,
-  HelpCircle
+  HelpCircle,
+  Menu,
+  X
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import uiContent from "@/data/ui-content-general.json"
@@ -21,6 +24,12 @@ import AppLogo from "@/app/icon.png"
 export function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname()
   const isPro = !!user?.isSubscribed
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Close sidebar on path change
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname])
 
   const links = [
     { href: "/dashboard", label: "نظرة عامة", icon: LayoutDashboard },
@@ -32,15 +41,51 @@ export function Sidebar({ user }: { user?: any }) {
   ]
 
   return (
-    <aside className="fixed right-0 top-0 h-screen w-64 bg-white border-l border-gray-100 flex flex-col z-40 overflow-hidden">
+    <>
+      {/* ── Mobile Header ── */}
+      <div className="lg:hidden fixed top-0 right-0 left-0 h-16 bg-white border-b border-gray-100 px-4 flex items-center justify-between z-40">
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="p-2 -mr-2 text-gray-600 hover:text-emerald-600 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="text-lg font-black text-emerald-600 tracking-tight">{uiContent.app.name}</span>
+          <div className="w-8 h-8 overflow-hidden flex items-center justify-center rounded-lg shrink-0">
+            <Image src={AppLogo} alt="Logo" width={32} height={32} className="object-contain" priority />
+          </div>
+        </Link>
+      </div>
 
-      {/* ── Logo strip ── */}
-      <Link href="/" className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100 shrink-0 group">
-        <div className="w-8 h-8 overflow-hidden flex items-center justify-center rounded-lg shrink-0">
-          <Image src={AppLogo} alt="Logo" width={32} height={32} className="object-contain" priority />
+      {/* ── Overlay ── */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar ── */}
+      <aside className={`fixed right-0 top-0 h-screen w-64 bg-white border-l border-gray-100 flex flex-col z-50 overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"} lg:translate-x-0`}>
+
+        {/* ── Logo strip ── */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 overflow-hidden flex items-center justify-center rounded-lg shrink-0">
+              <Image src={AppLogo} alt="Logo" width={32} height={32} className="object-contain" priority />
+            </div>
+            <span className="text-lg font-black text-emerald-600 tracking-tight">{uiContent.app.name}</span>
+          </Link>
+          <button 
+            className="lg:hidden p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-        <span className="text-lg font-black text-emerald-600 tracking-tight">{uiContent.app.name}</span>
-      </Link>
 
       {/* ── Navigation ── */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
@@ -144,6 +189,7 @@ export function Sidebar({ user }: { user?: any }) {
           <span>تسجيل الخروج</span>
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   )
 }

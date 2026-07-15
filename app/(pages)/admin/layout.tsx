@@ -16,8 +16,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 md:pr-64 transition-all">
         {/* Header */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-800">إدارة حسابات المستخدمين</h2>
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between pr-16 pl-4 md:px-8 sticky top-0 z-10 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-800 truncate">إدارة حسابات المستخدمين</h2>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-slate-700 hidden sm:block">{adminName}</span>
             {dbUser.image ? (

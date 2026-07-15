@@ -11,9 +11,9 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50 text-right" dir="rtl">
       <Sidebar user={user} />
-      <main className="pr-64">
+      <main className="lg:pr-64 pt-16 lg:pt-0">
         {/* Main Content Area */}
-        <div className="p-8 mx-auto max-w-7xl">
+        <div className="p-4 lg:p-8 mx-auto max-w-7xl">
           {children}
         </div>
       </main>
