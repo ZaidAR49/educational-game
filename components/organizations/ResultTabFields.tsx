@@ -3,6 +3,7 @@ import { CheckCircle2, XCircle, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { improveOrganizationFormAction } from "@/lib/actions/ai.actions"
 import { AiImproveButton } from "./AiImproveButton"
+import type { OrganizationFormData } from "./OrganizationForm"
 
 type ResultTabFieldsProps = {
   formData: OrganizationFormData

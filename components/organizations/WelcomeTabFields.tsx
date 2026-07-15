@@ -2,6 +2,7 @@ import { Sparkles, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { improveOrganizationFormAction } from "@/lib/actions/ai.actions"
 import { AiImproveButton } from "./AiImproveButton"
+import type { OrganizationFormData } from "./OrganizationForm"
 
 type WelcomeTabFieldsProps = {
   formData: OrganizationFormData

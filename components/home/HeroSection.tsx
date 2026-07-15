@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { PlayCircle, ArrowLeft, Sparkles } from "lucide-react"
-import { DemoGameCard } from "./DemoGameCard"
+import { DemoGameCard } from "./DemoGameCard";
 
 export function HeroSection({ content }: { content: any }) {
   return (
