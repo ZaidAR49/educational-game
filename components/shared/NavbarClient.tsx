@@ -87,84 +87,140 @@ export function NavbarClient({ session }: { session: any }) {
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
+            onClick={() => setIsMobileMenuOpen(true)}
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <Menu className="w-6 h-6" />
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-white border-b border-gray-100 shadow-xl">
-          <div className="flex flex-col p-4 space-y-4">
-            <Link 
-              href="/#features" 
-              className="p-3 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-medium transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              المميزات
-            </Link>
-            <Link 
-              href="/#how-it-works" 
-              className="p-3 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-medium transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              كيف تعمل؟
-            </Link>
-            <hr className="border-gray-100" />
-            <Link 
-              href="/game/demo"
-              className="p-3 flex items-center justify-center gap-2 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-bold transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Gamepad2 className="w-5 h-5" />
-              <span>جرب اللعبة كطالب</span>
-            </Link>
-            {session && (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 text-emerald-700 font-bold"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <LayoutDashboard className="w-5 h-5" />
-                  <span>لوحة التحكم</span>
-                </Link>
-                {['admin', 'super_admin', 'viewer'].includes(session.user?.role) && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-2 p-3 rounded-xl bg-purple-50 text-purple-700 font-bold mt-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Shield className="w-5 h-5" />
-                    <span>لوحة الإدارة</span>
-                  </Link>
-                )}
-              </>
-            )}
-            {!session && (
+      {/* Mobile Menu Overlay */}
+      <div 
+        className={`md:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[60] transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Mobile Menu Sidebar */}
+      <div className={`md:hidden fixed top-0 right-0 h-full w-[85vw] max-w-[320px] bg-white z-[70] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 overflow-hidden flex items-center justify-center rounded-lg">
+              <Image src={AppLogo} alt="Logo" width={40} height={40} className="object-contain" priority />
+            </div>
+            <span className="text-xl font-black text-gray-900 tracking-tight">
+              {uiContent.app.name}
+            </span>
+          </div>
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Sidebar Links */}
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-1.5">
+          {session && (
+            <div className="mb-4 flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+              {session.user?.image ? (
+                <Image src={session.user.image} alt="Profile" width={44} height={44} className="rounded-full border-2 border-white shadow-sm" />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg shadow-sm border-2 border-white shrink-0">
+                  {session.user?.name?.charAt(0) || "U"}
+                </div>
+              )}
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="text-sm font-bold text-gray-900 truncate">{session.user?.name}</span>
+                <span className="text-xs text-gray-500 truncate">{['admin', 'super_admin'].includes(session.user?.role) ? 'مدير النظام' : 'معلم'}</span>
+              </div>
+            </div>
+          )}
+
+          <Link 
+            href="/#features" 
+            className="px-4 py-3.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            المميزات
+          </Link>
+          <Link 
+            href="/#how-it-works" 
+            className="px-4 py-3.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            كيف تعمل؟
+          </Link>
+          
+          <div className="my-2 border-t border-gray-100" />
+          
+          <Link 
+            href="/game/demo"
+            className="px-4 py-3.5 flex items-center gap-3 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl font-bold transition-colors"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <div className="bg-white p-1.5 rounded-lg shadow-sm">
+              <Gamepad2 className="w-5 h-5 text-emerald-600" />
+            </div>
+            <span>جرب اللعبة كطالب</span>
+          </Link>
+
+          {session && (
+            <>
               <Link
-                href="/login"
-                className="flex items-center gap-2 p-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                href="/dashboard"
+                className="px-4 py-3.5 flex items-center gap-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-emerald-600 font-bold transition-colors mt-1"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <LogIn className="w-5 h-5 text-gray-400" />
+                <div className="bg-gray-100 p-1.5 rounded-lg text-gray-500">
+                  <LayoutDashboard className="w-5 h-5" />
+                </div>
+                <span>لوحة التحكم</span>
+              </Link>
+              {['admin', 'super_admin', 'viewer'].includes(session.user?.role) && (
+                <Link
+                  href="/admin"
+                  className="px-4 py-3.5 flex items-center gap-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-purple-600 font-bold transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="bg-purple-50 p-1.5 rounded-lg text-purple-600">
+                    <Shield className="w-5 h-5" />
+                  </div>
+                  <span>لوحة الإدارة</span>
+                </Link>
+              )}
+            </>
+          )}
+          
+          {!session && (
+            <div className="mt-2">
+              <Link
+                href="/login"
+                className="px-4 py-3.5 flex items-center justify-center gap-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold transition-colors shadow-sm"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <LogIn className="w-5 h-5" />
                 <span>تسجيل الدخول كمعلم</span>
               </Link>
-            )}
-            {session && (
-               <button
-                 onClick={() => { posthog.reset(); signOut() }}
-                 className="flex items-center gap-2 p-3 rounded-xl hover:bg-red-50 text-red-600 font-medium transition-colors"
-               >
-                 <span>تسجيل الخروج</span>
-               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Sidebar Footer */}
+        {session && (
+          <div className="p-5 border-t border-gray-100 bg-gray-50/50 mt-auto">
+            <button
+              onClick={() => { posthog.reset(); signOut() }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-gray-200 hover:border-red-200 font-bold transition-all shadow-sm"
+            >
+              <span>تسجيل الخروج</span>
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   )
 }
