@@ -25,6 +25,7 @@ export function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname()
   const isPro = !!user?.isSubscribed
   const [isOpen, setIsOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   // Close sidebar on path change
   useEffect(() => {
@@ -146,11 +147,12 @@ export function Sidebar({ user }: { user?: any }) {
               <div className={`relative shrink-0 rounded-full ${
                 isPro ? "p-[2.5px] bg-gradient-to-tr from-amber-400 via-yellow-300 to-orange-400" : ""
               }`}>
-                {user.image ? (
+                {user.image && !imageError ? (
                   <img
                     src={user.image}
                     alt={user.name}
                     className={`w-11 h-11 rounded-full object-cover block ${isPro ? "border-2 border-amber-50" : ""}`}
+                    onError={() => setImageError(true)}
                   />
                 ) : (
                   <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base ${

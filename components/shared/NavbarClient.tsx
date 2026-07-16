@@ -12,6 +12,7 @@ import posthog from "posthog-js"
 
 export function NavbarClient({ session }: { session: any }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
@@ -62,8 +63,8 @@ export function NavbarClient({ session }: { session: any }) {
                     تسجيل الخروج
                   </button>
                 </div>
-                {session.user?.image ? (
-                  <Image src={session.user.image} alt="Profile" width={40} height={40} className="rounded-full border-2 border-emerald-100" />
+                {session.user?.image && !imageError ? (
+                  <Image src={session.user.image} alt="Profile" width={40} height={40} className="rounded-full border-2 border-emerald-100" onError={() => setImageError(true)} />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
                     {session.user?.name?.charAt(0) || "U"}
@@ -126,8 +127,8 @@ export function NavbarClient({ session }: { session: any }) {
         <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-1.5">
           {session && (
             <div className="mb-4 flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-              {session.user?.image ? (
-                <Image src={session.user.image} alt="Profile" width={44} height={44} className="rounded-full border-2 border-white shadow-sm" />
+              {session.user?.image && !imageError ? (
+                <Image src={session.user.image} alt="Profile" width={44} height={44} className="rounded-full border-2 border-white shadow-sm" onError={() => setImageError(true)} />
               ) : (
                 <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg shadow-sm border-2 border-white shrink-0">
                   {session.user?.name?.charAt(0) || "U"}

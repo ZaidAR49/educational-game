@@ -16,6 +16,7 @@ interface AdminSidebarProps {
 export function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     setIsOpen(false)
@@ -104,7 +105,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         {/* User info */}
         {user && (
           <div className="flex items-center gap-3 px-4 py-2">
-            {user.image ? (
+            {user.image && !imageError ? (
               <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-indigo-500/40">
                 <Image
                   src={user.image}
@@ -112,6 +113,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                   width={36}
                   height={36}
                   className="object-cover w-full h-full"
+                  onError={() => setImageError(true)}
                 />
               </div>
             ) : (

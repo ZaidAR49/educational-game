@@ -72,6 +72,7 @@ export function GameSuccessModal({
                     height: 48,
                     width: 48,
                     excavate: true,
+                    crossOrigin: "anonymous",
                   }}
                 />
               </div>
