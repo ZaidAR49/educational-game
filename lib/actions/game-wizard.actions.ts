@@ -2,9 +2,9 @@
 
 import { revalidatePath, unstable_cache, updateTag } from "next/cache";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { games, scenarios, choices, NewGame } from "@/lib/db/schema";
+import { games, scenarios, choices, NewGame, classroomPlays } from "@/lib/db/schema";
 import { requireAuth, verifyGameOwnership } from "./utils";
 
 export type SaveGameData = {
@@ -125,6 +125,41 @@ export async function saveFullGameAction(
       .update(games)
       .set({ maxPoints: calculatedMaxPoints })
       .where(eq(games.id, targetGameId!));
+
+    // 5. Manage ClassroomPlay based on Game Status
+    if (gameData.status === 'published') {
+      // Check if a live session already exists
+      const existingLiveSessions = await tx
+        .select({ id: classroomPlays.id })
+        .from(classroomPlays)
+        .where(
+          and(
+            eq(classroomPlays.gameId, targetGameId!),
+            eq(classroomPlays.status, 'live')
+          )
+        )
+        .limit(1);
+
+      if (existingLiveSessions.length === 0) {
+        await tx.insert(classroomPlays).values({
+          gameId: targetGameId!,
+          teacherId: user.id,
+          status: 'live',
+          startedAt: new Date(),
+        });
+      }
+    } else {
+      // If draft or archived, close active sessions for this game
+      await tx
+        .update(classroomPlays)
+        .set({ status: 'closed', endedAt: new Date() })
+        .where(
+          and(
+            eq(classroomPlays.gameId, targetGameId!),
+            eq(classroomPlays.status, 'live')
+          )
+        );
+    }
 
     return targetGameId;
   });
