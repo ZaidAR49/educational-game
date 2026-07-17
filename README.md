@@ -16,30 +16,28 @@
 - **Contextual Tips**: Short, fun facts and educational hints are dynamically displayed to strengthen student comprehension after every response.
 
 ### 3. ⚡ Zero-Friction Student Access
-- **Zero Accounts Required**: Students join live classroom sessions in under 2 seconds by scanning a **QR code** or following a direct link. No login, registration, or password retrieval required.
+- **Zero Accounts Required**: Students join live classroom sessions in under 2 seconds by scanning a dynamically generated **QR code** (via `qrcode.react`) or following a direct link. No login, registration, or password retrieval required.
 - **Privacy-First**: Students enter using generated or custom nicknames, ensuring complete data privacy and compliance.
 
 ### 4. 📊 Real-Time Dashboard Analytics
-- **Live Metrics Tracking**: Monitor student completion rates, class accuracy, and score distributions in real time as gameplay happens.
+- **Live Metrics Tracking**: Monitor student completion rates, class accuracy, and score distributions in real time as gameplay happens, powered by `recharts`.
 - **Historic Session Reports**: Access past session scores and analytics inside the Sessions list to easily export grades and identify recurring knowledge gaps.
 - **Admin & Teacher Dashboards**: Dedicated interfaces for teachers to manage classrooms and for admins to manage platform-wide analytics and accounts.
 
 ### 5. 🏫 Multi-Tenant School & Brand Management
 - **Organizations Support**: Group games, teachers, and analytics under distinct **Organizations** (schools, classrooms, or coaching centers).
-- **Custom Branding**: Upload custom logos (via AWS S3 integration) that appear on student screens during gameplay to represent your school's unique brand.
+- **Optimized Custom Branding**: Upload custom logos that appear on student screens during gameplay to represent your school's unique brand. We use **Client-Side Image Compression** with web-worker support to ensure logos are automatically resized (max 500x500px), compressed (max 500KB), and converted to optimized WebP format before being uploaded to AWS S3.
 - **Customizable Result Screens**: Tailor the "Pass" and "Fail" result screens per organization.
 
 ### 6. 💎 Premium, Responsive UI
 - **Modern Animations**: Silky smooth transitions and micro-interactions powered by **Framer Motion** and Tailwind CSS animations.
 - **Responsive Design**: Flawless experience across desktop, tablet, and mobile devices.
-- **Localization Support**: Built with internationalization in mind (currently heavily optimized for Arabic/RTL out of the box).
+- **Localization Support**: Built with internationalization in mind, utilizing centralized JSON content files for scalable multi-language support (currently heavily optimized for Arabic/RTL out of the box).
 
 ### 7. 🛡️ Enterprise-Grade Architecture & Safeguards
 - **Fully Typed Database**: Built on PostgreSQL (Supabase) with **Drizzle ORM** for end-to-end type safety.
 - **Role-Based Access Control**: Granular roles (`user`, `admin`, `viewer`, `super_admin`) and secure authentication powered by **Auth.js (NextAuth v5)**.
-- **Usage Tracking & Subscriptions**: Built-in logic for tracking AI tokens, game plays, and managing subscription tiers.
-- **Keep-Alive Ping Endpoint**: A dedicated `/api/keep-alive` path that queries the database to keep the connection pool warm and prevent free-tier database suspension.
-- **Automated Data Retention**: Scheduled database cleanup via `pg_cron` that preserves detailed student response logs for 30 days, keeping the database footprint optimized.
+- **Automated Data Retention**: Scheduled database cleanup that preserves detailed student response logs for 30 days, keeping the database footprint optimized.
 
 ---
 
@@ -50,23 +48,27 @@
 *   **Styling & Animation**: Tailwind CSS v4, [Framer Motion](https://www.framer.com/motion/), & Lucide React
 *   **Authentication**: [Auth.js (NextAuth v5)](https://authjs.dev/)
 *   **Telemetry & Analytics**: [PostHog](https://posthog.com/) (Web & Server integration)
-*   **AI Integration**: Google GenAI SDK
-*   **File Storage**: AWS SDK S3 Client
+*   **AI Integration**: Google GenAI SDK (`@google/genai`)
+*   **File Storage & Processing**: AWS SDK S3 Client & `browser-image-compression`
+*   **Data Visualization**: Recharts
 
 ---
 
 ## 📂 Project Structure
 
 *   `app/`: Main router layouts, views, and API routes.
-    *   `app/api/keep-alive/`: Database keep-alive API.
-    *   `app/dashboard/`: Teacher/Organization dashboard.
+    *   `app/api/`: API endpoints, including `keep-alive` database pinging.
+    *   `app/dashboard/`: Teacher/Organization dashboard routing.
     *   `app/admin/`: Super admin dashboard for platform management.
 *   `components/`: Modular React components.
     *   `components/home/`: Redesigned premium landing page sections.
     *   `components/dashboard/` & `components/admin/`: Dashboard layouts and navigation sidebars.
     *   `components/games/`: AI wizards, prompt engines, and question editors.
-*   `lib/`: Core helpers, server actions, services, database schemas, and AI configuration.
-*   `data/`: Localization strings and general static text contents.
+*   `lib/`: Core helpers and application logic.
+    *   `lib/ai/`: GenAI client configs and AI game generation logic.
+    *   `lib/db/`: Drizzle ORM schema definitions and database connection utilities.
+    *   `lib/image-compression.ts`: Client-side utility for processing WebP logos.
+*   `data/`: Localization strings, structural definitions, and general static JSON text content.
 
 ---
 
@@ -102,3 +104,11 @@ Start the local hot-reloaded development environment:
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) to see the platform in action!
+
+---
+
+## 🚀 Deployment (Vercel)
+
+The platform is optimized for Vercel deployment with specific automation settings defined in `vercel.json`:
+- **Database Keep-Alive & Pruning**: A cron job (`0 3 * * *`) pings `/api/keep-alive` daily to prevent serverless database suspension and clean up student records older than 30 days.
+- **Deployment Control**: Automatic deployments from Git are currently **disabled** (`git.deploymentEnabled: false`) to give administrators manual control over pushing releases to production.
