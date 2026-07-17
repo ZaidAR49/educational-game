@@ -23,7 +23,8 @@ export default async function RootLayout({
 }>) {
   const session = await auth()
 
-  return (<><html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
+  return (
+    <html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
       <body className={`${tajawal.className} font-sans antialiased`}>
         {children}
         {session?.user?.id && (
@@ -31,10 +32,8 @@ export default async function RootLayout({
         )}
         <Toaster position="top-center" richColors />
         {config.enableAnalytics && <Analytics />}
+        <SpeedInsights />
       </body>
     </html>
-    <SpeedInsights />
-    </>
-    
   )
 }
