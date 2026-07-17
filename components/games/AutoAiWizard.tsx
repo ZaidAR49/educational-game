@@ -216,6 +216,9 @@ export function AutoAiWizard({ organizations, onBack }: AutoAiWizardProps) {
               <Sparkles className="w-6 h-6" />
               <span>توليد اللعبة الآن بواسطة AI</span>
             </button>
+            <p className="text-center text-xs text-gray-400 font-medium mt-3">
+              قد يخطئ الذكاء الاصطناعي أحياناً. يرجى مراجعة الأسئلة والأجوبة والتأكد من صحتها قبل نشر اللعبة.
+            </p>
           </div>
         ) : (
           <div className="py-16 flex flex-col items-center justify-center space-y-6 relative z-10 min-h-[300px]">

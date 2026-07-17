@@ -6,6 +6,7 @@ import { Bot, Copy, CheckCircle2, ArrowRight, AlertCircle, Wand2 } from "lucide-
 import { GameWizard } from "./GameWizard"
 import { OrganizationOption } from "./wizard/BasicInfoStep"
 import { GameFormData, Scenario } from "./wizard/types"
+import { gameGeneratorConfig } from "@/lib/ai/game-generator.config"
 
 interface ByoAiWizardProps {
   organizations: OrganizationOption[];
@@ -18,50 +19,16 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
   const [copied, setCopied] = useState(false)
   const [jsonInput, setJsonInput] = useState("")
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [scrollTop, setScrollTop] = useState(0)
   
   // State for parsed game data
   const [parsedGame, setParsedGame] = useState<Partial<GameFormData> | null>(null)
   const [parsedScenarios, setParsedScenarios] = useState<Scenario[] | null>(null)
 
-  const promptTemplate = `You are an expert educational game designer. Your task is to generate a highly engaging, interactive quiz game in Arabic about the following topic:
-"${idea || '[أدخل فكرتك هنا]'}"
-
-CRITICAL RULES:
-1. Generate exactly ${questionCount} scenarios (questions).
-2. For each scenario, provide exactly 4 choices.
-3. Only ONE choice can be correct (isCorrect: true). The other 3 must be false.
-4. Each correct choice must award exactly 10 points.
-5. Provide detailed, encouraging feedback for each choice in Arabic.
-6. Use appropriate emojis for icons.
-
-You MUST respond ONLY with a raw JSON object that perfectly matches the structure below. Do NOT include any markdown wrappers (like \`\`\`json), do NOT include any introductory or concluding text. Just the raw JSON object.
-
-{
-  "title": "A catchy title for the game in Arabic",
-  "description": "A short, engaging description in Arabic",
-  "slug": "a-url-friendly-slug-in-english",
-  "icon": "🎮",
-  "scenarios": [
-    {
-      "icon": "❓",
-      "title": "The question text in Arabic",
-      "description": "Additional context or instruction for the question in Arabic",
-      "choices": [
-        {
-          "text": "Choice text in Arabic",
-          "icon": "📝",
-          "isCorrect": true,
-          "points": 10,
-          "feedback": {
-            "title": "Feedback title (e.g., إجابة صحيحة! / محاولة جيدة!)",
-            "message": "Detailed explanation of why it is correct or incorrect in Arabic",
-            "tip": "A helpful tip or fun fact in Arabic"
-          }
-        }
-      ]
-    }
-  ]
-}`
+  const promptTemplate = gameGeneratorConfig.getCustomUserPrompt(
+    idea || '[أدخل فكرتك هنا]',
+    questionCount
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(promptTemplate)
@@ -246,13 +213,26 @@ You MUST respond ONLY with a raw JSON object that perfectly matches the structur
         </p>
 
         <div className="space-y-4">
-          <textarea
-            value={jsonInput}
-            onChange={(e) => setJsonInput(e.target.value)}
-            placeholder={'{\n  "title": "...",\n  "scenarios": [...]\n}'}
-            dir="ltr"
-            className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all font-mono text-sm resize-none min-h-[250px]"
-          />
+          <div className="relative flex rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 transition-all font-mono text-sm h-[400px]" dir="ltr">
+            <div 
+              className="w-12 bg-gray-100 text-gray-400 flex flex-col items-end pr-3 py-4 select-none overflow-hidden shrink-0 border-r border-gray-200"
+            >
+              <div style={{ transform: `translateY(-${scrollTop}px)` }}>
+                {Array.from({ length: Math.max(1, jsonInput.split('\n').length) }).map((_, i) => (
+                  <div key={i} className="leading-6">{i + 1}</div>
+                ))}
+              </div>
+            </div>
+            <textarea
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
+              placeholder={'{\n  "title": "...",\n  "scenarios": [...]\n}'}
+              spellCheck={false}
+              wrap="off"
+              className="flex-1 w-full bg-transparent px-4 py-4 outline-none resize-none leading-6 whitespace-pre overflow-auto"
+            />
+          </div>
 
           {errorMsg && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-3 rounded-xl font-bold flex items-center gap-3 text-sm">
@@ -268,6 +248,9 @@ You MUST respond ONLY with a raw JSON object that perfectly matches the structur
           >
             معالجة الـ JSON وإنشاء اللعبة
           </button>
+          <p className="text-center text-xs text-gray-400 font-medium mt-3">
+            قد يخطئ الذكاء الاصطناعي أحياناً. يرجى مراجعة الأسئلة والأجوبة والتأكد من صحتها قبل نشر اللعبة.
+          </p>
         </div>
       </div>
 

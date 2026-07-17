@@ -37,10 +37,10 @@ export async function POST(req: Request) {
     const ai = getGenAIClient();
     const responseStream = await ai.models.generateContentStream({
       model: gameGeneratorConfig.model,
-      contents: `Game Topic / Idea: "${idea}"`,
+      contents: "Please generate the quiz game now according to the system instructions.",
       config: {
         ...gameGeneratorConfig.config,
-        systemInstruction: gameGeneratorConfig.getSystemPrompt(questionCount),
+        systemInstruction: gameGeneratorConfig.getSystemPrompt(idea, questionCount),
       },
     });
 
