@@ -9,5 +9,6 @@
       "path": "/api/keep-alive",
       "schedule": "0 3 * * *"
     }
-  ]
+  ],
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then exit 0; else exit 1; fi"
 }
