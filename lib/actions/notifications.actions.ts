@@ -39,6 +39,12 @@ export async function deleteSystemAnnouncementAction(id: string) {
   revalidatePath("/admin/notifications");
 }
 
+export async function deleteAllSystemAnnouncementsAction() {
+  await requireAdmin();
+  await db.delete(systemAnnouncements);
+  revalidatePath("/admin/notifications");
+}
+
 export async function getUserNotificationsAction() {
   await requireAdmin();
   
@@ -68,6 +74,15 @@ export async function createUserNotificationAction(data: {
 }) {
   await requireAdmin();
 
+  // Validate that the user exists first
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.id, data.userId),
+  });
+
+  if (!existingUser) {
+    return { error: "المستخدم غير موجود. الرجاء التأكد من المعرف (User ID)." };
+  }
+
   await db.insert(userNotifications).values({
     userId: data.userId,
     title: data.title,
@@ -76,11 +91,18 @@ export async function createUserNotificationAction(data: {
   });
 
   revalidatePath("/admin/notifications");
+  return { success: true };
 }
 
 export async function deleteUserNotificationAction(id: string) {
   await requireAdmin();
   await db.delete(userNotifications).where(eq(userNotifications.id, id));
+  revalidatePath("/admin/notifications");
+}
+
+export async function deleteAllUserNotificationsAction() {
+  await requireAdmin();
+  await db.delete(userNotifications);
   revalidatePath("/admin/notifications");
 }
 

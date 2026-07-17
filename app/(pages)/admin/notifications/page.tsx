@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Megaphone, UserSquare2, Trash2, Send, Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { 
   getSystemAnnouncementsAction, 
   createSystemAnnouncementAction, 
   deleteSystemAnnouncementAction,
+  deleteAllSystemAnnouncementsAction,
   createUserNotificationAction,
   getUserNotificationsAction,
-  deleteUserNotificationAction
+  deleteUserNotificationAction,
+  deleteAllUserNotificationsAction
 } from "@/lib/actions/notifications.actions";
 
 export default function NotificationsAdminPage() {
@@ -50,7 +53,7 @@ export default function NotificationsAdminPage() {
     e.preventDefault();
 
     if (sysForm.endsAt && new Date(sysForm.endsAt) <= new Date()) {
-      alert("عذراً، تاريخ ووقت الانتهاء يجب أن يكون في المستقبل لتجنب الأخطاء.");
+      toast.error("عذراً، تاريخ ووقت الانتهاء يجب أن يكون في المستقبل لتجنب الأخطاء.");
       return;
     }
 
@@ -61,9 +64,11 @@ export default function NotificationsAdminPage() {
         endsAt: sysForm.endsAt ? new Date(sysForm.endsAt) : null,
       });
       setSysForm({ title: "", body: "", type: "message", severity: "info", endsAt: "" });
+      toast.success("تم نشر إشعار النظام بنجاح");
       await fetchData();
     } catch (error) {
       console.error(error);
+      toast.error("حدث خطأ أثناء إرسال إشعار النظام.");
     } finally {
       setIsSubmitting(false);
     }
@@ -73,11 +78,17 @@ export default function NotificationsAdminPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createUserNotificationAction(userForm);
-      setUserForm({ userId: "", title: "", body: "", type: "account" });
-      await fetchData();
+      const result = await createUserNotificationAction(userForm);
+      if (result && result.error) {
+        toast.error(result.error);
+      } else {
+        setUserForm({ userId: "", title: "", body: "", type: "account" });
+        toast.success("تم إرسال الإشعار للمستخدم بنجاح");
+        await fetchData();
+      }
     } catch (error) {
       console.error(error);
+      toast.error("حدث خطأ غير متوقع أثناء الإرسال.");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,12 +107,34 @@ export default function NotificationsAdminPage() {
       } else {
         await deleteUserNotificationAction(deleteModal.id);
       }
+      toast.success("تم حذف الإشعار بنجاح");
       await fetchData();
     } catch (error) {
       console.error(error);
+      toast.error("حدث خطأ أثناء الحذف.");
     } finally {
       setIsSubmitting(false);
       setDeleteModal(null);
+    }
+  };
+
+  const confirmDeleteAll = async () => {
+    if (!confirm("هل أنت متأكد من حذف جميع الإشعارات؟ هذا الإجراء لا يمكن التراجع عنه.")) return;
+    
+    setIsSubmitting(true);
+    try {
+      if (activeTab === "system") {
+        await deleteAllSystemAnnouncementsAction();
+      } else {
+        await deleteAllUserNotificationsAction();
+      }
+      toast.success("تم حذف جميع الإشعارات بنجاح");
+      await fetchData();
+    } catch (error) {
+      console.error(error);
+      toast.error("حدث خطأ أثناء الحذف.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -273,6 +306,7 @@ export default function NotificationsAdminPage() {
                     <option value="billing">فوترة</option>
                   </select>
                 </div>
+
                 <button
                   disabled={isSubmitting}
                   type="submit"
@@ -289,9 +323,22 @@ export default function NotificationsAdminPage() {
         {/* LIST COLUMN */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 min-h-[500px]">
-            <h2 className="text-lg font-semibold text-slate-800 mb-6">
-              {activeTab === "system" ? "الإشعارات النشطة" : "أحدث إشعارات المستخدمين"}
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <h2 className="text-lg font-semibold text-slate-800">
+                {activeTab === "system" ? "الإشعارات النشطة" : "أحدث إشعارات المستخدمين"}
+              </h2>
+              {((activeTab === "system" && systemAnnouncements.length > 0) || (activeTab === "user" && userNotifications.length > 0)) && (
+                <button
+                  onClick={confirmDeleteAll}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-50"
+                  title="حذف جميع الإشعارات"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  حذف الكل
+                </button>
+              )}
+            </div>
 
             {isLoading ? (
               <div className="flex items-center justify-center h-64 text-slate-400">

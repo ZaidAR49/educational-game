@@ -80,7 +80,7 @@ export function SystemAnnouncementsBanner() {
   return (
     <div className="flex flex-col gap-3 mb-6">
       <AnimatePresence>
-        {announcements.map((item) => {
+        {announcements.slice(0, 3).map((item) => {
           const style = severityStyles[item.severity] || severityStyles.info;
           const isExpanded = expandedIds.has(item.id);
           
