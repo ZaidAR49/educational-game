@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Users, LayoutDashboard, Settings, LogOut, Gamepad2, Menu, X } from "lucide-react"
+import { Users, LayoutDashboard, Settings, LogOut, Gamepad2, Menu, X, Bell } from "lucide-react"
 import Image from "next/image"
 import AppLogo from "@/app/icon.png"
 import uiContent from "@/data/ui-content-general.json"
@@ -25,6 +25,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const navItems = [
     { name: "الحسابات", href: "/admin/accounts", icon: Users },
     { name: "الإحصائيات", href: "/admin/analytics", icon: LayoutDashboard },
+    { name: "الإشعارات", href: "/admin/notifications", icon: Bell },
     { name: "الإعدادات", href: "/admin/settings", icon: Settings },
   ]
 

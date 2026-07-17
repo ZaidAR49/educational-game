@@ -500,6 +500,51 @@ CREATE INDEX idx_system_announcement_reads_announcement_id
 ALTER TABLE public.system_announcement_reads ENABLE ROW LEVEL SECURITY;
 
 
+-- -------------------------------------------------------------------------
+-- 4.14 user_notifications  *** NEW ***
+-- Direct, 1-to-1 notifications for a specific user.
+-- -------------------------------------------------------------------------
+CREATE TABLE public.user_notifications (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  type         text NOT NULL,
+  title        text NOT NULL,
+  body         text,
+  link         text,
+  is_read      boolean NOT NULL DEFAULT false,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.user_notifications IS
+  'High-volume direct notifications targeted at a specific user (e.g., account alerts, gameplay achievements).';
+
+CREATE TRIGGER set_updated_at_user_notifications
+  BEFORE UPDATE ON public.user_notifications
+  FOR EACH ROW EXECUTE FUNCTION public.trigger_set_updated_at();
+
+CREATE INDEX idx_user_notifications_user_id
+  ON public.user_notifications (user_id, created_at DESC);
+  
+CREATE INDEX idx_user_notifications_unread
+  ON public.user_notifications (user_id)
+  WHERE is_read = false;
+
+ALTER TABLE public.user_notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read their own notifications"
+  ON public.user_notifications
+  FOR SELECT
+  TO authenticated
+  USING (user_id = auth.uid());
+  
+CREATE POLICY "Users can update their own notifications (mark read)"
+  ON public.user_notifications
+  FOR UPDATE
+  TO authenticated
+  USING (user_id = auth.uid());
+
+
 -- =========================================================================
 -- 5. EXAMPLE APPLICATION QUERIES (for reference, not part of the schema)
 -- =========================================================================

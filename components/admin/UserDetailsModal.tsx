@@ -1,7 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Building2, Gamepad2, Users } from "lucide-react"
+import { Building2, Gamepad2, Users, Copy, Check } from "lucide-react"
+import { useState } from "react"
 
 type UserDetailsModalProps = {
   user: any
@@ -9,6 +10,14 @@ type UserDetailsModalProps = {
 }
 
 export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(user.id)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" dir="rtl">
       <motion.div
@@ -31,9 +40,21 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
             <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl font-bold">
               {user.name.charAt(0)}
             </div>
-            <div>
-              <div className="text-lg font-bold text-slate-900">{user.name}</div>
-              <div className="text-slate-500 text-sm">{user.email}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-lg font-bold text-slate-900 truncate">{user.name}</div>
+              <div className="text-slate-500 text-sm truncate">{user.email}</div>
+              <div className="mt-2 flex items-center gap-2">
+                <code className="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1.5 rounded-md border border-slate-200 truncate flex-1" dir="ltr">
+                  {user.id}
+                </code>
+                <button
+                  onClick={handleCopy}
+                  className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-indigo-600 rounded-md transition-colors border border-slate-200 shrink-0"
+                  title="نسخ المعرف"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
           </div>
 

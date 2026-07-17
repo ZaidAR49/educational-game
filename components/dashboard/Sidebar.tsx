@@ -20,6 +20,7 @@ import {
 import { signOut } from "next-auth/react"
 import uiContent from "@/data/ui-content-general.json"
 import AppLogo from "@/app/icon.png"
+import { NotificationsMenu } from "./NotificationsMenu"
 
 export function Sidebar({ user }: { user?: any }) {
   const pathname = usePathname()
@@ -45,19 +46,24 @@ export function Sidebar({ user }: { user?: any }) {
     <>
       {/* ── Mobile Header ── */}
       <div className="lg:hidden fixed top-0 right-0 left-0 h-16 bg-white border-b border-gray-100 px-4 flex items-center justify-between z-40">
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="p-2 -mr-2 text-gray-600 hover:text-emerald-600 transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-        <Link href="/" className="flex items-center gap-2.5">
+        <div className="flex items-center">
+          <button 
+            onClick={() => setIsOpen(true)}
+            className="p-2 -mr-2 text-gray-600 hover:text-emerald-600 transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+        <Link href="/" className="flex items-center gap-2.5 absolute left-1/2 -translate-x-1/2">
           <span className="text-lg font-black text-emerald-600 tracking-tight">{uiContent.app.name}</span>
           <div className="w-8 h-8 overflow-hidden flex items-center justify-center rounded-lg shrink-0">
             <Image src={AppLogo} alt="Logo" width={32} height={32} className="object-contain" priority />
           </div>
         </Link>
+        <div className="flex items-center">
+          <NotificationsMenu />
+        </div>
       </div>
 
       {/* ── Overlay ── */}
@@ -79,6 +85,9 @@ export function Sidebar({ user }: { user?: any }) {
             </div>
             <span className="text-lg font-black text-emerald-600 tracking-tight">{uiContent.app.name}</span>
           </Link>
+          <div className="hidden lg:block">
+            <NotificationsMenu />
+          </div>
           <button 
             className="lg:hidden p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
             onClick={() => setIsOpen(false)}

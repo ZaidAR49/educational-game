@@ -344,3 +344,53 @@ export type NewPlayer = typeof players.$inferInsert;
 
 export type UsageEvent = typeof usageEvents.$inferSelect;
 export type NewUsageEvent = typeof usageEvents.$inferInsert;
+
+export const systemAnnouncements = pgTable("system_announcements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  body: text("body"),
+  severity: text("severity").notNull().default("info"),
+  isActive: boolean("is_active").notNull().default(true),
+  startsAt: timestamp("starts_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+  endsAt: timestamp("ends_at", { mode: "date", withTimezone: true }),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+});
+
+export const systemAnnouncementReads = pgTable(
+  "system_announcement_reads",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    announcementId: uuid("announcement_id")
+      .notNull()
+      .references(() => systemAnnouncements.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.announcementId] }),
+  })
+);
+
+export const userNotifications = pgTable("user_notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  body: text("body"),
+  link: text("link"),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
+});
+
+export type SystemAnnouncement = typeof systemAnnouncements.$inferSelect;
+export type NewSystemAnnouncement = typeof systemAnnouncements.$inferInsert;
+
+export type UserNotification = typeof userNotifications.$inferSelect;
+export type NewUserNotification = typeof userNotifications.$inferInsert;

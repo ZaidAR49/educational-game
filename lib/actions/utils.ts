@@ -60,6 +60,17 @@ export const requireAuth = cache(async () => {
 });
 
 /**
+ * Ensures the user is authenticated AND has admin privileges.
+ */
+export const requireAdmin = cache(async () => {
+  const user = await requireAuth();
+  if (!["admin", "super_admin"].includes(user.role)) {
+    throw new Error("Unauthorized: Admin access required.");
+  }
+  return user;
+});
+
+/**
  * Verifies if the user is the owner of the given game.
  * Throws an error if not authorized.
  */
