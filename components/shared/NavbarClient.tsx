@@ -37,6 +37,9 @@ export function NavbarClient({ session }: { session: any }) {
             <Link href="/#how-it-works" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
               كيف تعمل؟
             </Link>
+            <Link href="/contact" className="text-gray-600 hover:text-emerald-600 font-medium transition-colors">
+              تواصل معنا
+            </Link>
             {session && (
               <>
                 <Link href="/dashboard" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors flex items-center gap-1">
@@ -154,6 +157,13 @@ export function NavbarClient({ session }: { session: any }) {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             كيف تعمل؟
+          </Link>
+          <Link 
+            href="/contact" 
+            className="px-4 py-3.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            تواصل معنا
           </Link>
           
           <div className="my-2 border-t border-gray-100" />
