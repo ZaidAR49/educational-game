@@ -1,24 +1,66 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Shield, ShieldOff, Trash2, Ban, CheckCircle, Eye, Zap, ZapOff, UserPlus, Loader2 } from "lucide-react"
+import { Search, Shield, ShieldOff, Trash2, Ban, CheckCircle, Eye, Zap, ZapOff, UserPlus, Loader2, ChevronRight, ChevronLeft, ArrowDownUp } from "lucide-react"
 import { toast } from "sonner"
 import { ConfirmModal } from "@/components/shared/ConfirmModal"
 import { UserDetailsModal } from "./UserDetailsModal"
 import { AddUserModal } from "./AddUserModal"
 import { addNormalUserAction, toggleUserSubscriptionAction, toggleUserBlockAction, deleteUserAction } from "@/lib/actions/admin.actions"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 
-export function UsersTable({ userRole, initialUsers }: { userRole: string; initialUsers: any[] }) {
+export function UsersTable({ 
+  userRole, 
+  initialUsers,
+  totalPages,
+  currentPage,
+  currentSearch,
+  currentFilter,
+  currentSort
+}: { 
+  userRole: string; 
+  initialUsers: any[];
+  totalPages: number;
+  currentPage: number;
+  currentSearch: string;
+  currentFilter: string;
+  currentSort: string;
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const [isPending, startTransition] = useTransition()
-  const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState<"all" | "pro" | "locked">("all")
+  const [search, setSearch] = useState(currentSearch)
+  const [filter, setFilter] = useState<"all" | "pro" | "locked">(currentFilter as any)
+  const [sort, setSort] = useState(currentSort)
   const [selectedUser, setSelectedUser] = useState<any | null>(null)
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{
     type: "delete" | "subscribe" | "block" | "unblock" | null
     user: any | null
   }>({ type: null, user: null })
+
+  useEffect(() => {
+    setSearch(currentSearch)
+    setFilter(currentFilter as any)
+    setSort(currentSort)
+  }, [currentSearch, currentFilter, currentSort])
+
+  useEffect(() => {
+    if (search === currentSearch) return;
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (search) params.set('q', search);
+      else params.delete('q');
+      params.set('page', '1');
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, currentSearch, pathname, router, searchParams]);
 
   const handleAddUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -34,13 +76,37 @@ export function UsersTable({ userRole, initialUsers }: { userRole: string; initi
     })
   }
 
-  const filteredUsers = initialUsers.filter((user) => {
-    if (user.role === "admin") return false
-    const matchesSearch = user.name.includes(search) || user.email.includes(search)
-    const matchesFilter =
-      filter === "all" ? true : filter === "pro" ? user.plan === "pro" : user.status === "locked"
-    return matchesSearch && matchesFilter
-  })
+  const filteredUsers = initialUsers;
+
+  const handleSortChange = (newSort: string) => {
+    setSort(newSort);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('s', newSort);
+    params.set('page', '1');
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
+  }
+
+  const handleFilterChange = (f: string) => {
+    setFilter(f as any);
+    const params = new URLSearchParams(searchParams.toString());
+    if (f !== 'all') params.set('f', f);
+    else params.delete('f');
+    params.set('page', '1');
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
+  }
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
+  }
 
   const executeSubscriptionToggle = () => {
     if (!confirmAction.user) return
@@ -96,20 +162,37 @@ export function UsersTable({ userRole, initialUsers }: { userRole: string; initi
           )}
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100 overflow-x-auto w-fit">
-          {(["all", "pro", "locked"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                filter === f ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-              }`}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100 overflow-x-auto w-fit">
+            {(["all", "pro", "locked"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => handleFilterChange(f)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filter === f ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                {f === "all" && "الكل"}
+                {f === "pro" && (<><Zap className="w-3.5 h-3.5" /> مشتركي برو</>)}
+                {f === "locked" && (<><Ban className="w-3.5 h-3.5" /> محظورين</>)}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-500 flex items-center gap-1">
+              <ArrowDownUp className="w-4 h-4" /> ترتيب:
+            </span>
+            <select
+              value={sort}
+              onChange={(e) => handleSortChange(e.target.value)}
+              className="bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 rounded-xl px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
-              {f === "all" && "الكل"}
-              {f === "pro" && (<><Zap className="w-3.5 h-3.5" /> مشتركي برو</>)}
-              {f === "locked" && (<><Ban className="w-3.5 h-3.5" /> محظورين</>)}
-            </button>
-          ))}
+              <option value="newest">الأحدث تسجيلاً</option>
+              <option value="oldest">الأقدم تسجيلاً</option>
+              <option value="recent_login">آخر ظهور</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -221,6 +304,63 @@ export function UsersTable({ userRole, initialUsers }: { userRole: string; initi
           <div className="p-12 text-center text-slate-500">لا توجد حسابات مطابقة للبحث</div>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 p-6 bg-white border-t border-slate-100 rounded-b-2xl">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1 || isPending}
+            className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="الصفحة السابقة"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const pageNum = i + 1;
+            // Show only a few buttons around the current page to avoid clutter if there are many pages
+            if (
+              totalPages > 7 &&
+              pageNum !== 1 &&
+              pageNum !== totalPages &&
+              Math.abs(pageNum - currentPage) > 1
+            ) {
+              if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                return (
+                  <span key={i} className="w-10 h-10 flex items-center justify-center text-slate-400">
+                    ...
+                  </span>
+                );
+              }
+              return null;
+            }
+
+            return (
+              <button
+                key={i}
+                onClick={() => handlePageChange(pageNum)}
+                disabled={isPending}
+                className={`w-10 h-10 rounded-xl font-bold transition-colors ${
+                  currentPage === pageNum
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || isPending}
+            className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="الصفحة التالية"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       <AnimatePresence>

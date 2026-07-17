@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql, and, or, ilike, desc, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, organizations, games, players, classroomPlays } from "@/lib/db/schema";
 import { requireSuperAdmin, requireDashboardAccess, requireAdmin } from "@/lib/auth/rbac";
@@ -75,9 +75,46 @@ export async function toggleAdminBlockAction(userId: string, isLocked: boolean) 
   revalidatePath("/admin/settings");
 }
 
-export async function getUsersListAction() {
+export async function getUsersListAction(page = 1, searchQuery = "", filterType = "all", sortType = "newest") {
   // Bug #2 Fix: only admin+ can list all platform users
   await requireAdmin();
+
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  const conditions = [eq(users.role, "user")];
+
+  if (searchQuery) {
+    conditions.push(or(
+      ilike(users.name, `%${searchQuery}%`),
+      ilike(users.email, `%${searchQuery}%`)
+    ) as any);
+  }
+
+  if (filterType === "pro") {
+    conditions.push(eq(users.subscriptionPlan, "pro"));
+  } else if (filterType === "locked") {
+    conditions.push(eq(users.isLocked, true));
+  }
+
+  const whereClause = and(...conditions);
+
+  const totalCountResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(users)
+    .where(whereClause);
+  
+  const totalCount = Number(totalCountResult[0].count);
+  const totalPages = Math.ceil(totalCount / limit);
+
+  let orderByClause;
+  if (sortType === "recent_login") {
+    orderByClause = desc(users.lastLoginAt);
+  } else if (sortType === "oldest") {
+    orderByClause = asc(users.createdAt);
+  } else {
+    orderByClause = desc(users.createdAt);
+  }
 
   const result = await db.select({
     id: users.id,
@@ -88,6 +125,10 @@ export async function getUsersListAction() {
     isSubscribed: users.isSubscribed,
     plan: users.subscriptionPlan,
     createdAt: users.createdAt,
+    lastLoginAt: users.lastLoginAt,
+    aiRequestsCurrentPeriod: users.aiRequestsCurrentPeriod,
+    subscriptionExpiresAt: users.subscriptionExpiresAt,
+    aiTokensUsedCurrentPeriod: users.aiTokensUsedCurrentPeriod,
     organizations: sql<number>`(
       SELECT count(*)::int FROM "organizations" WHERE "owner_id" = "users"."id"
     )`,
@@ -102,14 +143,25 @@ export async function getUsersListAction() {
     )`,
   })
   .from(users)
-  .where(eq(users.role, "user"));
+  .where(whereClause)
+  .limit(limit)
+  .offset(offset)
+  .orderBy(orderByClause);
 
-  return result.map(u => ({
+  const mappedUsers = result.map(u => ({
     ...u,
     status: u.isLocked ? "locked" : "active",
     plan: u.plan || "free",
-    createdAt: u.createdAt.toISOString().split('T')[0]
+    createdAt: u.createdAt.toISOString().split('T')[0],
+    lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString().split('T')[0] : null,
+    subscriptionExpiresAt: u.subscriptionExpiresAt ? u.subscriptionExpiresAt.toISOString().split('T')[0] : null,
   }));
+
+  return {
+    users: mappedUsers,
+    totalPages,
+    currentPage: page
+  };
 }
 
 export async function addNormalUserAction(formData: FormData) {

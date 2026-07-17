@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
+import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { users, accounts, sessions, verificationToken } from "@/lib/db/schema"
 
@@ -30,7 +31,7 @@ const authResult = NextAuth({
       if (!user?.email) return true;
       try {
         const dbUser = await db.query.users.findFirst({
-          where: (users, { eq }) => eq(users.email, user.email as string),
+          where: (users, { eq: eqOp }) => eqOp(users.email, user.email as string),
           columns: { isLocked: true }
         });
         if (dbUser?.isLocked) {
@@ -87,6 +88,19 @@ const authResult = NextAuth({
       return session
     },
   },
+  events: {
+    async signIn({ user }) {
+      if (user?.email) {
+        try {
+          await db.update(users)
+            .set({ lastLoginAt: new Date() })
+            .where(eq(users.email, user.email as string));
+        } catch (error) {
+          console.error("[auth] Failed to update lastLoginAt:", error);
+        }
+      }
+    }
+  }
 }) 
 
 export const { handlers, signIn, signOut, auth } = authResult;
