@@ -6,6 +6,7 @@ import uiContent from "@/data/ui-content-general.json"
 import { Toaster } from "sonner"
 import { auth } from "@/auth"
 import { PosthogIdentify } from "@/components/shared/PosthogIdentify"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css"
 
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["300", "400", "500", "700"] })
@@ -22,8 +23,7 @@ export default async function RootLayout({
 }>) {
   const session = await auth()
 
-  return (
-    <html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
+  return (<><html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
       <body className={`${tajawal.className} font-sans antialiased`}>
         {children}
         {session?.user?.id && (
@@ -33,5 +33,8 @@ export default async function RootLayout({
         {config.enableAnalytics && <Analytics />}
       </body>
     </html>
+    <SpeedInsights />
+    </>
+    
   )
 }
