@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Megaphone, UserSquare2, Trash2, Send, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import { 
   getSystemAnnouncementsAction, 
   createSystemAnnouncementAction, 
@@ -27,6 +28,7 @@ export default function NotificationsAdminPage() {
   const [sysForm, setSysForm] = useState({ title: "", body: "", type: "message", severity: "info", endsAt: "" });
   const [userForm, setUserForm] = useState({ userId: "", title: "", body: "", type: "account" });
   const [deleteModal, setDeleteModal] = useState<{ id: string, type: "system" | "user" } | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -118,9 +120,12 @@ export default function NotificationsAdminPage() {
     }
   };
 
-  const confirmDeleteAll = async () => {
-    if (!confirm("هل أنت متأكد من حذف جميع الإشعارات؟ هذا الإجراء لا يمكن التراجع عنه.")) return;
-    
+  const confirmDeleteAll = () => {
+    setShowDeleteAllConfirm(true);
+  };
+
+  const executeDeleteAll = async () => {
+    setShowDeleteAllConfirm(false);
     setIsSubmitting(true);
     try {
       if (activeTab === "system") {
@@ -448,6 +453,18 @@ export default function NotificationsAdminPage() {
           </div>
         </div>
       )}
+
+      {/* Delete All Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteAllConfirm}
+        onClose={() => setShowDeleteAllConfirm(false)}
+        onConfirm={executeDeleteAll}
+        title="تأكيد حذف جميع الإشعارات"
+        description="هل أنت متأكد من حذف جميع الإشعارات؟ هذا الإجراء لا يمكن التراجع عنه."
+        confirmText="حذف الكل"
+        cancelText="إلغاء"
+        type="danger"
+      />
     </div>
   );
 }

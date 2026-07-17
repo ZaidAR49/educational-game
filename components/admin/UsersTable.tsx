@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Shield, ShieldOff, Trash2, Ban, CheckCircle, Eye, Zap, ZapOff, UserPlus, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { ConfirmModal } from "@/components/shared/ConfirmModal"
 import { UserDetailsModal } from "./UserDetailsModal"
 import { AddUserModal } from "./AddUserModal"
@@ -28,7 +29,7 @@ export function UsersTable({ userRole, initialUsers }: { userRole: string; initi
         setIsAddUserModalOpen(false)
       } catch (err) {
         console.error(err)
-        alert("حدث خطأ أثناء إضافة المستخدم")
+        toast.error("حدث خطأ أثناء إضافة المستخدم")
       }
     })
   }
