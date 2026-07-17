@@ -4,6 +4,7 @@ import { revalidatePath, unstable_cache, updateTag } from "next/cache";
 import * as organizationsService from "@/lib/services/organizations.service";
 import { NewOrganization } from "@/lib/db/schema";
 import { requireAuth, verifyOrganizationOwnership } from "./utils";
+import { deleteLogoFromS3 } from "./upload.actions";
 
 /**
  * Creates a new organization for the logged-in user.
@@ -54,6 +55,13 @@ export async function updateOrganizationAction(orgId: string, orgData: Partial<N
   const user = await requireAuth();
   await verifyOrganizationOwnership(orgId, user.id);
 
+  if (orgData.logoPath !== undefined) {
+    const oldOrg = await organizationsService.getOrganizationById(orgId);
+    if (oldOrg && oldOrg.logoPath && oldOrg.logoPath !== orgData.logoPath) {
+      await deleteLogoFromS3(oldOrg.logoPath);
+    }
+  }
+
   const updatedOrg = await organizationsService.updateOrganization(orgId, orgData);
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/organizations");
@@ -68,6 +76,11 @@ export async function updateOrganizationAction(orgId: string, orgData: Partial<N
 export async function deleteOrganizationAction(orgId: string) {
   const user = await requireAuth();
   await verifyOrganizationOwnership(orgId, user.id);
+
+  const org = await organizationsService.getOrganizationById(orgId);
+  if (org && org.logoPath) {
+    await deleteLogoFromS3(org.logoPath);
+  }
 
   await organizationsService.deleteOrganization(orgId);
   revalidatePath("/dashboard/settings");

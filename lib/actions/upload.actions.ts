@@ -1,6 +1,6 @@
 "use server";
 
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "@/lib/s3";
 import { requireAuth } from "./utils";
 
@@ -79,5 +79,40 @@ export async function uploadLogoAction(formData: FormData) {
   const publicUrl = `https://${projectId}.supabase.co/storage/v1/object/public/${bucketName}/${key}`;
 
   return publicUrl;
+}
+
+/**
+ * Deletes a logo file from Supabase S3 Storage given its public URL.
+ */
+export async function deleteLogoFromS3(publicUrl: string) {
+  if (!publicUrl) return;
+
+  try {
+    const bucketName = getBucketName();
+    
+    // The public URL looks like: https://[projectId].supabase.co/storage/v1/object/public/[bucketName]/[key]
+    // We need to extract the [key] part
+    const bucketPath = `/object/public/${bucketName}/`;
+    const urlIndex = publicUrl.indexOf(bucketPath);
+    
+    if (urlIndex === -1) {
+      console.warn("Could not parse S3 key from URL:", publicUrl);
+      return;
+    }
+    
+    const key = publicUrl.substring(urlIndex + bucketPath.length);
+    if (!key) return;
+
+    const command = new DeleteObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    });
+
+    await s3Client.send(command);
+    console.log(`Successfully deleted ${key} from S3.`);
+  } catch (error) {
+    console.error("Failed to delete logo from S3:", error);
+    // We don't throw here to prevent blocking the database deletion
+  }
 }
 

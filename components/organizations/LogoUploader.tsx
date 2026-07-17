@@ -1,7 +1,8 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import Image from "next/image"
+import { compressLogoImage } from "@/lib/image-compression"
 import { Image as ImageIcon, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -13,8 +14,9 @@ type LogoUploaderProps = {
 
 export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isCompressing, setIsCompressing] = useState(false)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -22,16 +24,26 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
       toast.warning("الرجاء رفع ملف صورة صالح (PNG, JPG, إلخ)")
       return
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.warning("حجم الصورة يجب أن لا يتجاوز 2 ميجابايت")
+    if (file.size > 5 * 1024 * 1024) {
+      toast.warning("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت قبل الضغط")
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      if (event.target?.result) onLogoChange(event.target.result as string, file)
+    try {
+      setIsCompressing(true)
+      const compressedFile = await compressLogoImage(file)
+      
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) onLogoChange(event.target.result as string, compressedFile)
+      }
+      reader.readAsDataURL(compressedFile)
+    } catch (error) {
+      console.error("Compression error:", error)
+      toast.error("حدث خطأ أثناء ضغط الصورة")
+    } finally {
+      setIsCompressing(false)
     }
-    reader.readAsDataURL(file)
   }
 
   const handleRemove = (e: React.MouseEvent) => {
@@ -47,6 +59,7 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
+        disabled={isCompressing}
         accept="image/png, image/jpeg, image/jpg, image/webp"
         className="hidden"
       />
@@ -70,12 +83,14 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
         </div>
       ) : (
         <div
-          onClick={() => fileInputRef.current?.click()}
-          className="w-full h-32 border-2 border-dashed border-emerald-200 bg-emerald-50/50 rounded-2xl flex flex-col items-center justify-center gap-2 text-emerald-600 hover:bg-emerald-50 cursor-pointer transition-colors"
+          onClick={() => !isCompressing && fileInputRef.current?.click()}
+          className={`w-full h-32 border-2 border-dashed border-emerald-200 bg-emerald-50/50 rounded-2xl flex flex-col items-center justify-center gap-2 text-emerald-600 transition-colors ${
+            isCompressing ? "cursor-wait opacity-70" : "hover:bg-emerald-50 cursor-pointer"
+          }`}
         >
-          <ImageIcon className="w-8 h-8 opacity-50" />
-          <div className="text-sm font-bold">انقر لرفع صورة الشعار</div>
-          <div className="text-xs text-emerald-600/60 font-medium">PNG, JPG حتى 2MB</div>
+          <ImageIcon className={`w-8 h-8 opacity-50 ${isCompressing ? 'animate-pulse' : ''}`} />
+          <div className="text-sm font-bold">{isCompressing ? "جاري ضغط الصورة..." : "انقر لرفع صورة الشعار"}</div>
+          <div className="text-xs text-emerald-600/60 font-medium">PNG, JPG حتى 5MB</div>
         </div>
       )}
     </div>
