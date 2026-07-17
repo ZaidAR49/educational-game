@@ -15,7 +15,8 @@ export function NavbarClient({ session }: { session: any }) {
   const [imageError, setImageError] = useState(false)
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+    <>
+      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
       <div className="w-full px-4 sm:px-8 lg:px-16 2xl:px-24 mx-auto">
         <div className="flex justify-between items-center h-20">
           
@@ -98,6 +99,7 @@ export function NavbarClient({ session }: { session: any }) {
           </button>
         </div>
       </div>
+    </header>
 
       {/* Mobile Menu Overlay */}
       <div 
@@ -232,6 +234,6 @@ export function NavbarClient({ session }: { session: any }) {
           </div>
         )}
       </div>
-    </header>
+    </>
   )
 }
