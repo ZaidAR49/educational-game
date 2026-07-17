@@ -1,14 +1,11 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "regions": ["iad1"],
+  "git": {
+    "deploymentEnabled": false
+  },
   "crons": [
     {
       "path": "/api/keep-alive",
       "schedule": "0 3 * * *"
     }
-  ],
-  "ignoreCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then exit 0; else exit 1; fi"
+  ]
 }
