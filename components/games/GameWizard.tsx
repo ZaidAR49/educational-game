@@ -54,8 +54,9 @@ export function GameWizard({
   } = useGameWizard({ gameId, initialGame, initialScenarios })
 
   const finalGameId = createdGameId || gameId;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const gameUrl = finalGameId 
-    ? `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/game/${finalGameId}`
+    ? `${baseUrl}/game/${finalGameId}`
     : "";
 
   const downloadQR = () => {
