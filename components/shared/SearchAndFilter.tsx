@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLocale } from "@/lib/i18n/LanguageContext";
 
 interface SearchAndFilterProps {
   placeholder?: string;
@@ -10,14 +11,17 @@ interface SearchAndFilterProps {
 }
 
 export function SearchAndFilter({ 
-  placeholder = "ابحث...", 
+  placeholder, 
   showStatusFilter = false 
 }: SearchAndFilterProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { t, locale, isRTL } = useLocale();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+
+  const resolvedPlaceholder = placeholder || t.common?.search || (locale === 'ar' ? "ابحث..." : "Search...");
 
   // Debounce search
   useEffect(() => {
@@ -54,13 +58,13 @@ export function SearchAndFilter({
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6 mt-4">
       <div className="relative flex-1">
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+        <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none text-gray-400`}>
           <Search className="h-5 w-5" />
         </div>
         <input
           type="text"
-          className="block w-full pr-10 pl-3 py-3 border border-gray-200 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white"
-          placeholder={placeholder}
+          className={`block w-full ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-3 border border-gray-200 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white`}
+          placeholder={resolvedPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -72,10 +76,10 @@ export function SearchAndFilter({
           value={searchParams.get("status") || ""}
           onChange={(e) => handleStatusChange(e.target.value)}
         >
-          <option value="">كل الحالات</option>
-          <option value="published">منشور</option>
-          <option value="draft">مسودة</option>
-          <option value="archived">مؤرشف</option>
+          <option value="">{t.common?.allStatuses || (locale === 'ar' ? "كل الحالات" : "All Statuses")}</option>
+          <option value="published">{t.common?.published || (locale === 'ar' ? "منشور" : "Published")}</option>
+          <option value="draft">{t.common?.draft || (locale === 'ar' ? "مسودة" : "Draft")}</option>
+          <option value="archived">{t.common?.archived || (locale === 'ar' ? "مؤرشف" : "Archived")}</option>
         </select>
       )}
     </div>

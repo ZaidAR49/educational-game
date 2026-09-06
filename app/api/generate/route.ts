@@ -10,7 +10,8 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { idea, questionCount } = await req.json();
+    const { idea, questionCount, locale } = await req.json();
+    const resolvedLocale = typeof locale === "string" && locale.toLowerCase() === "en" ? "en" : "ar";
 
     // SECURITY: Prevent Denial of Wallet / AI Abuse
     const maxQuestions = 20;
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
       contents: "Please generate the quiz game now according to the system instructions.",
       config: {
         ...gameGeneratorConfig.config,
-        systemInstruction: gameGeneratorConfig.getSystemPrompt(idea, questionCount),
+        systemInstruction: gameGeneratorConfig.getSystemPrompt(idea, questionCount, resolvedLocale),
       },
     });
 

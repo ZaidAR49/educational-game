@@ -5,6 +5,7 @@ import Image from "next/image"
 import { compressLogoImage } from "@/lib/image-compression"
 import { Image as ImageIcon, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 type LogoUploaderProps = {
   logo: string | null
@@ -13,6 +14,8 @@ type LogoUploaderProps = {
 }
 
 export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderProps) {
+  const { t, locale } = useLocale()
+  const o = t.orgForm
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isCompressing, setIsCompressing] = useState(false)
 
@@ -21,11 +24,11 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
     if (!file) return
 
     if (!file.type.startsWith("image/")) {
-      toast.warning("الرجاء رفع ملف صورة صالح (PNG, JPG, إلخ)")
+      toast.warning(locale === 'ar' ? "الرجاء رفع ملف صورة صالح (PNG, JPG, إلخ)" : "Please upload a valid image file (PNG, JPG, etc.)")
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.warning("حجم الصورة يجب أن لا يتجاوز 5 ميجابايت قبل الضغط")
+      toast.warning(locale === 'ar' ? "حجم الصورة يجب أن لا يتجاوز 5 ميجابايت قبل الضغط" : "Image size must not exceed 5MB before compression")
       return
     }
 
@@ -40,7 +43,7 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
       reader.readAsDataURL(compressedFile)
     } catch (error) {
       console.error("Compression error:", error)
-      toast.error("حدث خطأ أثناء ضغط الصورة")
+      toast.error(locale === 'ar' ? "حدث خطأ أثناء ضغط الصورة" : "Error compressing image")
     } finally {
       setIsCompressing(false)
     }
@@ -54,7 +57,7 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-bold text-gray-700 block text-right">شعار المؤسسة</label>
+      <label className="text-sm font-bold text-gray-700 block text-start">{o.logoLabel}</label>
       <input
         type="file"
         ref={fileInputRef}
@@ -70,12 +73,18 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
             <Image src={logo} alt="Logo Preview" fill className="object-contain p-4 transition-transform group-hover:scale-95" />
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="bg-white text-gray-900 px-4 py-2 rounded-lg font-bold text-sm shadow-md hover:bg-gray-100"
               >
-                تغيير الشعار
+                {o.logoChange}
               </button>
-              <button onClick={handleRemove} className="bg-red-500 text-white p-2 rounded-lg shadow-md hover:bg-red-600">
+              <button 
+                type="button" 
+                onClick={handleRemove} 
+                className="bg-red-500 text-white p-2 rounded-lg shadow-md hover:bg-red-600"
+                aria-label="Remove logo"
+              >
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
@@ -89,8 +98,8 @@ export function LogoUploader({ logo, onLogoChange, onLogoRemove }: LogoUploaderP
           }`}
         >
           <ImageIcon className={`w-8 h-8 opacity-50 ${isCompressing ? 'animate-pulse' : ''}`} />
-          <div className="text-sm font-bold">{isCompressing ? "جاري ضغط الصورة..." : "انقر لرفع صورة الشعار"}</div>
-          <div className="text-xs text-emerald-600/60 font-medium">PNG, JPG حتى 5MB</div>
+          <div className="text-sm font-bold">{isCompressing ? o.logoCompressing : o.logoUploadPrompt}</div>
+          <div className="text-xs text-emerald-600/60 font-medium">{o.logoHint}</div>
         </div>
       )}
     </div>

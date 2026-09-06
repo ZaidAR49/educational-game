@@ -7,20 +7,27 @@ import { users, usageEvents, accounts, sessions, organizations, games, classroom
 import { requireAuth } from "./utils";
 import { update } from "@/auth";
 
-export async function updateUserAction(data: { name: string }) {
+export async function updateUserAction(data: { name?: string; locale?: string }) {
   const sessionUser = await requireAuth();
+
+  const updateData: Record<string, any> = { updatedAt: new Date() };
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.locale !== undefined && ["ar", "en"].includes(data.locale)) {
+    updateData.locale = data.locale;
+  }
 
   // Update in database
   await db
     .update(users)
-    .set({ name: data.name, updatedAt: new Date() })
+    .set(updateData)
     .where(eq(users.id, sessionUser.id!));
 
   // Update JWT session
-  // Note: This requires auth callback configuration to handle session updates if NextAuth v5.
-  // We'll call update() to attempt session refresh.
   try {
-    await update({ user: { name: data.name } });
+    const sessionUpdatePayload: Record<string, any> = {};
+    if (data.name !== undefined) sessionUpdatePayload.name = data.name;
+    if (data.locale !== undefined) sessionUpdatePayload.locale = data.locale;
+    await update({ user: sessionUpdatePayload });
   } catch (error) {
     console.error("Session update error:", error);
   }

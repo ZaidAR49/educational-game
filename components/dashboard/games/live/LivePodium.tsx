@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Users, Crown, Medal, Award } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 type LivePodiumProps = {
   top3: any[]
@@ -9,6 +10,8 @@ type LivePodiumProps = {
 }
 
 export function LivePodium({ top3, totalStudents }: LivePodiumProps) {
+  const { t } = useLocale()
+
   return (
     <div className="lg:col-span-5 bg-gradient-to-b from-slate-900 via-slate-800 to-gray-900 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center justify-end relative overflow-hidden h-[450px]">
       {/* Decorative Animated Background */}
@@ -19,7 +22,7 @@ export function LivePodium({ top3, totalStudents }: LivePodiumProps) {
 
       <h2 className="absolute top-8 text-white text-2xl font-black flex items-center gap-2 drop-shadow-md z-20">
         <Crown className="w-6 h-6 text-amber-400" />
-        أوائل التحدي
+        <span>{t.liveSession.challengeLeaders}</span>
       </h2>
 
       {totalStudents > 0 ? (
@@ -87,7 +90,7 @@ export function LivePodium({ top3, totalStudents }: LivePodiumProps) {
       ) : (
          <div className="text-white/60 font-bold z-10 flex flex-col items-center gap-2">
            <Users className="w-10 h-10 opacity-50" />
-           في انتظار انضمام الطلاب...
+           <span>{t.liveSession.waitingStudents}</span>
          </div>
       )}
     </div>

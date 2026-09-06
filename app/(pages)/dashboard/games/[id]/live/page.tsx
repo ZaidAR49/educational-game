@@ -3,12 +3,13 @@
 import { useState, useEffect, use, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowRight, PowerOff, Loader2, QrCode } from "lucide-react"
+import { ArrowRight, ArrowLeft, PowerOff, Loader2, QrCode } from "lucide-react"
 import { getLiveSessionDataAction } from "@/lib/actions/sessions.actions"
 import { toggleGamePublishStatusAction } from "@/lib/actions/games.actions"
 import { GameShareModal } from "@/components/games/GameShareModal"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase-client"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 import { LiveStatsCards } from "@/components/dashboard/games/live/LiveStatsCards"
 import { LivePodium } from "@/components/dashboard/games/live/LivePodium"
@@ -17,6 +18,7 @@ import { LiveLeaderboardTable } from "@/components/dashboard/games/live/LiveLead
 export default function LiveSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const { t, isRTL } = useLocale()
   
   const [session, setSession] = useState<{ id: string; gameName: string } | null>(null)
   const [students, setStudents] = useState<any[]>([])
@@ -73,7 +75,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
         }
       } catch (error) {
         console.error("Failed to end session", error);
-        toast.error("حدث خطأ أثناء إنهاء الجلسة");
+        toast.error(isRTL ? "حدث خطأ أثناء إنهاء الجلسة" : "Failed to end session");
       }
     });
   }
@@ -82,7 +84,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
-        <p className="text-gray-500 font-bold">جاري تحميل بيانات الجلسة المباشرة...</p>
+        <p className="text-gray-500 font-bold">{t.liveSession.loading}</p>
       </div>
     )
   }
@@ -94,14 +96,14 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           <PowerOff className="w-10 h-10" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-gray-900 mb-2">لا توجد جلسة مباشرة</h2>
-          <p className="text-gray-500 max-w-md mx-auto">هذه اللعبة غير قيد التشغيل حالياً. يجب عليك بدء اللعبة من صفحة الألعاب أولاً.</p>
+          <h2 className="text-2xl font-black text-gray-900 mb-2">{t.liveSession.noSessionTitle}</h2>
+          <p className="text-gray-500 max-w-md mx-auto">{t.liveSession.noSessionDesc}</p>
         </div>
         <Link 
           href="/dashboard/games"
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-sm"
         >
-          العودة للألعاب
+          {t.liveSession.backToGames}
         </Link>
       </div>
     )
@@ -126,7 +128,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
     : 0
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500" dir="rtl">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -134,19 +136,20 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
             <Link 
               href="/dashboard/games" 
               className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm"
+              title={t.liveSession.backToGames}
             >
-              <ArrowRight className="w-5 h-5" />
+              {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
             </Link>
-            <h1 className="text-3xl font-black text-gray-900">الجلسة المباشرة</h1>
-            <div className="flex items-center gap-2 bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold ml-4">
+            <h1 className="text-3xl font-black text-gray-900">{t.liveSession.title}</h1>
+            <div className="flex items-center gap-2 bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold rtl:mr-4 ltr:ml-4">
               <div className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
               </div>
-              مباشر الآن
+              <span>{t.liveSession.liveNow}</span>
             </div>
           </div>
-          <p className="text-gray-500 mr-14 font-bold text-lg">
+          <p className="text-gray-500 rtl:mr-14 ltr:ml-14 font-bold text-lg">
             {session.gameName}
           </p>
         </div>
@@ -156,7 +159,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           <button
             onClick={() => setShowQrModal(true)}
             className="flex items-center justify-center w-[42px] h-[42px] bg-white border border-gray-100 shadow-sm text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 rounded-xl transition-all"
-            title="عرض رمز QR للطلاب"
+            title={t.liveSession.showQr}
           >
             <QrCode className="w-5 h-5" />
           </button>
@@ -166,7 +169,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
             className="flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-100 shadow-sm text-red-600 hover:bg-red-100 disabled:opacity-50 rounded-xl font-bold transition-all"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PowerOff className="w-4 h-4" />}
-            <span>إنهاء الجلسة</span>
+            <span>{t.liveSession.endSession}</span>
           </button>
         </div>
       </div>

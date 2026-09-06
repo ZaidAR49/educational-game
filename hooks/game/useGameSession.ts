@@ -4,7 +4,14 @@ import { useEffect } from "react"
 import nicknames from "@/data/nicknames.json"
 import { joinPlayAction } from "@/lib/actions/plays.actions"
 
-export const generateRandomName = () => {
+export const generateRandomName = (locale?: string) => {
+  if (locale === "en") {
+    const nouns = nicknames.nounsEn || []
+    const adjs = nicknames.adjectivesEn || []
+    const noun = nouns[Math.floor(Math.random() * nouns.length)] || "Hero"
+    const adj = adjs[Math.floor(Math.random() * adjs.length)] || "Brave"
+    return `${adj} ${noun}`
+  }
   const noun = nicknames.nouns[Math.floor(Math.random() * nicknames.nouns.length)]
   const adj = nicknames.adjectives[Math.floor(Math.random() * nicknames.adjectives.length)]
   return `${noun} ${adj}`
@@ -13,6 +20,7 @@ export const generateRandomName = () => {
 type SessionCallbacks = {
   playId: string
   isDemo: boolean
+  locale?: string
   startTransition: (fn: () => Promise<void>) => void
   setPlayerId: (id: string) => void
   setPlayerName: (name: string) => void
@@ -30,6 +38,7 @@ type SessionCallbacks = {
 export function useGameSession({
   playId,
   isDemo,
+  locale,
   startTransition,
   setPlayerId,
   setPlayerName,
@@ -71,7 +80,7 @@ export function useGameSession({
               localStorage.removeItem(`eduplay_session_${playId}`)
 
               const savedName = localStorage.getItem("drugGamePlayerName")
-              setPlayerName(savedName ?? generateRandomName())
+              setPlayerName(savedName ?? generateRandomName(locale))
             }
           })
           return
@@ -82,7 +91,16 @@ export function useGameSession({
     }
 
     const savedName = localStorage.getItem("drugGamePlayerName")
-    setPlayerName(savedName ?? generateRandomName())
+    const hasArabic = savedName ? /[\u0600-\u06FF]/.test(savedName) : false
+    const nameMismatch = savedName && ((locale === "en" && hasArabic) || (locale === "ar" && !hasArabic))
+
+    if (savedName && !nameMismatch) {
+      setPlayerName(savedName)
+    } else {
+      const newName = generateRandomName(locale)
+      setPlayerName(newName)
+      localStorage.setItem("drugGamePlayerName", newName)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playId, isDemo])
+  }, [playId, isDemo, locale])
 }

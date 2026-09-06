@@ -414,6 +414,7 @@ CREATE TABLE public.system_announcements (
   title        text NOT NULL,
   body         text,
   severity     text NOT NULL DEFAULT 'info' CHECK (severity IN ('info', 'warning', 'critical')),
+  language     text NOT NULL DEFAULT 'all' CHECK (language IN ('all', 'ar', 'en')),
   is_active    boolean NOT NULL DEFAULT true,
   starts_at    timestamptz NOT NULL DEFAULT now(),
   ends_at      timestamptz,
@@ -427,6 +428,8 @@ COMMENT ON TABLE public.system_announcements IS
   'Broadcast system messages: product updates, maintenance notices, general messages, and changelog entries. One row is shown to all users (not per-user).';
 COMMENT ON COLUMN public.system_announcements.type IS
   'update = feature/product update notice, maintenance = downtime/maintenance banner, message = general system message, changelog = platform "last updated" release entry';
+COMMENT ON COLUMN public.system_announcements.language IS
+  'all = universal announcement shown to everyone, ar = Arabic only, en = English only';
 COMMENT ON COLUMN public.system_announcements.is_active IS
   'Soft toggle to hide an announcement without deleting it';
 
@@ -437,7 +440,7 @@ CREATE TRIGGER set_updated_at
 -- Indexes:
 CREATE INDEX idx_system_announcements_active_window
   ON public.system_announcements (starts_at DESC)
-  INCLUDE (ends_at, type, severity)
+  INCLUDE (ends_at, type, severity, language)
   WHERE is_active = true;
   -- Primary read path: "get currently active announcements to show a user".
   -- Partial index keeps it tiny; INCLUDE avoids a heap fetch for the columns
@@ -451,6 +454,10 @@ CREATE INDEX idx_system_announcements_changelog_latest
 CREATE INDEX idx_system_announcements_type
   ON public.system_announcements (type);
   -- Admin dashboard filtering by type.
+
+CREATE INDEX idx_system_announcements_language
+  ON public.system_announcements (language);
+  -- Targeted language filtering (all, ar, en).
 
 CREATE INDEX idx_system_announcements_created_by
   ON public.system_announcements (created_by, created_at DESC)

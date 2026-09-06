@@ -1,5 +1,8 @@
+"use client"
+
 import { motion } from "framer-motion"
 import { Plus, Trash2, CheckCircle2 } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 import { Scenario } from "./types"
 
 interface ScenariosStepProps {
@@ -23,6 +26,7 @@ export function ScenariosStep({
   updateChoice,
   errors = {}
 }: ScenariosStepProps) {
+  const { t, isRTL } = useLocale()
   const activeScenario = scenarios.find(s => s.id === activeScenarioId)
 
   return (
@@ -36,16 +40,19 @@ export function ScenariosStep({
       <div className="lg:col-span-4 space-y-4">
         <div className="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm sticky top-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-gray-900 text-base">الأسئلة ({scenarios.length})</h3>
+            <h3 className="font-black text-gray-900 text-base">
+              {t.gameWizard.questionsList} ({scenarios.length})
+            </h3>
             <button 
               onClick={addScenario}
               className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm"
+              title={t.gameWizard.addScenario}
             >
               <Plus className="w-5 h-5" />
             </button>
           </div>
           
-          <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto rtl:pr-2 ltr:pl-2 custom-scrollbar">
             {scenarios.map((scenario, index) => {
               const hasError = Object.keys(errors).some(k => k.startsWith(`scenario_${scenario.id}`))
               return (
@@ -62,9 +69,11 @@ export function ScenariosStep({
                     {scenario.icon || "❓"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`text-xs font-bold mb-1 ${hasError ? 'text-red-600' : 'text-emerald-600'}`}>السؤال {index + 1}</div>
+                    <div className={`text-xs font-bold mb-1 ${hasError ? 'text-red-600' : 'text-emerald-600'}`}>
+                      {t.gameWizard.questionNum.replace('{num}', String(index + 1))}
+                    </div>
                     <div className="text-sm font-bold text-gray-900 truncate">
-                      {scenario.description || "سؤال جديد..."}
+                      {scenario.description || t.gameWizard.newQuestionPlaceholder}
                     </div>
                   </div>
                   {scenarios.length > 1 && (
@@ -106,7 +115,7 @@ export function ScenariosStep({
                   type="text" 
                   value={activeScenario.title}
                   onChange={(e) => updateActiveScenario('title', e.target.value)}
-                  placeholder="عنوان السؤال (مثال: السؤال الأول)"
+                  placeholder={t.gameWizard.scenarioTitlePlaceholder}
                   className={`w-full text-base font-bold outline-none placeholder:text-gray-300 ${
                     errors[`scenario_${activeScenario.id}_title`] ? 'text-red-500 placeholder:text-red-300' : 'text-gray-400'
                   }`}
@@ -115,7 +124,7 @@ export function ScenariosStep({
                 <textarea 
                   value={activeScenario.description}
                   onChange={(e) => updateActiveScenario('description', e.target.value)}
-                  placeholder="اكتب نص السؤال هنا..."
+                  placeholder={t.gameWizard.scenarioDescPlaceholder}
                   rows={2}
                   className={`w-full text-xl md:text-2xl font-black outline-none resize-none leading-tight ${
                     errors[`scenario_${activeScenario.id}_desc`] ? 'text-red-600 placeholder:text-red-200' : 'text-gray-900 placeholder:text-gray-200'
@@ -127,9 +136,9 @@ export function ScenariosStep({
 
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
-                <h3 className="font-black text-gray-800 text-lg">الخيارات المتاحة</h3>
+                <h3 className="font-black text-gray-800 text-lg">{t.gameWizard.choicesTitle}</h3>
                 <span className="text-sm font-bold bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full inline-block w-fit">
-                  يجب تحديد إجابة صحيحة واحدة
+                  {t.gameWizard.oneCorrectWarning}
                 </span>
               </div>
               
@@ -161,10 +170,10 @@ export function ScenariosStep({
                           </div>
                           <div className="flex-1 min-w-0">
                             <input 
-                              type="text"
+                              type="text" 
                               value={choice.text}
                               onChange={(e) => updateChoice(index, 'text', e.target.value)}
-                              placeholder={`الخيار ${index + 1}`}
+                              placeholder={t.gameWizard.choicePlaceholder.replace('{num}', String(index + 1))}
                               className={`w-full bg-transparent font-black text-base outline-none placeholder:text-gray-300 ${
                                 choiceError ? 'text-red-600' : 'text-gray-900'
                               }`}
@@ -182,22 +191,22 @@ export function ScenariosStep({
                           `}
                         >
                           <CheckCircle2 className={`w-5 h-5 ${choice.isCorrect ? 'opacity-100' : 'opacity-50'}`} />
-                          <span>{choice.isCorrect ? 'إجابة صحيحة' : 'تحديد كصحيحة'}</span>
+                          <span>{choice.isCorrect ? t.gameWizard.isCorrect : t.gameWizard.markAsCorrect}</span>
                         </button>
                       </div>
 
                       {/* Feedback Input */}
-                      <div className={`sm:mr-16 sm:pr-5 sm:border-r-4 py-1 space-y-2 ${
+                      <div className={`rtl:sm:mr-16 rtl:sm:pr-5 rtl:sm:border-r-4 ltr:sm:ml-16 ltr:sm:pl-5 ltr:sm:border-l-4 py-1 space-y-2 ${
                         feedbackError ? 'border-red-200' : 'border-gray-100'
                       }`}>
                         <label className={`text-xs font-bold block ${feedbackError ? 'text-red-400' : 'text-gray-400'}`}>
-                          التغذية الراجعة (تظهر عند اختيار الطالب لهذا الخيار)
+                          {t.gameWizard.feedbackHint}
                         </label>
                         <input 
-                          type="text"
+                          type="text" 
                           value={choice.feedback.message}
                           onChange={(e) => updateChoice(index, 'feedback.message', e.target.value)}
-                          placeholder="اكتب التغذية الراجعة هنا..."
+                          placeholder={t.gameWizard.feedbackPlaceholder}
                           className={`w-full bg-transparent text-sm font-bold outline-none placeholder:text-gray-300 ${
                             feedbackError ? 'text-red-600' : 'text-gray-600'
                           }`}

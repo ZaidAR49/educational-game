@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Bot, Copy, CheckCircle2, ArrowRight, AlertCircle, Wand2 } from "lucide-react"
+import { Bot, Copy, CheckCircle2, ArrowRight, AlertCircle, Wand2, Globe, ChevronDown } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 import { GameWizard } from "./GameWizard"
 import { OrganizationOption } from "./wizard/BasicInfoStep"
 import { GameFormData, Scenario } from "./wizard/types"
@@ -14,8 +15,10 @@ interface ByoAiWizardProps {
 }
 
 export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
+  const { t, isRTL, locale } = useLocale()
   const [idea, setIdea] = useState("")
   const [questionCount, setQuestionCount] = useState<number>(5)
+  const [targetLanguage, setTargetLanguage] = useState<string>(locale || "ar")
   const [copied, setCopied] = useState(false)
   const [jsonInput, setJsonInput] = useState("")
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -26,8 +29,9 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
   const [parsedScenarios, setParsedScenarios] = useState<Scenario[] | null>(null)
 
   const promptTemplate = gameGeneratorConfig.getCustomUserPrompt(
-    idea || '[أدخل فكرتك هنا]',
-    questionCount
+    idea || (targetLanguage === 'ar' ? '[أدخل فكرتك هنا]' : '[Enter your idea here]'),
+    questionCount,
+    targetLanguage
   );
 
   const handleCopy = () => {
@@ -159,41 +163,77 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
           اكتب فكرة اللعبة التي تريدها بشكل مبسط، وسنقوم بتجهيز أمر احترافي لنسخه.
         </p>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-3">
-              <label className="block text-gray-700 font-bold mb-2">عن ماذا تتحدث لعبتك؟</label>
-              <textarea
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                placeholder="مثال: لعبة عن مخاطر التدخين وأثره على الصحة بطريقة تفاعلية لطلاب الإعدادي..."
-                className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all font-medium resize-none min-h-[100px]"
-              />
+        <div className="space-y-5">
+          {/* Topic Input */}
+          <div>
+            <label className="block text-gray-700 font-bold mb-2 text-sm md:text-base">{t.gameCreation.byoIdeaLabel}</label>
+            <textarea
+              value={idea}
+              onChange={(e) => setIdea(e.target.value)}
+              placeholder={t.gameCreation.byoIdeaPlaceholder}
+              rows={2}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all font-medium resize-none text-sm md:text-base leading-relaxed placeholder:text-gray-400 shadow-xs"
+            />
+          </div>
+
+          {/* Parameters Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700 font-bold mb-1.5 text-xs uppercase tracking-wider">{t.gameCreation.gameLanguage}</label>
+              <div className="relative">
+                <Globe className="w-4 h-4 text-purple-600 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <select
+                  value={targetLanguage}
+                  onChange={(e) => setTargetLanguage(e.target.value)}
+                  className="w-full ps-10 pe-10 py-2.5 rounded-xl border border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all font-semibold text-sm bg-white shadow-xs text-gray-800 cursor-pointer appearance-none"
+                >
+                  <option value="ar">{t.gameCreation.langArabic}</option>
+                  <option value="en">{t.gameCreation.langEnglish}</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-gray-400 absolute end-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
-            <div className="md:col-span-1">
-              <label className="block text-gray-700 font-bold mb-2">عدد الأسئلة</label>
-              <input
-                type="number"
-                min="1"
-                max="30"
-                value={questionCount}
-                onChange={(e) => setQuestionCount(Number(e.target.value) || 5)}
-                className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 outline-none transition-all font-bold text-center h-[100px] text-2xl"
-              />
+
+            <div>
+              <label className="block text-gray-700 font-bold mb-1.5 text-xs uppercase tracking-wider">{t.gameCreation.byoQuestionsCount}</label>
+              <div className="flex items-center border border-gray-200 rounded-xl bg-white overflow-hidden focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-100 transition-all shadow-xs h-[42px]">
+                <button
+                  type="button"
+                  onClick={() => setQuestionCount(Math.max(1, questionCount - 1))}
+                  className="w-11 h-full flex items-center justify-center text-gray-500 hover:text-purple-700 hover:bg-purple-50 font-bold transition-colors text-lg select-none"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
+                  className="flex-1 text-center font-black text-gray-900 outline-none text-base bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setQuestionCount(Math.min(20, questionCount + 1))}
+                  className="w-11 h-full flex items-center justify-center text-gray-500 hover:text-purple-700 hover:bg-purple-50 font-bold transition-colors text-lg select-none"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-2xl p-5 border border-gray-200 relative group">
-            <div className="absolute top-4 left-4">
+            <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
               <button
                 onClick={handleCopy}
                 className="flex items-center gap-2 bg-white border border-gray-200 hover:border-purple-300 text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-sm"
               >
                 {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                {copied ? "تم النسخ!" : "نسخ الموجه"}
+                <span>{copied ? t.gameCreation.byoCopied : t.gameCreation.byoCopyPrompt}</span>
               </button>
             </div>
-            <label className="block text-gray-500 font-bold mb-3 text-sm">الموجه الجاهز (انسخه والصقه في ChatGPT أو Gemini):</label>
+            <label className="block text-gray-500 font-bold mb-3 text-sm">{t.gameCreation.byoPromptReady}</label>
             <pre className="text-left font-mono text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto" dir="ltr">
               {promptTemplate}
             </pre>

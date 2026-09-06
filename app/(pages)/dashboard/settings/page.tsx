@@ -13,6 +13,7 @@ export default async function SettingsPage() {
         session={session}
         isSubscribed={user.isSubscribed}
         subscriptionPlan={user.subscriptionPlan}
+        initialLocale={user.locale || "ar"}
       />
     </SessionProvider>
   )

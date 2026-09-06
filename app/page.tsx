@@ -1,5 +1,3 @@
-import Link from "next/link"
-import uiContent from "@/data/ui-content-general.json"
 import { Navbar } from "@/components/shared/Navbar"
 import { HeroSection } from "@/components/home/HeroSection"
 import { FeaturesSection } from "@/components/home/FeaturesSection"
@@ -12,12 +10,11 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Navbar />
-      <HeroSection content={uiContent} />
+      <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
       <CallToAction />
       <ContactCTA />
-      
       <Footer />
     </main>
   )

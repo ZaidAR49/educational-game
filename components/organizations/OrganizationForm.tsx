@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Building2, Save, Loader2, ArrowRight, Sparkles } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Building2, Save, Loader2, ArrowRight, ArrowLeft, Sparkles } from "lucide-react"
 import { LivePreview } from "@/components/dashboard/LivePreview"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -12,6 +12,7 @@ import { toast } from "sonner"
 import { LogoUploader } from "./LogoUploader"
 import { WelcomeTabFields } from "./WelcomeTabFields"
 import { ResultTabFields } from "./ResultTabFields"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 export type OrganizationFormData = {
   institutionName: string
@@ -32,6 +33,44 @@ export type OrganizationFormData = {
   resultSecondaryButtonText: string
 }
 
+export const DEFAULT_ORG_FORM_AR: OrganizationFormData = {
+  institutionName: "مؤسسة جديدة",
+  logo: null,
+  icon: "👋",
+  mainTitle: "اختبر معلوماتك",
+  subtitle: "لعبة تفاعلية تعليمية للجميع",
+  welcomeMessage: "مرحباً بك! 👋\n\nستواجه في هذا الاختبار مجموعة من الأسئلة المتنوعة.\n\nاختر الإجابة الصحيحة في كل سؤال واجمع أكبر عدد من النقاط!\n\nهل أنت مستعد لاختبار معلوماتك؟",
+  buttonText: "ابدأ الاختبار 🚀",
+  resultTitlePass: "ممتاز!",
+  resultSubtitlePass: "لقد أثبتّ جدارتك!",
+  resultMessagePass: "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر.",
+  resultTitleFail: "لا بأس، استمر!",
+  resultSubtitleFail: "كل محاولة تعلّم جديد!",
+  resultMessageFail: "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
+  orgMessage: "أحسنت على مشاركتك! كل سؤال هو فرصة جديدة للتعلم والنمو. استمر في تطوير معلوماتك ومهاراتك، ونحن واثقون من قدراتك! 🌟",
+  resultPrimaryButtonText: "العب مرة أخرى 🔄",
+  resultSecondaryButtonText: "شارك نتيجتك 📊",
+}
+
+export const DEFAULT_ORG_FORM_EN: OrganizationFormData = {
+  institutionName: "New Organization",
+  logo: null,
+  icon: "👋",
+  mainTitle: "Test Your Knowledge",
+  subtitle: "Interactive educational quiz for everyone",
+  welcomeMessage: "Welcome! 👋\n\nIn this quiz, you will face a variety of interesting questions.\n\nChoose the correct answer for each question and score maximum points!\n\nAre you ready to test your knowledge?",
+  buttonText: "Start Quiz 🚀",
+  resultTitlePass: "Excellent!",
+  resultSubtitlePass: "You proved your skills!",
+  resultMessagePass: "Well done! You completed the quiz with impressive results.",
+  resultTitleFail: "Don't give up, keep going!",
+  resultSubtitleFail: "Every attempt is a new lesson!",
+  resultMessageFail: "Don't lose hope! Every mistake is an opportunity to learn something new. Try again!",
+  orgMessage: "Great job participating! Every question is a chance to learn and grow. Keep developing your skills, we believe in you! 🌟",
+  resultPrimaryButtonText: "Play Again 🔄",
+  resultSecondaryButtonText: "Share Result 📊",
+}
+
 interface OrganizationFormProps {
   initialData?: Partial<OrganizationFormData>
   organizationId?: string
@@ -39,6 +78,9 @@ interface OrganizationFormProps {
 
 export function OrganizationForm({ initialData, organizationId }: OrganizationFormProps) {
   const router = useRouter()
+  const { t, isRTL } = useLocale()
+  const o = t.orgForm
+
   const [activeTab, setActiveTab] = useState<"welcome" | "result">("welcome")
   const [resultView, setResultView] = useState<"pass" | "fail">("pass")
   const [isSaving, setIsSaving] = useState(false)
@@ -46,24 +88,43 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const [formData, setFormData] = useState<OrganizationFormData>({
-    institutionName: initialData?.institutionName || "مؤسسة جديدة",
-    logo: initialData?.logo || null,
-    icon: initialData?.icon || "👋",
-    mainTitle: initialData?.mainTitle || "اختبر معلوماتك",
-    subtitle: initialData?.subtitle || "لعبة تفاعلية تعليمية للجميع",
-    welcomeMessage: initialData?.welcomeMessage || "مرحباً بك! 👋\n\nستواجه في هذا الاختبار مجموعة من الأسئلة المتنوعة.\n\nاختر الإجابة الصحيحة في كل سؤال واجمع أكبر عدد من النقاط!\n\nهل أنت مستعد لاختبار معلوماتك؟",
-    buttonText: initialData?.buttonText || "ابدأ الاختبار 🚀",
-    resultTitlePass: initialData?.resultTitlePass || "ممتاز!",
-    resultSubtitlePass: initialData?.resultSubtitlePass || "لقد أثبتّ جدارتك!",
-    resultMessagePass: initialData?.resultMessagePass || "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر.",
-    resultTitleFail: initialData?.resultTitleFail || "لا بأس، استمر!",
-    resultSubtitleFail: initialData?.resultSubtitleFail || "كل محاولة تعلّم جديد!",
-    resultMessageFail: initialData?.resultMessageFail || "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
-    orgMessage: initialData?.orgMessage || "أحسنت على مشاركتك! كل سؤال هو فرصة جديدة للتعلم والنمو. استمر في تطوير معلوماتك ومهاراتك، ونحن واثقون من قدراتك! 🌟",
-    resultPrimaryButtonText: initialData?.resultPrimaryButtonText || "العب مرة أخرى 🔄",
-    resultSecondaryButtonText: initialData?.resultSecondaryButtonText || "شارك نتيجتك 📊",
+  const [formData, setFormData] = useState<OrganizationFormData>(() => {
+    const defaults = isRTL ? DEFAULT_ORG_FORM_AR : DEFAULT_ORG_FORM_EN
+    return {
+      ...defaults,
+      ...initialData,
+    }
   })
+
+  // Synchronize defaults with selected language if fields haven't been customized by the user
+  useEffect(() => {
+    if (organizationId) return
+    setFormData((prev) => {
+      const targetDefaults = isRTL ? DEFAULT_ORG_FORM_AR : DEFAULT_ORG_FORM_EN
+      const otherDefaults = isRTL ? DEFAULT_ORG_FORM_EN : DEFAULT_ORG_FORM_AR
+
+      const shouldUpdate = (val: string, key: keyof OrganizationFormData) =>
+        !val || val === otherDefaults[key] || val === targetDefaults[key]
+
+      return {
+        ...prev,
+        institutionName: shouldUpdate(prev.institutionName, "institutionName") ? targetDefaults.institutionName : prev.institutionName,
+        mainTitle: shouldUpdate(prev.mainTitle, "mainTitle") ? targetDefaults.mainTitle : prev.mainTitle,
+        subtitle: shouldUpdate(prev.subtitle, "subtitle") ? targetDefaults.subtitle : prev.subtitle,
+        welcomeMessage: shouldUpdate(prev.welcomeMessage, "welcomeMessage") ? targetDefaults.welcomeMessage : prev.welcomeMessage,
+        buttonText: shouldUpdate(prev.buttonText, "buttonText") ? targetDefaults.buttonText : prev.buttonText,
+        resultTitlePass: shouldUpdate(prev.resultTitlePass, "resultTitlePass") ? targetDefaults.resultTitlePass : prev.resultTitlePass,
+        resultSubtitlePass: shouldUpdate(prev.resultSubtitlePass, "resultSubtitlePass") ? targetDefaults.resultSubtitlePass : prev.resultSubtitlePass,
+        resultMessagePass: shouldUpdate(prev.resultMessagePass, "resultMessagePass") ? targetDefaults.resultMessagePass : prev.resultMessagePass,
+        resultTitleFail: shouldUpdate(prev.resultTitleFail, "resultTitleFail") ? targetDefaults.resultTitleFail : prev.resultTitleFail,
+        resultSubtitleFail: shouldUpdate(prev.resultSubtitleFail, "resultSubtitleFail") ? targetDefaults.resultSubtitleFail : prev.resultSubtitleFail,
+        resultMessageFail: shouldUpdate(prev.resultMessageFail, "resultMessageFail") ? targetDefaults.resultMessageFail : prev.resultMessageFail,
+        orgMessage: shouldUpdate(prev.orgMessage, "orgMessage") ? targetDefaults.orgMessage : prev.orgMessage,
+        resultPrimaryButtonText: shouldUpdate(prev.resultPrimaryButtonText, "resultPrimaryButtonText") ? targetDefaults.resultPrimaryButtonText : prev.resultPrimaryButtonText,
+        resultSecondaryButtonText: shouldUpdate(prev.resultSecondaryButtonText, "resultSecondaryButtonText") ? targetDefaults.resultSecondaryButtonText : prev.resultSecondaryButtonText,
+      }
+    })
+  }, [isRTL, organizationId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -72,21 +133,21 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.institutionName.trim()) newErrors.institutionName = "الرجاء إدخال اسم المؤسسة"
-    if (!formData.mainTitle.trim()) newErrors.mainTitle = "الرجاء إدخال العنوان الرئيسي"
-    if (!formData.icon.trim()) newErrors.icon = "مطلوب"
-    if (!formData.subtitle.trim()) newErrors.subtitle = "الرجاء إدخال العنوان الفرعي"
-    if (!formData.welcomeMessage.trim()) newErrors.welcomeMessage = "الرجاء إدخال رسالة الترحيب"
-    if (!formData.buttonText.trim()) newErrors.buttonText = "الرجاء إدخال نص الزر"
-    if (!formData.resultTitlePass.trim()) newErrors.resultTitlePass = "مطلوب"
-    if (!formData.resultSubtitlePass.trim()) newErrors.resultSubtitlePass = "مطلوب"
-    if (!formData.resultMessagePass.trim()) newErrors.resultMessagePass = "مطلوب"
-    if (!formData.resultTitleFail.trim()) newErrors.resultTitleFail = "مطلوب"
-    if (!formData.resultSubtitleFail.trim()) newErrors.resultSubtitleFail = "مطلوب"
-    if (!formData.resultMessageFail.trim()) newErrors.resultMessageFail = "مطلوب"
-    if (!formData.orgMessage.trim()) newErrors.orgMessage = "الرجاء إدخال رسالة المؤسسة"
-    if (!formData.resultPrimaryButtonText.trim()) newErrors.resultPrimaryButtonText = "مطلوب"
-    if (!formData.resultSecondaryButtonText.trim()) newErrors.resultSecondaryButtonText = "مطلوب"
+    if (!formData.institutionName.trim()) newErrors.institutionName = isRTL ? "الرجاء إدخال اسم المؤسسة" : "Please enter organization name"
+    if (!formData.mainTitle.trim()) newErrors.mainTitle = isRTL ? "الرجاء إدخال العنوان الرئيسي" : "Please enter main title"
+    if (!formData.icon.trim()) newErrors.icon = isRTL ? "مطلوب" : "Required"
+    if (!formData.subtitle.trim()) newErrors.subtitle = isRTL ? "الرجاء إدخال العنوان الفرعي" : "Please enter subtitle"
+    if (!formData.welcomeMessage.trim()) newErrors.welcomeMessage = isRTL ? "الرجاء إدخال رسالة الترحيب" : "Please enter welcome message"
+    if (!formData.buttonText.trim()) newErrors.buttonText = isRTL ? "الرجاء إدخال نص الزر" : "Please enter button text"
+    if (!formData.resultTitlePass.trim()) newErrors.resultTitlePass = isRTL ? "مطلوب" : "Required"
+    if (!formData.resultSubtitlePass.trim()) newErrors.resultSubtitlePass = isRTL ? "مطلوب" : "Required"
+    if (!formData.resultMessagePass.trim()) newErrors.resultMessagePass = isRTL ? "مطلوب" : "Required"
+    if (!formData.resultTitleFail.trim()) newErrors.resultTitleFail = isRTL ? "مطلوب" : "Required"
+    if (!formData.resultSubtitleFail.trim()) newErrors.resultSubtitleFail = isRTL ? "مطلوب" : "Required"
+    if (!formData.resultMessageFail.trim()) newErrors.resultMessageFail = isRTL ? "مطلوب" : "Required"
+    if (!formData.orgMessage.trim()) newErrors.orgMessage = isRTL ? "الرجاء إدخال رسالة المؤسسة" : "Please enter organization message"
+    if (!formData.resultPrimaryButtonText.trim()) newErrors.resultPrimaryButtonText = isRTL ? "مطلوب" : "Required"
+    if (!formData.resultSecondaryButtonText.trim()) newErrors.resultSecondaryButtonText = isRTL ? "مطلوب" : "Required"
 
     setErrors(newErrors)
     // Auto-switch tab to the one containing errors
@@ -100,7 +161,7 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
 
   const handleSave = async () => {
     if (!validateForm()) {
-      toast.error("يوجد بعض الأخطاء في النموذج، يرجى مراجعتها.")
+      toast.error(o.validationError)
       return
     }
 
@@ -119,10 +180,10 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
         introduction: {
           title: formData.mainTitle,
           subtitle: formData.subtitle,
-          welcome_box: { description: formData.welcomeMessage, closing_question: "هل أنت مستعد لاختبار معلوماتك?" },
+          welcome_box: { description: formData.welcomeMessage, closing_question: isRTL ? "هل أنت مستعد لاختبار معلوماتك?" : "Are you ready to test your knowledge?" },
           button_text: formData.buttonText,
           decorative_emojis: [formData.icon, "✨", "🌟"],
-          back_link_text: "العودة للرئيسية",
+          back_link_text: o.backToOrgs,
         },
         resultScreen: {
           pass: {
@@ -146,7 +207,7 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
       router.push("/dashboard/organizations")
     } catch (error) {
       console.error("Save error", error)
-      toast.error("حدث خطأ أثناء حفظ المؤسسة. الرجاء المحاولة مرة أخرى.")
+      toast.error(o.saveError)
     } finally {
       setIsSaving(false)
     }
@@ -159,16 +220,18 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
         href="/dashboard/organizations"
         className="inline-flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors font-bold text-sm"
       >
-        <ArrowRight className="w-4 h-4" />
-        <span>العودة للمؤسسات</span>
+        {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+        <span>{o.backToOrgs}</span>
       </Link>
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 mb-2">إعدادات المؤسسة</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-2">
+            {organizationId ? o.editTitle : o.newTitle}
+          </h1>
           <p className="text-gray-500">
-            أكمل إعداد ملفك التعريفي لتتمكن من إنشاء الألعاب. هذه الإعدادات ستظهر للطلاب في جميع ألعابك.
+            {organizationId ? o.editSubtitle : o.newSubtitle}
           </p>
         </div>
       </div>
@@ -178,17 +241,17 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
         <div className="lg:col-span-7 space-y-6">
           {/* Basic Info Card */}
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">المعلومات الأساسية</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">{o.basicInfo}</h2>
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 block text-right">اسم المؤسسة</label>
+                <label className="text-sm font-bold text-gray-700 block text-start">{o.orgNameLabel}</label>
                 <input
                   type="text"
                   name="institutionName"
                   value={formData.institutionName}
                   onChange={handleChange}
-                  placeholder="مثال: مدرسة الأمل"
-                  className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-right ${
+                  placeholder={o.orgNamePlaceholder}
+                  className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-start ${
                     errors.institutionName
                       ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                       : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
@@ -214,13 +277,13 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
               onClick={() => setActiveTab("welcome")}
               className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === "welcome" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
             >
-              شاشة الترحيب
+              {o.tabWelcome}
             </button>
             <button
               onClick={() => setActiveTab("result")}
               className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === "result" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
             >
-              شاشة النتيجة
+              {o.tabResult}
             </button>
           </div>
 
@@ -255,7 +318,7 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
               className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md w-full md:w-auto text-lg"
             >
               {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-              <span>{isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
+              <span>{isSaving ? o.saving : o.saveChanges}</span>
             </button>
           </div>
         </div>

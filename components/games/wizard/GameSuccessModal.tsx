@@ -1,8 +1,11 @@
+"use client"
+
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle2, Link as LinkIcon, Download } from "lucide-react"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface GameSuccessModalProps {
   show: boolean;
@@ -23,10 +26,12 @@ export function GameSuccessModal({
   qrLogo,
   onDownloadQR
 }: GameSuccessModalProps) {
+  const { t } = useLocale()
+
   const copyLink = () => {
     if (typeof navigator !== "undefined") {
       navigator.clipboard.writeText(gameUrl);
-      toast.success("تم نسخ الرابط بنجاح!");
+      toast.success(t.gameWizard.copiedLinkToast);
     }
   }
 
@@ -52,9 +57,9 @@ export function GameSuccessModal({
             </div>
 
             <div>
-              <h3 className="text-2xl font-black text-gray-900 mb-2">تم نشر اللعبة بنجاح! 🎉</h3>
+              <h3 className="text-2xl font-black text-gray-900 mb-2">{t.gameWizard.publishSuccessTitle}</h3>
               <p className="text-gray-500 font-medium text-base max-w-sm mx-auto">
-                لعبتك "{gameTitle}" أصبحت متاحة الآن للعب باستخدام الرابط أو رمز الاستجابة السريعة (QR).
+                {t.gameWizard.publishSuccessDesc.replace('{title}', gameTitle)}
               </p>
             </div>
 
@@ -82,7 +87,7 @@ export function GameSuccessModal({
                 className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 px-6 py-2.5 rounded-xl font-bold transition-colors w-full sm:w-auto justify-center"
               >
                 <Download className="w-4 h-4" />
-                <span>تحميل كصورة</span>
+                <span>{t.gameWizard.downloadQr}</span>
               </button>
             </div>
 
@@ -92,14 +97,14 @@ export function GameSuccessModal({
                 className="flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-6 py-4 rounded-xl flex-1 transition-colors border-2 border-emerald-100"
               >
                 <LinkIcon className="w-5 h-5" />
-                <span>نسخ الرابط</span>
+                <span>{t.gameWizard.copyLink}</span>
               </button>
               
               <Link 
                 href="/dashboard/games"
                 className="flex items-center justify-center gap-2 bg-gray-900 hover:bg-black text-white font-bold px-6 py-4 rounded-xl flex-1 transition-colors shadow-lg shadow-gray-900/20"
               >
-                <span>لوحة التحكم</span>
+                <span>{t.gameWizard.backToDashboard}</span>
               </Link>
             </div>
           </motion.div>

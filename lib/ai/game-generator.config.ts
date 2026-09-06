@@ -1,14 +1,24 @@
-const getCoreSystemRules = (questionCount: number) => `## OUTPUT FORMAT
+const getCoreSystemRules = (questionCount: number, locale: string = "ar") => {
+  const isEn = locale.toLowerCase() === "en";
+  const languageName = isEn ? "English" : "Arabic";
+  const quoteRule = isEn
+    ? `- If you need to quote a word or phrase inside a string, use single quotes ('word'). NEVER use unescaped double quotes ("word") inside a JSON string, as it will crash the system.`
+    : `- If you need to quote a word or phrase inside a string, use single quotes ('word') or Arabic guillemets («word»). NEVER use unescaped double quotes ("word") inside a JSON string, as it will crash the system.`;
+  const reactionExample = isEn
+    ? `- "title": A short reaction (e.g., "Correct answer!", "Good try!").`
+    : `- "title": A short reaction (e.g., "إجابة صحيحة!", "محاولة جيدة!").`;
+
+  return `## OUTPUT FORMAT
 Output ONLY raw JSON. No markdown code fences (no \`\`\`), no commentary, no preamble. Start with { and end with }. No trailing commas.
 CRITICAL JSON RULES:
 - Do not include unescaped newlines within string values.
-- If you need to quote a word or phrase inside a string, use single quotes ('word') or Arabic guillemets («word»). NEVER use unescaped double quotes ("word") inside a JSON string, as it will crash the system.
+${quoteRule}
 
 ## STRUCTURE (validated by the system — must match exactly)
 - Exactly ${questionCount} scenarios.
 - Exactly 4 choices per scenario.
 - Exactly 1 choice per scenario has "isCorrect": true and "points": 10. The other 3 have "isCorrect": false and "points": 0.
-- All narrative text in natural, grade-appropriate Arabic. "slug" is the only field in English (lowercase, hyphenated, URL-friendly).
+- All narrative text in natural, grade-appropriate ${languageName}. "slug" is the only field in English (lowercase, hyphenated, URL-friendly).
 
 ## QUESTION QUALITY — this is what actually matters
 Each scenario must stand on its own as a clear, sensible question:
@@ -35,21 +45,21 @@ A quiz is broken if a student can find the right answer without reading anything
 
 ## FEEDBACK
 Per choice:
-- "title": A short reaction (e.g., "إجابة صحيحة!", "محاولة جيدة!").
+${reactionExample}
 - "message": MUST explicitly explain WHY the choice is right or wrong. If it is the correct choice, explain why it is correct. If it is a wrong choice, explain exactly why it is incorrect or what the common misconception is. Do not just restate the answer.
 - "tip": A related fun fact or memory aid.
 Keep it tight: message = 1–2 sentences, tip = 1 sentence. Explanatory value matters more than length — don't pad.
 
 ## JSON STRUCTURE
 {
-  "title": "Catchy game title in Arabic",
-  "description": "Short engaging description in Arabic",
+  "title": "Catchy game title in ${languageName}",
+  "description": "Short engaging description in ${languageName}",
   "slug": "url-friendly-slug-in-english",
   "icon": "🎮",
   "scenarios": [
     {
       "icon": "topical icon for this scenario",
-      "title": "Complete, standalone question in Arabic",
+      "title": "Complete, standalone question in ${languageName}",
       "description": "Optional extra context (not a repeat of the title)",
       "choices": [
         { "text": "...", "icon": "content-based icon", "isCorrect": true, "points": 10,
@@ -62,6 +72,7 @@ Keep it tight: message = 1–2 sentences, tip = 1 sentence. Explanatory value ma
     // repeat for all ${questionCount} scenarios
   ]
 }`;
+};
 
 export const gameGeneratorConfig = {
   // We use gemini-2.5-flash as it is highly capable for structured JSON output and fast.
@@ -76,21 +87,27 @@ export const gameGeneratorConfig = {
 
   // 1. Function for Auto Generation (Topic-based)
   // This is currently used by your /api/generate route
-  getSystemPrompt: (idea: string, questionCount: number) => `You are an expert educational game designer and assessment writer, creating engaging, pedagogically sound quiz games in Arabic.
+  getSystemPrompt: (idea: string, questionCount: number, locale: string = "ar") => {
+    const langName = locale.toLowerCase() === "en" ? "English" : "Arabic";
+    return `You are an expert educational game designer and assessment writer, creating engaging, pedagogically sound quiz games in ${langName}.
 
 Your task is to create a game about the following topic:
 "${idea}"
 
-${getCoreSystemRules(questionCount)}`,
+${getCoreSystemRules(questionCount, locale)}`;
+  },
 
   // 2. Function for Custom User Prompt Generation (Ready for future use)
   // You can use this when you build the UI/API for accepting custom user instructions.
-  getCustomUserPrompt: (userInstruction: string, questionCount: number) => `You are an expert educational game designer and assessment writer, creating engaging, pedagogically sound quiz games in Arabic.
+  getCustomUserPrompt: (userInstruction: string, questionCount: number, locale: string = "ar") => {
+    const langName = locale.toLowerCase() === "en" ? "English" : "Arabic";
+    return `You are an expert educational game designer and assessment writer, creating engaging, pedagogically sound quiz games in ${langName}.
 
 A user has provided the following specific instructions for a game they want you to build:
 "${userInstruction}"
 
 Your task is to generate a highly engaging quiz game that STRICTLY follows their instructions above.
 
-${getCoreSystemRules(questionCount)}`
+${getCoreSystemRules(questionCount, locale)}`;
+  }
 };

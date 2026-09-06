@@ -1,21 +1,25 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Save, UserCircle2, Mail, Loader2, Zap, Star } from "lucide-react"
+import { Save, UserCircle2, Mail, Loader2, Zap, Star, Globe } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { updateUserAction, deleteUserAccountAction } from "@/lib/actions/users.actions"
 import { useSession, signOut } from "next-auth/react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface SettingsClientProps {
   session: any
   isSubscribed: boolean
   subscriptionPlan: string | null
+  initialLocale?: string
 }
 
-export default function SettingsClient({ session, isSubscribed, subscriptionPlan }: SettingsClientProps) {
+export default function SettingsClient({ session, isSubscribed, subscriptionPlan, initialLocale = "ar" }: SettingsClientProps) {
   const router = useRouter()
+  const { t, isRTL, setLocale } = useLocale()
+  const s = t.settings
   const { update: updateSession } = useSession()
   const [isPending, startTransition] = useTransition()
   const [isDeleting, startDeleteTransition] = useTransition()
@@ -25,10 +29,10 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
 
-  // Use session data if available, fallback to mock data
   const [formData, setFormData] = useState({
     name: session?.user?.name || "",
     email: session?.user?.email || "",
+    locale: initialLocale || "ar",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -38,22 +42,22 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
 
   const handleSave = () => {
     if (!formData.name.trim()) {
-      setError("الرجاء إدخال الاسم الكامل")
+      setError(s.fullNameReq)
       return;
     }
     
     startTransition(async () => {
       try {
-        await updateUserAction({ name: formData.name });
-        
-        // This updates the client session without a full page reload
-        await updateSession({ name: formData.name });
-        
-        // Refresh server components
+        await updateUserAction({ name: formData.name, locale: formData.locale });
+        await updateSession({ name: formData.name, locale: formData.locale });
+        if (formData.locale === "ar" || formData.locale === "en") {
+          setLocale(formData.locale);
+        }
+        toast.success(s.savedToast);
         router.refresh();
-      } catch (error) {
-        console.error("Failed to save settings", error);
-        toast.error("حدث خطأ أثناء الحفظ.");
+      } catch (err) {
+        console.error("Failed to save settings", err);
+        toast.error(s.saveErrorToast);
       }
     });
   }
@@ -61,7 +65,7 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
   const handleDeleteAccount = () => {
     const expectedName = session?.user?.name || "";
     if (deleteConfirmation !== expectedName) {
-      setDeleteError(`الرجاء كتابة '${expectedName}' للتأكيد`)
+      setDeleteError(s.deleteConfirmError.replace("{name}", expectedName))
       return;
     }
     
@@ -69,15 +73,15 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
       try {
         const result = await deleteUserAccountAction();
         if (result && !result.success) {
-          setDeleteError(result.error || "حدث خطأ أثناء محاولة حذف الحساب.");
+          setDeleteError(result.error || s.deleteErrorToast);
           return;
         }
-        toast.success("تم حذف حسابك بنجاح");
+        toast.success(s.deletedToast);
         await signOut({ callbackUrl: '/' });
-      } catch (error: any) {
-        console.error("Failed to delete account", error);
-        setDeleteError("حدث خطأ أثناء محاولة حذف الحساب.");
-        toast.error("حدث خطأ أثناء حذف الحساب.");
+      } catch (err: any) {
+        console.error("Failed to delete account", err);
+        setDeleteError(s.deleteErrorToast);
+        toast.error(s.deleteErrorToast);
       }
     });
   }
@@ -90,9 +94,9 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 mb-2">إعدادات الحساب</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-2">{s.title}</h1>
           <p className="text-gray-500">
-            تحديث المعلومات الشخصية الخاصة بك.
+            {s.subtitle}
           </p>
         </div>
         <button 
@@ -101,7 +105,7 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
           className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0"
         >
           {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-          <span>{isPending ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
+          <span>{isPending ? s.saving : s.saveChanges}</span>
         </button>
       </div>
 
@@ -118,12 +122,12 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
 
           <div className="relative flex-1">
             <div className="flex items-center gap-2 mb-0.5">
-              <h3 className="text-lg font-black text-amber-900">باقة Pro مفعّلة</h3>
+              <h3 className="text-lg font-black text-amber-900">{s.proActiveTitle}</h3>
               <span className="inline-flex items-center gap-1 text-[11px] font-black bg-gradient-to-r from-amber-400 to-orange-400 text-white px-2 py-0.5 rounded-full">
                 <Zap className="w-3 h-3 fill-white" /> PRO
               </span>
             </div>
-            <p className="text-sm text-amber-700">أنت تستمتع بكامل مميزات المنصة بدون قيود.</p>
+            <p className="text-sm text-amber-700">{s.proActiveDesc}</p>
           </div>
 
           <Star className="w-6 h-6 text-amber-400 fill-amber-200 shrink-0" />
@@ -134,8 +138,8 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
             <Zap className="w-7 h-7 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-black text-gray-800 mb-0.5">الباقة المجانية</h3>
-            <p className="text-sm text-gray-500">تواصل مع المسؤول للترقية إلى Pro والوصول لكامل المميزات.</p>
+            <h3 className="text-lg font-black text-gray-800 mb-0.5">{s.freePlanTitle}</h3>
+            <p className="text-sm text-gray-500">{s.freePlanDesc}</p>
           </div>
         </div>
       )}
@@ -152,9 +156,9 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
             )}
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">الصورة الشخصية</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">{s.profilePicTitle}</h3>
             <p className="text-sm text-gray-500 leading-relaxed max-w-md">
-              يتم سحب صورتك الشخصية تلقائياً من مزود تسجيل الدخول الخاص بك (مثل Google). لا يمكنك تغييرها من هنا.
+              {s.profilePicDesc}
             </p>
           </div>
         </div>
@@ -163,39 +167,100 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
         <div className="space-y-6">
           <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <UserCircle2 className="w-5 h-5 text-emerald-500" />
-            <span>المعلومات الشخصية</span>
+            <span>{s.personalInfoTitle}</span>
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block">الاسم الكامل</label>
+              <label className="text-sm font-bold text-gray-700 block">{s.fullName}</label>
               <div className="relative">
                 <input 
                   type="text" 
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full pl-4 pr-11 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-right ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200'}`}
+                  className={`w-full ${isRTL ? 'pl-4 pr-11 text-right' : 'pr-4 pl-11 text-left'} py-3 rounded-xl border focus:ring-2 outline-none transition-all ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-200'}`}
                 />
-                <UserCircle2 className={`w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 ${error ? 'text-red-400' : 'text-gray-400'}`} />
+                <UserCircle2 className={`w-5 h-5 absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 ${error ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block">البريد الإلكتروني</label>
+              <label className="text-sm font-bold text-gray-700 block">{s.email}</label>
               <div className="relative">
                 <input 
                   type="email" 
                   name="email"
                   value={formData.email}
                   disabled
-                  className="w-full pl-4 pr-11 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none cursor-not-allowed text-right font-sans"
+                  className={`w-full ${isRTL ? 'pl-4 pr-11' : 'pr-4 pl-11'} py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none cursor-not-allowed font-sans`}
                   dir="ltr"
                 />
-                <Mail className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
+                <Mail className={`w-5 h-5 text-gray-400 absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2`} />
               </div>
-              <p className="text-xs text-gray-500 font-medium">لا يمكن تغيير البريد الإلكتروني لأنه مرتبط بحساب Google الخاص بك.</p>
+              <p className="text-xs text-gray-500 font-medium">{s.emailNotice}</p>
+            </div>
+          </div>
+
+          {/* Language Preferences */}
+          <div className="space-y-4 pt-6 border-t border-gray-100">
+            <div>
+              <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-emerald-600" />
+                <span>{s.languageTitle}</span>
+              </h4>
+              <p className="text-xs text-gray-500 mt-1">
+                {s.languageDesc}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, locale: "ar" })}
+                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-start ${
+                  formData.locale === "ar"
+                    ? "border-emerald-500 bg-emerald-50/60 shadow-sm ring-2 ring-emerald-500/10"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🇸🇦</span>
+                  <div>
+                    <div className="font-bold text-gray-900 text-sm">{s.langArabic}</div>
+                    <div className="text-[11px] text-gray-500">اللغة العربية (الافتراضية)</div>
+                  </div>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  formData.locale === "ar" ? "border-emerald-600 bg-emerald-600 text-white" : "border-gray-300"
+                }`}>
+                  {formData.locale === "ar" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, locale: "en" })}
+                className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-start ${
+                  formData.locale === "en"
+                    ? "border-emerald-500 bg-emerald-50/60 shadow-sm ring-2 ring-emerald-500/10"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🇺🇸</span>
+                  <div>
+                    <div className="font-bold text-gray-900 text-sm">{s.langEnglish}</div>
+                    <div className="text-[11px] text-gray-500">English language</div>
+                  </div>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  formData.locale === "en" ? "border-emerald-600 bg-emerald-600 text-white" : "border-gray-300"
+                }`}>
+                  {formData.locale === "en" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -203,9 +268,9 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
         {/* Danger Zone */}
         <div className="space-y-6 pt-8 border-t border-red-100">
           <div className="bg-red-50/50 rounded-3xl p-6 border border-red-100">
-            <h3 className="text-lg font-bold text-red-900 mb-2">منطقة الخطر</h3>
+            <h3 className="text-lg font-bold text-red-900 mb-2">{s.dangerZone}</h3>
             <p className="text-sm text-red-700 mb-6">
-              بمجرد حذف حسابك، سيتم مسح جميع بياناتك، والمنظمات التي تمتلكها، والألعاب التي قمت بإنشائها نهائياً ولن تتمكن من استعادتها.
+              {s.dangerZoneDesc}
             </p>
             <button
               onClick={() => {
@@ -215,7 +280,7 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
               }}
               className="bg-white border-2 border-red-200 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm"
             >
-              حذف الحساب نهائياً
+              {s.deleteAccountBtn}
             </button>
           </div>
         </div>
@@ -224,12 +289,12 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200" dir="rtl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200" dir={isRTL ? "rtl" : "ltr"}>
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 transform transition-all animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-black text-gray-900 mb-4">هل أنت متأكد من حذف الحساب؟</h3>
+            <h3 className="text-2xl font-black text-gray-900 mb-4">{s.deleteModalTitle}</h3>
             <p className="text-gray-600 mb-6 leading-relaxed">
-              هذا الإجراء <strong>نهائي ولا يمكن التراجع عنه</strong>. سيتم حذف جميع الألعاب والمنظمات التابعة لك.<br/><br/>
-              لتأكيد الحذف، الرجاء كتابة اسمك <strong>{session?.user?.name}</strong> أدناه.
+              {s.deleteModalDesc1} <strong className="text-red-600 font-black">{s.deleteModalDescBold}</strong>. {s.deleteModalDesc2}<br/><br/>
+              {s.deleteModalPrompt.replace("{name}", session?.user?.name || "")}
             </p>
             
             <div className="space-y-4 mb-8">
@@ -240,8 +305,8 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
                   setDeleteConfirmation(e.target.value);
                   setDeleteError("");
                 }}
-                placeholder={`اكتب '${session?.user?.name}' هنا...`}
-                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-right ${deleteError ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200'}`}
+                placeholder={s.deleteModalPlaceholder.replace("{name}", session?.user?.name || "")}
+                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all ${deleteError ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-red-500 focus:ring-red-200'}`}
               />
               {deleteError && <p className="text-red-500 text-sm font-bold">{deleteError}</p>}
             </div>
@@ -253,14 +318,14 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
                 className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-3 rounded-xl font-bold transition-all shadow-md"
               >
                 {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-                <span>{isDeleting ? "جاري الحذف..." : "نعم، احذف حسابي"}</span>
+                <span>{isDeleting ? s.saving : s.confirmDeleteBtn}</span>
               </button>
-              <button
+              <button 
                 onClick={() => setIsDeleteModalOpen(false)}
                 disabled={isDeleting}
                 className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-bold transition-all"
               >
-                إلغاء
+                {s.cancel}
               </button>
             </div>
           </div>

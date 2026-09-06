@@ -24,7 +24,7 @@ export const requireAuth = cache(async () => {
     // Fetch fresh user from DB to check for real-time locks and subscription
     const dbUser = await db.query.users.findFirst({
       where: eq(users.id, session.user.id),
-      columns: { isLocked: true, role: true, isSubscribed: true, subscriptionPlan: true }
+      columns: { isLocked: true, role: true, isSubscribed: true, subscriptionPlan: true, locale: true }
     });
 
     if (dbUser?.isLocked) {
@@ -40,7 +40,8 @@ export const requireAuth = cache(async () => {
       isLocked: !!dbUser?.isLocked,
       isSubscribed,
       subscriptionPlan: isSubscribed ? (dbUser?.subscriptionPlan ?? "pro") : null,
-    } as typeof session.user & { id: string, role: string, isLocked: boolean, isSubscribed: boolean, subscriptionPlan: string | null };
+      locale: dbUser?.locale || "ar",
+    } as typeof session.user & { id: string, role: string, isLocked: boolean, isSubscribed: boolean, subscriptionPlan: string | null, locale: string };
   } catch (error) {
     // DB timeout or connection error — fall back to JWT session data rather than
     // bouncing the user back to the login page.
@@ -55,7 +56,8 @@ export const requireAuth = cache(async () => {
       isLocked: false,
       isSubscribed: isAdmin,
       subscriptionPlan: isAdmin ? "pro" : null,
-    } as typeof session.user & { id: string, role: string, isLocked: boolean, isSubscribed: boolean, subscriptionPlan: string | null };
+      locale: "ar",
+    } as typeof session.user & { id: string, role: string, isLocked: boolean, isSubscribed: boolean, subscriptionPlan: string | null, locale: string };
   }
 });
 

@@ -7,15 +7,17 @@ import {
   getMySystemAnnouncementsAction,
   dismissSystemAnnouncementAction 
 } from "@/lib/actions/notifications.actions";
+import { useLocale } from "@/lib/i18n/LanguageContext";
 
 export function SystemAnnouncementsBanner() {
+  const { locale, t } = useLocale();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const fetchAnnouncements = async () => {
     try {
-      const data = await getMySystemAnnouncementsAction();
+      const data = await getMySystemAnnouncementsAction(locale);
       setAnnouncements(data);
     } catch (error) {
       console.error("Error fetching system announcements:", error);
@@ -28,7 +30,7 @@ export function SystemAnnouncementsBanner() {
     fetchAnnouncements();
     const interval = setInterval(fetchAnnouncements, 60000); // Check every minute
     return () => clearInterval(interval);
-  }, []);
+  }, [locale]);
 
   const handleDismiss = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -55,21 +57,21 @@ export function SystemAnnouncementsBanner() {
 
   const severityStyles: Record<string, { bg: string, icon: string, badge: string, decor: string, shimmer: string }> = {
     info: {
-      bg: "bg-white border-r-4 border-r-emerald-500 shadow-xl shadow-emerald-500/10 ring-1 ring-slate-100",
+      bg: "bg-white border-s-4 border-s-emerald-500 shadow-xl shadow-emerald-500/10 ring-1 ring-slate-100",
       icon: "bg-emerald-50 text-emerald-600 border border-emerald-100",
       badge: "bg-emerald-100 text-emerald-700",
       decor: "text-emerald-50",
       shimmer: "from-transparent via-emerald-50/50 to-transparent"
     },
     warning: {
-      bg: "bg-white border-r-4 border-r-amber-500 shadow-xl shadow-amber-500/10 ring-1 ring-slate-100",
+      bg: "bg-white border-s-4 border-s-amber-500 shadow-xl shadow-amber-500/10 ring-1 ring-slate-100",
       icon: "bg-amber-50 text-amber-600 border border-amber-100",
       badge: "bg-amber-100 text-amber-700",
       decor: "text-amber-50",
       shimmer: "from-transparent via-amber-50/50 to-transparent"
     },
     critical: {
-      bg: "bg-white border-r-4 border-r-rose-500 shadow-xl shadow-rose-500/10 ring-1 ring-slate-100",
+      bg: "bg-white border-s-4 border-s-rose-500 shadow-xl shadow-rose-500/10 ring-1 ring-slate-100",
       icon: "bg-rose-50 text-rose-600 border border-rose-100",
       badge: "bg-rose-100 text-rose-700",
       decor: "text-rose-50",
@@ -94,7 +96,7 @@ export function SystemAnnouncementsBanner() {
               className={`relative overflow-hidden rounded-2xl ${style.bg}`}
             >
               {/* Decorative Background Icon */}
-              <div className={`absolute top-0 left-0 opacity-10 pointer-events-none transform -translate-x-4 -translate-y-4 -rotate-12 ${style.decor}`}>
+              <div className={`absolute top-0 start-0 opacity-10 pointer-events-none transform -translate-x-4 -translate-y-4 -rotate-12 ${style.decor}`}>
                 <Megaphone className="w-40 h-40" />
               </div>
 
@@ -122,7 +124,7 @@ export function SystemAnnouncementsBanner() {
                         </h3>
                         <span className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${style.badge}`}>
                           <Sparkles className="w-3 h-3" />
-                          جديد
+                          {t.announcements?.newBadge || "جديد"}
                         </span>
                       </div>
                       
@@ -145,8 +147,8 @@ export function SystemAnnouncementsBanner() {
                     <button
                       onClick={(e) => handleDismiss(e, item.id)}
                       className="shrink-0 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors group z-10"
-                      title="إخفاء الإعلان"
-                      aria-label="إخفاء"
+                      title={t.announcements?.dismiss || "إخفاء الإعلان"}
+                      aria-label={t.announcements?.ariaDismiss || "إخفاء"}
                     >
                       <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                     </button>
@@ -160,3 +162,4 @@ export function SystemAnnouncementsBanner() {
     </div>
   );
 }
+

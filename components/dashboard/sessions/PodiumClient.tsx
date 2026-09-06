@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Crown, Medal, Award, ArrowRight, Trophy } from "lucide-react"
+import { Crown, Medal, Award, ArrowRight, ArrowLeft, Trophy } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 import { createConfettiPieces, type ConfettiPiece } from "@/lib/game"
 
 export default function PodiumClient({ session, players }: { session: any, players: any[] }) {
+  const { t, isRTL } = useLocale()
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
   const [showPodium, setShowPodium] = useState(false)
 
@@ -37,7 +39,7 @@ export default function PodiumClient({ session, players }: { session: any, playe
   }, [top3.length])
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans" dir="rtl">
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans">
       {/* Confetti */}
       {confetti.map((piece) => (
         <div
@@ -77,7 +79,7 @@ export default function PodiumClient({ session, players }: { session: any, playe
           className="text-center mb-12"
         >
           <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 drop-shadow-[0_0_15px_rgba(251,191,36,0.3)] mb-4">
-            تتويج الأبطال
+            {t.sessionDetails.podiumTitle}
           </h1>
           <p className="text-indigo-200 text-xl font-bold flex items-center justify-center gap-2">
             <Trophy className="w-5 h-5" />
@@ -168,8 +170,12 @@ export default function PodiumClient({ session, players }: { session: any, playe
             href="/dashboard/sessions"
             className="group flex items-center gap-3 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md px-8 py-4 rounded-2xl font-bold transition-all duration-300 border border-white/10 hover:border-white/30 hover:scale-105"
           >
-            العودة إلى سجل الجلسات
-            <ArrowRight className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span>{t.sessionDetails.backToSessions}</span>
+            {isRTL ? (
+              <ArrowRight className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            ) : (
+              <ArrowLeft className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            )}
           </Link>
         </motion.div>
       </div>

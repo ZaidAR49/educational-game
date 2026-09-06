@@ -10,8 +10,10 @@ import {
   deleteMyNotificationAction,
   markAllNotificationsReadAction
 } from "@/lib/actions/notifications.actions";
+import { useLocale } from "@/lib/i18n/LanguageContext";
 
 export function NotificationsMenu() {
+  const { t, locale, isRTL } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -52,8 +54,6 @@ export function NotificationsMenu() {
     return () => clearInterval(interval);
   }, []);
 
-
-
   const handleMarkRead = async (id: string) => {
     try {
       // Optimistic UI update
@@ -61,7 +61,6 @@ export function NotificationsMenu() {
       await markUserNotificationReadAction(id);
     } catch (error) {
       console.error("Failed to mark as read:", error);
-      // Re-fetch if optimistic update fails
       fetchNotifications();
     }
   };
@@ -89,14 +88,7 @@ export function NotificationsMenu() {
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
-  
   const combined = notifications;
-
-  const severityColors: Record<string, string> = {
-    info: "text-blue-600 bg-blue-50 border-blue-100",
-    warning: "text-amber-600 bg-amber-50 border-amber-100",
-    critical: "text-red-600 bg-red-50 border-red-100",
-  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -107,7 +99,7 @@ export function NotificationsMenu() {
           if (!isOpen && unreadCount > 0) fetchNotifications(); // fresh fetch on open
         }}
         className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
-        aria-label="Notifications"
+        aria-label={t.notificationsMenu?.title || "Notifications"}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -122,7 +114,7 @@ export function NotificationsMenu() {
       {mounted && createPortal(
         <AnimatePresence>
           {isOpen && (
-            <div className="relative z-[9999]" dir="rtl">
+            <div className="relative z-[9999]" dir={isRTL ? "rtl" : "ltr"}>
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -134,18 +126,18 @@ export function NotificationsMenu() {
             
             {/* Panel */}
             <motion.div
-              initial={{ x: "100%" }} // Slide from right
+              initial={{ x: isRTL ? "100%" : "100%" }} // Slide from right
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              exit={{ x: isRTL ? "100%" : "100%" }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-white shadow-2xl z-[100] flex flex-col border-l border-slate-100"
+              className={`fixed top-0 bottom-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-[100] flex flex-col ${isRTL ? 'border-l' : 'border-l'} border-slate-100`}
             >
               <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-black text-slate-800">الإشعارات</h3>
+                  <h3 className="text-lg font-black text-slate-800">{t.notificationsMenu?.title || "الإشعارات"}</h3>
                   {unreadCount > 0 && (
                     <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">
-                      {unreadCount} جديد
+                      {unreadCount} {t.notificationsMenu?.newBadge || "جديد"}
                     </span>
                   )}
                 </div>
@@ -155,7 +147,7 @@ export function NotificationsMenu() {
                       onClick={handleMarkAllRead}
                       className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
                     >
-                      تحديد الكل كمقروء
+                      {t.notificationsMenu?.markAllRead || "تحديد الكل كمقروء"}
                     </button>
                   )}
                   <button 
@@ -171,14 +163,14 @@ export function NotificationsMenu() {
                 {isLoading && combined.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-3">
                     <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
-                    <span className="text-sm">جاري تحميل الإشعارات...</span>
+                    <span className="text-sm">{t.notificationsMenu?.loading || "جاري تحميل الإشعارات..."}</span>
                   </div>
                 ) : combined.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-3">
                     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-2">
                       <Bell className="w-8 h-8 text-slate-300" />
                     </div>
-                    <span className="text-sm font-medium">لا توجد إشعارات حالياً</span>
+                    <span className="text-sm font-medium">{t.notificationsMenu?.empty || "لا توجد إشعارات حالياً"}</span>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100">
@@ -236,7 +228,7 @@ export function NotificationsMenu() {
                                           className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
                                         >
                                           <Check className="w-3.5 h-3.5" />
-                                          تحديد كمقروء
+                                          {t.notificationsMenu?.markRead || "تحديد كمقروء"}
                                         </button>
                                       )}
                                       <button
@@ -247,7 +239,7 @@ export function NotificationsMenu() {
                                         className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
-                                        حذف
+                                        {t.notificationsMenu?.delete || "حذف"}
                                       </button>
                                     </div>
                                   </motion.div>
@@ -256,7 +248,7 @@ export function NotificationsMenu() {
                               
                               <div className="flex items-center gap-2">
                                 <span className="text-[11px] text-slate-400 font-medium">
-                                  {new Date(item.createdAt).toLocaleDateString("ar-SA", { 
+                                  {new Date(item.createdAt).toLocaleDateString(locale === 'ar' ? "ar-u-nu-latn" : "en-US", { 
                                     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
                                   })}
                                 </span>

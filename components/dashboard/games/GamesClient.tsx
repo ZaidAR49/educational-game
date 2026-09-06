@@ -13,6 +13,7 @@ import { toast } from "sonner"
 import { toggleGamePublishStatusAction, deleteGameAction } from "@/lib/actions/games.actions"
 import { PaginationControls } from "@/components/shared/PaginationControls"
 import { SearchAndFilter } from "@/components/shared/SearchAndFilter"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface GamesClientProps {
   initialGames: Game[]
@@ -23,6 +24,8 @@ interface GamesClientProps {
 
 export function GamesClient({ initialGames, totalPages, currentPage, showSearchAndFilter }: GamesClientProps) {
   const router = useRouter()
+  const { t, isRTL } = useLocale()
+  const g = t.gamesDashboard
   const [shareGame, setShareGame] = useState<Game | null>(null)
   const [gameToDelete, setGameToDelete] = useState<Game | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -33,7 +36,7 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
   }, [])
 
   const toggleGameStatus = (id: string) => {
-    const game = initialGames.find(g => g.id === id);
+    const game = initialGames.find(gm => gm.id === id);
     if (!game) return;
 
     startTransition(async () => {
@@ -42,7 +45,7 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
         await toggleGamePublishStatusAction(id, isPublishing);
       } catch (error) {
         console.error("Failed to update status:", error);
-        toast.error("حدث خطأ أثناء تحديث حالة اللعبة");
+        toast.error(g.statusUpdateError);
       }
     });
   }
@@ -54,18 +57,18 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
       try {
         await deleteGameAction(gameToDelete.id);
         setGameToDelete(null);
-        toast.success("تم حذف اللعبة بنجاح");
+        toast.success(g.deletedSuccess);
         router.refresh()
       } catch (error) {
         console.error("Failed to delete game:", error);
-        toast.error("حدث خطأ أثناء حذف اللعبة");
+        toast.error(g.deleteError);
       }
     });
   }
 
   const initiateDelete = (game: Game) => {
     if (game.status === 'published') {
-      toast.error("لا يمكنك حذف اللعبة أثناء وجود جلسة مباشرة. يرجى إنهاء الجلسة أولاً.");
+      toast.error(g.cannotDeleteLive);
       return;
     }
     setGameToDelete(game);
@@ -77,9 +80,9 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 mb-2">ألعابي</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-2">{g.title}</h1>
           <p className="text-gray-500">
-            إدارة الألعاب التي قمت بإنشائها. يمكنك إضافة ألعاب جديدة أو تعديل الحالية.
+            {g.subtitle}
           </p>
         </div>
         <Link 
@@ -87,13 +90,13 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
           className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0"
         >
           <Plus className="w-5 h-5" />
-          <span>إضافة لعبة جديدة</span>
+          <span>{g.newGameBtn}</span>
         </Link>
       </div>
 
       {showSearchAndFilter && (
         <SearchAndFilter 
-          placeholder="ابحث عن لعبة..." 
+          placeholder={g.searchPlaceholder} 
           showStatusFilter={true} 
         />
       )}
@@ -118,7 +121,7 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
             <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center">
               <Plus className="w-6 h-6" />
             </div>
-            <span className="font-bold">إنشاء لعبة جديدة</span>
+            <span className="font-bold">{g.newGameBtn}</span>
           </Link>
         )}
       </div>
@@ -136,10 +139,10 @@ export function GamesClient({ initialGames, totalPages, currentPage, showSearchA
         isOpen={!!gameToDelete}
         onClose={() => setGameToDelete(null)}
         onConfirm={handleDelete}
-        title="حذف اللعبة"
-        description={`هل أنت متأكد أنك تريد حذف لعبة "${gameToDelete?.title}"؟ لا يمكن التراجع عن هذا الإجراء.`}
-        confirmText="نعم، احذفها"
-        cancelText="إلغاء"
+        title={g.deleteModalTitle}
+        description={g.deleteModalDesc.replace("{title}", gameToDelete?.title || "")}
+        confirmText={g.confirmDelete}
+        cancelText={t.common?.cancel || (isRTL ? "إلغاء" : "Cancel")}
         type="danger"
       />
 

@@ -4,6 +4,7 @@ import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar } from "rec
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SectionTitle } from "./TrafficCharts"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 function formatDateTick(value: string) {
   const date = new Date(value)
@@ -21,13 +22,31 @@ export function PlayerJourneyCharts({
   playerFunnel,
   playerChartConfig
 }: PlayerJourneyChartsProps) {
+  const { t, isRTL } = useLocale()
+  const a = t.adminAnalytics
+
+  const localizedFunnel = playerFunnel.map((item) => {
+    let step = item.step
+    if (item.step === "انضمام") {
+      step = a?.eventNames?.game_joined || (isRTL ? "انضمام" : "Join")
+    } else if (item.step === "بدء اللعب") {
+      step = a?.eventNames?.game_started || (isRTL ? "بدء اللعب" : "Start")
+    } else if (item.step === "إكمال") {
+      step = a?.eventNames?.game_completed || (isRTL ? "إكمال" : "Complete")
+    }
+    return { ...item, step }
+  })
+
   return (
     <section>
-      <SectionTitle title="رحلة اللاعب" description="أحداث اللعب من الانضمام إلى المشاركة" />
+      <SectionTitle 
+        title={a?.playerJourneyTitle || (isRTL ? "رحلة اللاعب" : "Player Journey")} 
+        description={a?.playerJourneyDesc || (isRTL ? "أحداث اللعب من الانضمام إلى المشاركة" : "Gameplay events from joining to completion")} 
+      />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>اتجاه أحداث اللاعب</CardTitle>
+            <CardTitle>{a?.playerEventsTrend || (isRTL ? "اتجاه أحداث اللاعب" : "Player Events Trend")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ChartContainer config={playerChartConfig} className="h-[320px] w-full">
@@ -47,12 +66,12 @@ export function PlayerJourneyCharts({
 
         <Card>
           <CardHeader>
-            <CardTitle>قمع اللاعب</CardTitle>
-            <CardDescription>انضمام ← بدء ← إكمال</CardDescription>
+            <CardTitle>{a?.playerFunnel || (isRTL ? "قمع اللاعب" : "Player Funnel")}</CardTitle>
+            <CardDescription>{a?.playerFunnelDesc || (isRTL ? "انضمام ← بدء ← إكمال" : "Join ← Start ← Complete")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={{ count: { label: "عدد", color: "hsl(221.2 83.2% 53.3%)" } }} className="h-[320px] w-full">
-              <BarChart data={playerFunnel} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+            <ChartContainer config={{ count: { label: a?.count || (isRTL ? "عدد" : "Count"), color: "hsl(221.2 83.2% 53.3%)" } }} className="h-[320px] w-full">
+              <BarChart data={localizedFunnel} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                 <XAxis type="number" tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="step" tickLine={false} axisLine={false} width={80} />

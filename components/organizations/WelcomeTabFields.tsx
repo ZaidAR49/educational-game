@@ -1,8 +1,11 @@
+"use client"
+
 import { Sparkles, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { improveOrganizationFormAction } from "@/lib/actions/ai.actions"
 import { AiImproveButton } from "./AiImproveButton"
 import type { OrganizationFormData } from "./OrganizationForm"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 type WelcomeTabFieldsProps = {
   formData: OrganizationFormData
@@ -14,14 +17,19 @@ type WelcomeTabFieldsProps = {
 }
 
 export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isGlobalLoading, onGlobalLoadingChange }: WelcomeTabFieldsProps) {
+  const { t, locale, isRTL } = useLocale()
+  const o = t.orgForm
+
   const field = (name: keyof OrganizationFormData, error?: string, extra?: string) =>
-    `w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-right ${extra || ""} ${
+    `w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-start ${extra || ""} ${
       error ? "border-red-500 focus:border-red-500 focus:ring-red-200" : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
     }`
 
+  const paddingForAi = isRTL ? "pl-12" : "pr-12"
+
   const handleEnhanceSection = async () => {
     if (onGlobalLoadingChange) onGlobalLoadingChange(true);
-    const loadingToast = toast.loading("جاري تحسين نصوص شاشة الترحيب...");
+    const loadingToast = toast.loading(locale === 'ar' ? "جاري تحسين نصوص شاشة الترحيب..." : "Enhancing welcome screen texts...");
     try {
       const sectionData = {
         mainTitle: formData.mainTitle,
@@ -32,10 +40,10 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
       
       const improvedData = await improveOrganizationFormAction(sectionData);
       onBulkChange(improvedData);
-      toast.success("تم تحسين نصوص الترحيب بنجاح!", { id: loadingToast });
+      toast.success(locale === 'ar' ? "تم تحسين نصوص الترحيب بنجاح!" : "Welcome texts enhanced successfully!", { id: loadingToast });
     } catch (error) {
       console.error(error);
-      toast.error("حدث خطأ أثناء تحسين النصوص.", { id: loadingToast });
+      toast.error(locale === 'ar' ? "حدث خطأ أثناء تحسين النصوص." : "Error enhancing texts.", { id: loadingToast });
     } finally {
       if (onGlobalLoadingChange) onGlobalLoadingChange(false);
     }
@@ -45,32 +53,33 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
     <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-6 animate-in fade-in zoom-in-95 duration-200">
       
       <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-        <h3 className="font-bold text-gray-800">نصوص شاشة الترحيب</h3>
+        <h3 className="font-bold text-gray-800">{o.welcomeTexts}</h3>
         <button
+          type="button"
           onClick={handleEnhanceSection}
           disabled={isGlobalLoading}
           className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-xl font-bold transition-all text-sm"
         >
           {isGlobalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          <span>تحسين نصوص الترحيب</span>
+          <span>{o.enhanceWelcome}</span>
         </button>
       </div>
 
       {/* Title + Icon row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="space-y-2 md:col-span-3">
-          <label className="text-sm font-bold text-gray-700 block text-right">العنوان الرئيسي</label>
+          <label className="text-sm font-bold text-gray-700 block text-start">{o.mainTitleLabel}</label>
           <div className="relative">
             <input
               type="text"
               name="mainTitle"
               value={formData.mainTitle}
               onChange={onChange}
-              className={`${field("mainTitle", errors.mainTitle, "pl-12")} font-bold text-lg`}
+              className={`${field("mainTitle", errors.mainTitle, paddingForAi)} font-bold text-lg`}
             />
             <AiImproveButton 
               text={formData.mainTitle} 
-              context="أنت تقوم بتحسين 'العنوان الرئيسي' لشاشة الترحيب."
+              context="Improve the main title for the welcome screen. Make it engaging and concise."
               onImproved={(newText) => onChange({ target: { name: "mainTitle", value: newText } } as any)} 
               className="top-1/2 -translate-y-1/2" 
               isGlobalLoading={isGlobalLoading}
@@ -80,7 +89,7 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
           {errors.mainTitle && <p className="text-red-500 text-sm font-bold">{errors.mainTitle}</p>}
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-700 block text-right">الأيقونة</label>
+          <label className="text-sm font-bold text-gray-700 block text-start">{o.iconLabel}</label>
           <input
             type="text"
             name="icon"
@@ -94,18 +103,18 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
 
       {/* Subtitle */}
       <div className="space-y-2">
-        <label className="text-sm font-bold text-gray-700 block text-right">العنوان الفرعي</label>
+        <label className="text-sm font-bold text-gray-700 block text-start">{o.subTitleLabel}</label>
         <div className="relative">
           <input
             type="text"
             name="subtitle"
             value={formData.subtitle}
             onChange={onChange}
-            className={`${field("subtitle", errors.subtitle, "pl-12")} text-gray-600`}
+            className={`${field("subtitle", errors.subtitle, paddingForAi)} text-gray-600`}
           />
           <AiImproveButton 
             text={formData.subtitle} 
-            context={`أنت تقوم بتحسين 'العنوان الفرعي' لشاشة الترحيب. العنوان الرئيسي الحالي هو: "${formData.mainTitle}"`}
+            context={`Improve the subtitle for the welcome screen. The current main title is: "${formData.mainTitle}"`}
             onImproved={(newText) => onChange({ target: { name: "subtitle", value: newText } } as any)} 
             className="top-1/2 -translate-y-1/2" 
             isGlobalLoading={isGlobalLoading}
@@ -117,21 +126,18 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
 
       {/* Welcome message */}
       <div className="space-y-2">
-        <label className="text-sm font-bold text-gray-700 block text-right">نص رسالة الترحيب</label>
+        <label className="text-sm font-bold text-gray-700 block text-start">{o.welcomeMsgLabel}</label>
         <div className="relative">
           <textarea
             name="welcomeMessage"
             value={formData.welcomeMessage}
             onChange={onChange}
             rows={5}
-            className={`${field("welcomeMessage", errors.welcomeMessage, "pl-12")} text-sm leading-relaxed resize-none`}
+            className={`${field("welcomeMessage", errors.welcomeMessage, paddingForAi)} text-sm leading-relaxed resize-none`}
           />
           <AiImproveButton 
             text={formData.welcomeMessage} 
-            context={`أنت تقوم بتحسين 'رسالة الترحيب' للطلاب. 
-العنوان الرئيسي هو: "${formData.mainTitle}"
-العنوان الفرعي هو: "${formData.subtitle}"
-تأكد من أن الرسالة متناسقة مع العناوين السابقة ومشجعة للطلاب.`}
+            context={`Improve the welcome message for students. Main title: "${formData.mainTitle}", Subtitle: "${formData.subtitle}". Make it encouraging and clear.`}
             onImproved={(newText) => onChange({ target: { name: "welcomeMessage", value: newText } } as any)} 
             className="top-3" 
             isGlobalLoading={isGlobalLoading}
@@ -139,25 +145,25 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
           />
         </div>
         {errors.welcomeMessage && <p className="text-red-500 text-sm font-bold">{errors.welcomeMessage}</p>}
-        <p className="text-xs text-emerald-600/70 font-medium text-right">
-          يمكنك استخدام أسطر فارغة، سيتم تلوين السطر الأخير باللون الأخضر الغامق.
+        <p className="text-xs text-emerald-600/70 font-medium text-start">
+          {o.welcomeMsgHint}
         </p>
       </div>
 
       {/* Button text */}
       <div className="space-y-2">
-        <label className="text-sm font-bold text-gray-700 block text-right">نص زر البدء</label>
+        <label className="text-sm font-bold text-gray-700 block text-start">{o.buttonTextLabel}</label>
         <div className="relative">
           <input
             type="text"
             name="buttonText"
             value={formData.buttonText}
             onChange={onChange}
-            className={field("buttonText", errors.buttonText, "pl-12")}
+            className={field("buttonText", errors.buttonText, paddingForAi)}
           />
           <AiImproveButton 
             text={formData.buttonText} 
-            context={`أنت تقوم بتحسين 'نص زر البدء'. اجعله حماسياً وقصيراً. (مثال: ابدأ اللعب، اختبر معلوماتك، إلخ)`}
+            context={`Improve the start button text. Make it enthusiastic and concise.`}
             onImproved={(newText) => onChange({ target: { name: "buttonText", value: newText } } as any)} 
             className="top-1/2 -translate-y-1/2" 
             isGlobalLoading={isGlobalLoading}

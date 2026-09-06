@@ -1,4 +1,7 @@
+"use client"
+
 import { Search } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface SessionFiltersProps {
   searchQuery: string
@@ -16,17 +19,20 @@ export function SessionFilters({
   sortBy, setSortBy,
   games
 }: SessionFiltersProps) {
+  const { t, isRTL } = useLocale()
+  const s = t.sessionsDashboard
+
   return (
     <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4">
       {/* Search */}
       <div className="relative flex-1">
-        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5`} />
         <input 
           type="text" 
-          placeholder="البحث برقم الجلسة أو اسم اللعبة..." 
+          placeholder={s.searchPlaceholder} 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pr-12 pl-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-medium text-gray-700"
+          className={`w-full bg-gray-50 border border-gray-200 rounded-xl py-3 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-medium text-gray-700`}
         />
       </div>
 
@@ -35,10 +41,12 @@ export function SessionFilters({
         <select 
           value={gameFilter}
           onChange={(e) => setGameFilter(e.target.value)}
-          className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-gray-700 cursor-pointer appearance-none"
+          className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-gray-700 cursor-pointer"
         >
           {games.map(game => (
-            <option key={game} value={game}>{game}</option>
+            <option key={game} value={game}>
+              {game === "ALL" ? s.allGames : game}
+            </option>
           ))}
         </select>
       </div>
@@ -48,10 +56,10 @@ export function SessionFilters({
         <select 
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-gray-700 cursor-pointer appearance-none"
+          className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-gray-700 cursor-pointer"
         >
-          <option value="newest">الأحدث أولاً</option>
-          <option value="oldest">الأقدم أولاً</option>
+          <option value="newest">{s.newestFirst}</option>
+          <option value="oldest">{s.oldestFirst}</option>
         </select>
       </div>
     </div>

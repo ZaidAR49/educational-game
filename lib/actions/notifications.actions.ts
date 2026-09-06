@@ -17,6 +17,7 @@ export async function createSystemAnnouncementAction(data: {
   body: string;
   type: string;
   severity: string;
+  language?: string;
   endsAt: Date | null;
 }) {
   const sessionUser = await requireAdmin();
@@ -26,36 +27,41 @@ export async function createSystemAnnouncementAction(data: {
     body: data.body,
     type: data.type,
     severity: data.severity,
+    language: (data.language && ["all", "ar", "en"].includes(data.language)) ? data.language : "all",
     endsAt: data.endsAt,
     createdBy: sessionUser.id,
   });
 
   revalidatePath("/admin/notifications");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteSystemAnnouncementAction(id: string) {
   await requireAdmin();
   await db.delete(systemAnnouncements).where(eq(systemAnnouncements.id, id));
   revalidatePath("/admin/notifications");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteAllSystemAnnouncementsAction() {
   await requireAdmin();
   await db.delete(systemAnnouncements);
   revalidatePath("/admin/notifications");
+  revalidatePath("/dashboard");
 }
 
 export async function getUserNotificationsAction() {
   await requireAdmin();
   
-  // For the admin dashboard, we might want to fetch all recent user notifications
-  // joining with users to show who it was sent to.
+  // For the admin dashboard, we fetch all recent user notifications
+  // joining with users to show who it was sent to, including their preferred language.
   const notifications = await db
     .select({
       notification: userNotifications,
       user: {
         name: users.name,
         email: users.email,
+        locale: users.locale,
       }
     })
     .from(userNotifications)
@@ -123,8 +129,11 @@ export async function getMyNotificationsAction() {
   return notifications;
 }
 
-export async function getMySystemAnnouncementsAction() {
+export async function getMySystemAnnouncementsAction(overrideLocale?: string) {
   const sessionUser = await requireAuth();
+  const userLocale = (overrideLocale && ["ar", "en"].includes(overrideLocale))
+    ? overrideLocale
+    : (sessionUser.locale || "ar");
   
   // Find IDs of announcements the user has already dismissed
   const dismissedReads = await db
@@ -136,14 +145,17 @@ export async function getMySystemAnnouncementsAction() {
 
   // Build the query for active announcements
   // is_active = true AND startsAt <= now AND (endsAt IS NULL OR endsAt > now)
+  // AND (language = 'all' OR language = userLocale)
   const now = new Date();
   
-  // If the user has dismissed announcements, we exclude them.
-  // We use `notInArray` only if the array is not empty.
   const conditions = [
     eq(systemAnnouncements.isActive, true),
     lte(systemAnnouncements.startsAt, now),
-    or(isNull(systemAnnouncements.endsAt), gt(systemAnnouncements.endsAt, now))
+    or(isNull(systemAnnouncements.endsAt), gt(systemAnnouncements.endsAt, now)),
+    or(
+      eq(systemAnnouncements.language, "all"),
+      eq(systemAnnouncements.language, userLocale)
+    )
   ];
   
   if (dismissedIds.length > 0) {

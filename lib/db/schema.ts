@@ -351,6 +351,7 @@ export const systemAnnouncements = pgTable("system_announcements", {
   title: text("title").notNull(),
   body: text("body"),
   severity: text("severity").notNull().default("info"),
+  language: text("language").notNull().default("all"),
   isActive: boolean("is_active").notNull().default(true),
   startsAt: timestamp("starts_at", { mode: "date", withTimezone: true }).notNull().defaultNow(),
   endsAt: timestamp("ends_at", { mode: "date", withTimezone: true }),

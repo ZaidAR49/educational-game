@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertTriangle } from "lucide-react"
 import { SectionTitle } from "./TrafficCharts"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 function formatDateTick(value: string) {
   const date = new Date(value)
@@ -22,20 +23,26 @@ export function ErrorTrackingCharts({
   errorsPerDay,
   errorBreakdown
 }: ErrorTrackingChartsProps) {
+  const { t, isRTL } = useLocale()
+  const a = t.adminAnalytics
+
   return (
     <section>
-      <SectionTitle title="تتبع الأخطاء" description="أحداث $exception من PostHog" />
+      <SectionTitle 
+        title={a?.errorTrackingTitle || (isRTL ? "تتبع الأخطاء" : "Error Tracking")} 
+        description={a?.errorTrackingDesc || "$exception events from PostHog"} 
+      />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              أخطاء مسجّلة
+              {a?.recordedErrors || (isRTL ? "أخطاء مسجّلة" : "Recorded Errors")}
             </CardDescription>
-            <CardTitle className="text-3xl font-bold">{totalErrors.toLocaleString()}</CardTitle>
+            <CardTitle className="text-3xl font-bold">{totalErrors.toLocaleString('en-US')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={{ errors: { label: "أخطاء", color: "hsl(0 84.2% 60.2%)" } }} className="h-[280px] w-full">
+            <ChartContainer config={{ errors: { label: a?.errors || (isRTL ? "أخطاء" : "Errors"), color: "hsl(0 84.2% 60.2%)" } }} className="h-[280px] w-full">
               <AreaChart data={errorsPerDay} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="fillErrors" x1="0" y1="0" x2="0" y2="1">
@@ -55,8 +62,8 @@ export function ErrorTrackingCharts({
 
         <Card>
           <CardHeader>
-            <CardTitle>أكثر الأخطاء شيوعاً</CardTitle>
-            <CardDescription>أعلى 8 رسائل خطأ</CardDescription>
+            <CardTitle>{a?.commonErrors || (isRTL ? "أكثر الأخطاء شيوعاً" : "Most Common Errors")}</CardTitle>
+            <CardDescription>{a?.topErrors || (isRTL ? "أعلى 8 رسائل خطأ" : "Top 8 error messages")}</CardDescription>
           </CardHeader>
           <CardContent>
             {errorBreakdown.length > 0 ? (
@@ -75,7 +82,7 @@ export function ErrorTrackingCharts({
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                 <AlertTriangle className="mb-2 h-8 w-8 opacity-40" />
-                <p className="text-sm">لا توجد أخطاء مسجّلة</p>
+                <p className="text-sm">{a?.noErrors || (isRTL ? "لا توجد أخطاء مسجّلة" : "No recorded errors")}</p>
               </div>
             )}
           </CardContent>

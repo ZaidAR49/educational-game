@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useMemo, useEffect, useTransition } from "react"
-import { Search, History, Info, ChevronRight, ChevronLeft, CheckCircle2, Trash2, Loader2 } from "lucide-react"
+import { History, Info, ChevronRight, ChevronLeft, CheckCircle2, Trash2, Loader2 } from "lucide-react"
 import { ConfirmModal } from "@/components/shared/ConfirmModal"
 import { Session } from "@/components/sessions/types"
 import { SessionCard } from "@/components/sessions/SessionCard"
 import { SessionFilters } from "@/components/sessions/SessionFilters"
 import { deleteSessionsAction } from "@/lib/actions/sessions.actions"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 const ITEMS_PER_PAGE = 9
 
@@ -15,9 +16,15 @@ interface SessionsClientProps {
 }
 
 export default function SessionsClient({ initialSessions }: SessionsClientProps) {
+  const { t, isRTL } = useLocale()
+  const s = t.sessionsDashboard
+
+  const PrevPageIcon = isRTL ? ChevronRight : ChevronLeft
+  const NextPageIcon = isRTL ? ChevronLeft : ChevronRight
+
   const [sessions, setSessions] = useState<Session[]>(initialSessions)
   const [searchQuery, setSearchQuery] = useState("")
-  const [gameFilter, setGameFilter] = useState("الكل")
+  const [gameFilter, setGameFilter] = useState("ALL")
   const [sortBy, setSortBy] = useState("newest")
   const [selectedSessions, setSelectedSessions] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -32,19 +39,19 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
 
   // Get unique game names for filter
   const GAMES = useMemo(() => {
-    const names = new Set(initialSessions.map(s => s.gameName))
-    return ["الكل", ...Array.from(names)]
+    const names = new Set(initialSessions.map(sess => sess.gameName))
+    return ["ALL", ...Array.from(names)]
   }, [initialSessions])
 
   const filteredSessions = useMemo(() => {
     let result = sessions
 
     if (searchQuery) {
-      result = result.filter(s => s.gameName.includes(searchQuery) || s.id.includes(searchQuery))
+      result = result.filter(sess => sess.gameName.includes(searchQuery) || sess.id.includes(searchQuery))
     }
 
-    if (gameFilter !== "الكل") {
-      result = result.filter(s => s.gameName === gameFilter)
+    if (gameFilter !== "ALL") {
+      result = result.filter(sess => sess.gameName === gameFilter)
     }
 
     result = [...result].sort((a, b) => {
@@ -76,10 +83,10 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
 
   const toggleAll = () => {
     if (selectedSessions.length === paginatedSessions.length) {
-      setSelectedSessions(prev => prev.filter(id => !paginatedSessions.find(s => s.id === id)))
+      setSelectedSessions(prev => prev.filter(id => !paginatedSessions.find(sess => sess.id === id)))
     } else {
       const newSelected = new Set(selectedSessions)
-      paginatedSessions.forEach(s => newSelected.add(s.id))
+      paginatedSessions.forEach(sess => newSelected.add(sess.id))
       setSelectedSessions(Array.from(newSelected))
     }
   }
@@ -92,7 +99,7 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
     })
   }
 
-  const isAllCurrentPageSelected = paginatedSessions.length > 0 && paginatedSessions.every(s => selectedSessions.includes(s.id))
+  const isAllCurrentPageSelected = paginatedSessions.length > 0 && paginatedSessions.every(sess => selectedSessions.includes(sess.id))
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto">
@@ -103,10 +110,10 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
           <div>
             <h1 className="text-3xl font-black text-gray-900 mb-2 flex items-center gap-3">
               <History className="w-8 h-8 text-indigo-600" />
-              سجل الجلسات
+              <span>{s.title}</span>
             </h1>
             <p className="text-gray-500">
-              مراجعة وإدارة الجلسات السابقة للألعاب التي قمت بتشغيلها.
+              {s.subtitle}
             </p>
           </div>
           
@@ -117,7 +124,7 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
               className="flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 px-6 py-3 rounded-xl font-bold transition-all shadow-sm border border-red-100 shrink-0"
             >
               {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
-              <span>حذف المحدد ({selectedSessions.length})</span>
+              <span>{s.deleteSelected.replace("{count}", selectedSessions.length.toString())}</span>
             </button>
           )}
         </div>
@@ -126,7 +133,7 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-800 shadow-sm">
           <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm font-semibold">
-            ملاحظة هامة: سيتم الاحتفاظ بجميع الجلسات لمدة شهر واحد (30 يوماً) من تاريخ إنشائها، بعد ذلك سيتم حذفها تلقائياً للحفاظ على مساحة التخزين.
+            {s.retentionNotice}
           </div>
         </div>
       </div>
@@ -152,7 +159,7 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
             {isAllCurrentPageSelected && <CheckCircle2 className="w-4 h-4" />}
           </button>
           <span className="text-sm font-bold text-gray-600 cursor-pointer select-none" onClick={toggleAll}>
-            تحديد الكل في هذه الصفحة
+            {s.selectAllPage}
           </span>
         </div>
       )}
@@ -175,8 +182,8 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
           <div className="w-20 h-20 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mb-4">
             <History className="w-10 h-10" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">لا توجد جلسات</h3>
-          <p className="text-gray-500 max-w-sm">لم يتم العثور على أي جلسات تطابق بحثك. يرجى تعديل الفلاتر أو بدء جلسة جديدة.</p>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{s.emptyTitle}</h3>
+          <p className="text-gray-500 max-w-sm">{s.emptyDesc}</p>
         </div>
       )}
 
@@ -187,8 +194,9 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
             className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Previous Page"
           >
-            <ChevronRight className="w-5 h-5" />
+            <PrevPageIcon className="w-5 h-5" />
           </button>
           
           {Array.from({ length: totalPages }).map((_, i) => (
@@ -205,8 +213,9 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
             className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Next Page"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <NextPageIcon className="w-5 h-5" />
           </button>
         </div>
       )}
@@ -217,10 +226,10 @@ export default function SessionsClient({ initialSessions }: SessionsClientProps)
           isOpen={showDeleteModal}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={handleDeleteSelected}
-          title="حذف الجلسات المحددة"
-          description={`هل أنت متأكد من أنك تريد حذف ${selectedSessions.length} جلسة؟ لا يمكن التراجع عن هذا الإجراء.`}
-          confirmText={isPending ? "جاري الحذف..." : "نعم، احذف"}
-          cancelText="إلغاء"
+          title={s.deleteModalTitle}
+          description={s.deleteModalDesc.replace("{count}", selectedSessions.length.toString())}
+          confirmText={isPending ? (t.common?.saving || (isRTL ? "جاري الحذف..." : "Deleting...")) : s.confirmDelete}
+          cancelText={t.common?.cancel || (isRTL ? "إلغاء" : "Cancel")}
           type="danger"
         />
       )}

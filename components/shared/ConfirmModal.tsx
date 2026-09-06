@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { AlertTriangle, Info, X } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface ConfirmModalProps {
   isOpen: boolean
@@ -22,10 +23,11 @@ export function ConfirmModal({
   onConfirm,
   title,
   description,
-  confirmText = "تأكيد",
-  cancelText = "إلغاء",
+  confirmText,
+  cancelText,
   type = "danger"
 }: ConfirmModalProps) {
+  const { t, isRTL } = useLocale()
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
@@ -34,10 +36,13 @@ export function ConfirmModal({
 
   if (!mounted) return null
 
+  const resolvedConfirmText = confirmText || t.common?.confirm || (isRTL ? "تأكيد" : "Confirm")
+  const resolvedCancelText = cancelText || t.common?.cancel || (isRTL ? "إلغاء" : "Cancel")
+
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/50 transition-colors duration-500" dir="rtl">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/50 transition-colors duration-500" dir={isRTL ? "rtl" : "ltr"}>
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -64,13 +69,13 @@ export function ConfirmModal({
                   'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-lg'
                 }`}
               >
-                {confirmText}
+                {resolvedConfirmText}
               </button>
               <button 
                 onClick={onClose}
                 className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors shadow-sm"
               >
-                {cancelText}
+                {resolvedCancelText}
               </button>
             </div>
           </motion.div>

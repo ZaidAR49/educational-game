@@ -9,6 +9,7 @@ import { UserDetailsModal } from "./UserDetailsModal"
 import { AddUserModal } from "./AddUserModal"
 import { addNormalUserAction, toggleUserSubscriptionAction, toggleUserBlockAction, deleteUserAction } from "@/lib/actions/admin.actions"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 export function UsersTable({ 
   userRole, 
@@ -30,6 +31,7 @@ export function UsersTable({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { t, isRTL } = useLocale()
 
   const [isPending, startTransition] = useTransition()
   const [search, setSearch] = useState(currentSearch)
@@ -71,7 +73,7 @@ export function UsersTable({
         setIsAddUserModalOpen(false)
       } catch (err) {
         console.error(err)
-        toast.error("حدث خطأ أثناء إضافة المستخدم")
+        toast.error(isRTL ? "حدث خطأ أثناء إضافة المستخدم" : "Failed to add user")
       }
     })
   }
@@ -143,13 +145,13 @@ export function UsersTable({
       <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative max-w-md w-full">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
             <input
               type="text"
-              placeholder="البحث بالاسم أو البريد الإلكتروني..."
+              placeholder={t.adminAccounts.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm`}
             />
           </div>
           {userRole !== "viewer" && (
@@ -157,7 +159,7 @@ export function UsersTable({
               onClick={() => setIsAddUserModalOpen(true)}
               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm whitespace-nowrap shrink-0"
             >
-              <UserPlus className="w-5 h-5" /> إضافة مستخدم
+              <UserPlus className="w-5 h-5" /> <span>{t.adminAccounts.addUser}</span>
             </button>
           )}
         </div>
@@ -172,25 +174,25 @@ export function UsersTable({
                   filter === f ? "bg-white shadow-sm text-slate-800" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                 }`}
               >
-                {f === "all" && "الكل"}
-                {f === "pro" && (<><Zap className="w-3.5 h-3.5" /> مشتركي برو</>)}
-                {f === "locked" && (<><Ban className="w-3.5 h-3.5" /> محظورين</>)}
+                {f === "all" && t.adminAccounts.filterAll}
+                {f === "pro" && (<><Zap className="w-3.5 h-3.5" /> {t.adminAccounts.filterPro}</>)}
+                {f === "locked" && (<><Ban className="w-3.5 h-3.5" /> {t.adminAccounts.filterLocked}</>)}
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-slate-500 flex items-center gap-1">
-              <ArrowDownUp className="w-4 h-4" /> ترتيب:
+              <ArrowDownUp className="w-4 h-4" /> {t.adminAccounts.sortBy}
             </span>
             <select
               value={sort}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 rounded-xl px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className={`bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 rounded-xl px-3 py-2 ${isRTL ? 'pr-8' : 'pl-8'} focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
             >
-              <option value="newest">الأحدث تسجيلاً</option>
-              <option value="oldest">الأقدم تسجيلاً</option>
-              <option value="recent_login">آخر ظهور</option>
+              <option value="newest">{t.adminAccounts.sortNewest}</option>
+              <option value="oldest">{t.adminAccounts.sortOldest}</option>
+              <option value="recent_login">{t.adminAccounts.sortRecentLogin}</option>
             </select>
           </div>
         </div>
@@ -198,15 +200,15 @@ export function UsersTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-right">
+        <table className="w-full text-sm text-start">
           <thead className="bg-slate-50/50 text-slate-500 font-medium border-b border-slate-100">
             <tr>
-              <th className="px-6 py-4">المستخدم</th>
-              <th className="px-6 py-4">الصلاحية</th>
-              <th className="px-6 py-4">الباقة</th>
-              <th className="px-6 py-4">الحالة</th>
-              <th className="px-6 py-4">تاريخ التسجيل</th>
-              <th className="px-6 py-4 text-center">إجراءات</th>
+              <th className="px-6 py-4 text-start">{t.adminAccounts.thUser}</th>
+              <th className="px-6 py-4 text-start">{t.adminAccounts.thRole}</th>
+              <th className="px-6 py-4 text-start">{t.adminAccounts.thPlan}</th>
+              <th className="px-6 py-4 text-start">{t.adminAccounts.thStatus}</th>
+              <th className="px-6 py-4 text-start">{t.adminAccounts.thDate}</th>
+              <th className="px-6 py-4 text-center">{t.adminAccounts.thActions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 relative">
@@ -241,36 +243,36 @@ export function UsersTable({
                 <td className="px-6 py-4">
                   {user.role === "admin" ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-medium border border-purple-100">
-                      <Shield className="w-3.5 h-3.5" /> مسوؤل
+                      <Shield className="w-3.5 h-3.5" /> {t.adminAccounts.roleAdmin}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                      <ShieldOff className="w-3.5 h-3.5" /> مستخدم
+                      <ShieldOff className="w-3.5 h-3.5" /> {t.adminAccounts.roleUser}
                     </span>
                   )}
                 </td>
                 <td className="px-6 py-4">
                   {user.plan === "pro" ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">برو (Pro)</span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">{t.adminAccounts.planPro}</span>
                   ) : (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">مجاني</span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">{t.adminAccounts.planFree}</span>
                   )}
                 </td>
                 <td className="px-6 py-4">
                   {user.status === "active" ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> نشط
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {t.adminAccounts.statusActive}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 text-red-700 text-xs font-medium border border-red-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> محظور
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> {t.adminAccounts.statusLocked}
                     </span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-slate-500">{new Date(user.createdAt).toLocaleDateString("ar-SA")}</td>
+                <td className="px-6 py-4 text-slate-500">{new Date(user.createdAt).toLocaleDateString(isRTL ? "ar-u-nu-latn" : "en-US")}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-2">
-                    <button onClick={() => setSelectedUser(user)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="عرض التفاصيل">
+                    <button onClick={() => setSelectedUser(user)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title={t.adminAccounts.viewDetails}>
                       <Eye className="w-4 h-4" />
                     </button>
                     {userRole !== "viewer" && (
@@ -278,18 +280,18 @@ export function UsersTable({
                         <button
                           onClick={() => setConfirmAction({ type: "subscribe", user })}
                           className={`p-2 rounded-lg transition-colors ${user.plan === "pro" ? "text-amber-500 hover:text-amber-700 hover:bg-amber-50" : "text-slate-400 hover:text-amber-600 hover:bg-amber-50"}`}
-                          title={user.plan === "pro" ? "إلغاء الاشتراك" : "ترقية لبرو"}
+                          title={user.plan === "pro" ? t.adminAccounts.downgradePro : t.adminAccounts.upgradePro}
                         >
                           {user.plan === "pro" ? <ZapOff className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
                         </button>
                         <button
                           onClick={() => setConfirmAction({ type: user.status === "active" ? "block" : "unblock", user })}
                           className={`p-2 rounded-lg transition-colors ${user.status === "active" ? "text-slate-400 hover:text-amber-600 hover:bg-amber-50" : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"}`}
-                          title={user.status === "active" ? "حظر المستخدم" : "إلغاء الحظر"}
+                          title={user.status === "active" ? t.adminAccounts.blockUser : t.adminAccounts.unblockUser}
                         >
                           {user.status === "active" ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                         </button>
-                        <button onClick={() => setConfirmAction({ type: "delete", user })} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="حذف">
+                        <button onClick={() => setConfirmAction({ type: "delete", user })} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title={t.adminAccounts.deleteUser}>
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </>
@@ -301,7 +303,7 @@ export function UsersTable({
           </tbody>
         </table>
         {filteredUsers.length === 0 && (
-          <div className="p-12 text-center text-slate-500">لا توجد حسابات مطابقة للبحث</div>
+          <div className="p-12 text-center text-slate-500">{t.adminAccounts.noUsersFound}</div>
         )}
       </div>
 
@@ -311,14 +313,12 @@ export function UsersTable({
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1 || isPending}
             className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="الصفحة السابقة"
           >
-            <ChevronRight className="w-5 h-5" />
+            {isRTL ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
 
           {Array.from({ length: totalPages }).map((_, i) => {
             const pageNum = i + 1;
-            // Show only a few buttons around the current page to avoid clutter if there are many pages
             if (
               totalPages > 7 &&
               pageNum !== 1 &&
@@ -355,9 +355,8 @@ export function UsersTable({
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages || isPending}
             className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="الصفحة التالية"
           >
-            <ChevronLeft className="w-5 h-5" />
+            {isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </button>
         </div>
       )}
@@ -377,25 +376,34 @@ export function UsersTable({
         isOpen={confirmAction.type === "subscribe"}
         onClose={() => setConfirmAction({ type: null, user: null })}
         onConfirm={executeSubscriptionToggle}
-        title={confirmAction.user?.plan === "pro" ? "إلغاء الاشتراك" : "ترقية لبرو"}
-        description={confirmAction.user?.plan === "pro" ? `هل أنت متأكد من إلغاء اشتراك برو للمستخدم ${confirmAction.user?.name}؟` : `هل أنت متأكد من ترقية المستخدم ${confirmAction.user?.name} إلى برو؟`}
-        confirmText="تأكيد" cancelText="إلغاء" type="warning"
+        title={t.adminAccounts.confirmSubscribeTitle}
+        description={t.adminAccounts.confirmSubscribeMsg.replace('{name}', confirmAction.user?.name || '').replace('{plan}', confirmAction.user?.plan === "pro" ? t.adminAccounts.planFree : t.adminAccounts.planPro)}
+        confirmText={isRTL ? "تأكيد" : "Confirm"} 
+        cancelText={isRTL ? "إلغاء" : "Cancel"} 
+        type="warning"
       />
       <ConfirmModal
         isOpen={confirmAction.type === "block" || confirmAction.type === "unblock"}
         onClose={() => setConfirmAction({ type: null, user: null })}
         onConfirm={executeBlockToggle}
-        title={confirmAction.user?.status === "active" ? "حظر المستخدم" : "إلغاء الحظر"}
-        description={confirmAction.user?.status === "active" ? `هل أنت متأكد من حظر المستخدم ${confirmAction.user?.name}؟` : `هل أنت متأكد من إلغاء حظر المستخدم ${confirmAction.user?.name}؟`}
-        confirmText="تأكيد" cancelText="إلغاء" type={confirmAction.type === "block" ? "danger" : "warning"}
+        title={confirmAction.user?.status === "active" ? t.adminAccounts.confirmBlockTitle : t.adminAccounts.confirmUnblockTitle}
+        description={confirmAction.user?.status === "active" 
+          ? t.adminAccounts.confirmBlockMsg.replace('{name}', confirmAction.user?.name || '')
+          : t.adminAccounts.confirmUnblockMsg.replace('{name}', confirmAction.user?.name || '')
+        }
+        confirmText={isRTL ? "تأكيد" : "Confirm"} 
+        cancelText={isRTL ? "إلغاء" : "Cancel"} 
+        type={confirmAction.type === "block" ? "danger" : "warning"}
       />
       <ConfirmModal
         isOpen={confirmAction.type === "delete"}
         onClose={() => setConfirmAction({ type: null, user: null })}
         onConfirm={executeDelete}
-        title="حذف المستخدم"
-        description={`هل أنت متأكد من حذف المستخدم ${confirmAction.user?.name} نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`}
-        confirmText="حذف" cancelText="إلغاء" type="danger"
+        title={t.adminAccounts.confirmDeleteTitle}
+        description={t.adminAccounts.confirmDeleteMsg.replace('{name}', confirmAction.user?.name || '')}
+        confirmText={isRTL ? "حذف" : "Delete"} 
+        cancelText={isRTL ? "إلغاء" : "Cancel"} 
+        type="danger"
       />
     </div>
   )

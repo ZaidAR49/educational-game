@@ -1,7 +1,10 @@
+"use client"
+
 import Link from "next/link"
 import { History, CalendarDays, Users, CheckCircle2 } from "lucide-react"
 import { useLongPress } from "@/lib/hooks/use-long-press"
 import { Session } from "./types"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface SessionCardProps {
   session: Session
@@ -11,6 +14,9 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, isSelected, isSelectionMode, onToggleSelection }: SessionCardProps) {
+  const { t, locale, isRTL } = useLocale()
+  const s = t.sessionsDashboard
+
   const longPressProps = useLongPress(
     (e) => {
       e?.preventDefault()
@@ -37,15 +43,15 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
         
         {/* Selection Checkbox */}
         {isSelectionMode && (
-          <div className="absolute top-6 left-6 z-10 animate-in fade-in zoom-in duration-200">
+          <div className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} z-10 animate-in fade-in zoom-in duration-200`}>
             <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-300 bg-white'}`}>
               {isSelected && <CheckCircle2 className="w-4 h-4" />}
             </div>
           </div>
         )}
 
-        <div className="flex items-center gap-3 mb-4 pr-2">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
             <History className="w-6 h-6" />
           </div>
           <div>
@@ -57,11 +63,11 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
           <div className="flex gap-2">
             <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-xl">
               <CalendarDays className="w-4 h-4 text-emerald-500" />
-              <span>{new Date(session.date).toLocaleDateString('ar-SA')}</span>
+              <span>{new Date(session.date).toLocaleDateString(locale === 'ar' ? 'ar-u-nu-latn' : 'en-US')}</span>
             </div>
             <div className="flex items-center gap-1.5 text-sm font-bold text-gray-500 bg-gray-50 px-3 py-1.5 rounded-xl">
               <Users className="w-4 h-4 text-blue-500" />
-              <span>{session.playersCount} طلاب</span>
+              <span>{session.playersCount.toLocaleString('en-US')} {s.studentsSuffix}</span>
             </div>
           </div>
           
@@ -72,7 +78,7 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
             onTouchStart={handleLinkEvents}
             className="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl transition-colors"
           >
-            عرض التفاصيل
+            {s.viewDetails}
           </Link>
         </div>
 

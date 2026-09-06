@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { ConfirmModal } from "@/components/shared/ConfirmModal"
 import { deleteOrganizationAction } from "@/lib/actions/organizations.actions"
 import { toast } from "sonner"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 interface DeleteOrganizationButtonProps {
   orgId: string
@@ -14,19 +15,21 @@ interface DeleteOrganizationButtonProps {
 
 export function DeleteOrganizationButton({ orgId, orgName }: DeleteOrganizationButtonProps) {
   const router = useRouter()
+  const { t, isRTL } = useLocale()
+  const o = t.organizations
   const [isOpen, setIsOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
     setIsDeleting(true)
-    const toastId = toast.loading(`جاري حذف المؤسسة ${orgName}...`)
+    const toastId = toast.loading(o.deletingToast.replace("{name}", orgName))
     try {
       await deleteOrganizationAction(orgId)
-      toast.success("تم الحذف بنجاح", { id: toastId })
+      toast.success(o.deletedToast, { id: toastId })
       router.refresh()
     } catch (error) {
       console.error(error)
-      toast.error("حدث خطأ أثناء الحذف", { id: toastId })
+      toast.error(o.deleteErrorToast, { id: toastId })
     } finally {
       setIsDeleting(false)
       setIsOpen(false)
@@ -37,21 +40,20 @@ export function DeleteOrganizationButton({ orgId, orgName }: DeleteOrganizationB
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        disabled={isDeleting}
-        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        title="حذف"
+        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+        title={o.deleteTooltip}
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 className="w-5 h-5" />
       </button>
 
       <ConfirmModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onConfirm={handleDelete}
-        title="حذف المؤسسة نهائياً؟"
-        description={`تنبيه هام: إذا قمت بحذف هذه المؤسسة ("${orgName}")، سيتم أيضاً حذف جميع الألعاب المرتبطة بها وجميع بياناتها نهائياً ولا يمكن التراجع عن هذا الإجراء.`}
-        confirmText="نعم، احذف المؤسسة والألعاب"
-        cancelText="إلغاء"
+        title={o.deleteModalTitle}
+        description={o.deleteModalDesc.replace("{name}", orgName)}
+        confirmText={o.confirmDelete}
+        cancelText={t.common?.cancel || (isRTL ? "إلغاء" : "Cancel")}
         type="danger"
       />
     </>

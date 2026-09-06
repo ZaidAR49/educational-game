@@ -4,12 +4,14 @@ import { useState, useTransition } from "react"
 import { Shield, UserPlus, Loader2 } from "lucide-react"
 import { AnimatePresence } from "framer-motion"
 import { ConfirmModal } from "@/components/shared/ConfirmModal"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 import { addAdminAction, toggleAdminBlockAction, removeAdminAction, editAdminAction } from "@/lib/actions/admin.actions"
 import { AddAdminModal } from "./AddAdminModal"
 import { EditAdminModal } from "./EditAdminModal"
 import { AdminListItem } from "./AdminListItem"
 
 export function SettingsClient({ userRole, initialAdmins }: { userRole: string; initialAdmins: any[] }) {
+  const { t } = useLocale()
   const [isPending, startTransition] = useTransition()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<any | null>(null)
@@ -30,7 +32,7 @@ export function SettingsClient({ userRole, initialAdmins }: { userRole: string; 
         await addAdminAction(formData)
         setIsAddModalOpen(false)
       } catch (err: any) {
-        setActionError(err?.message || "حدث خطأ أثناء إضافة المسؤول")
+        setActionError(err?.message || t.adminSettings.errorAdd)
       }
     })
   }
@@ -44,7 +46,7 @@ export function SettingsClient({ userRole, initialAdmins }: { userRole: string; 
         await editAdminAction(formData)
         setEditTarget(null)
       } catch (err: any) {
-        setActionError(err?.message || "حدث خطأ أثناء تعديل المسؤول")
+        setActionError(err?.message || t.adminSettings.errorEdit)
       }
     })
   }
@@ -60,7 +62,7 @@ export function SettingsClient({ userRole, initialAdmins }: { userRole: string; 
           await toggleAdminBlockAction(confirmAction.payload.id, confirmAction.type === "block")
         }
       } catch (err: any) {
-        setActionError(err?.message || "حدث خطأ أثناء تنفيذ الإجراء")
+        setActionError(err?.message || t.adminSettings.errorAction)
       } finally {
         setConfirmAction({ type: null })
       }
@@ -80,15 +82,15 @@ export function SettingsClient({ userRole, initialAdmins }: { userRole: string; 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">إدارة المسؤولين</h2>
-          <p className="text-slate-500 mt-1">إضافة وإزالة مدراء المنصة</p>
+          <h2 className="text-2xl font-bold text-slate-800">{t.adminSettings.pageTitle}</h2>
+          <p className="text-slate-500 mt-1">{t.adminSettings.pageSubtitle}</p>
         </div>
         {userRole === "super_admin" && (
           <button
             onClick={() => { setActionError(null); setIsAddModalOpen(true) }}
             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm whitespace-nowrap shrink-0"
           >
-            <UserPlus className="w-5 h-5" /> إضافة مسؤول
+            <UserPlus className="w-5 h-5" /> {t.adminSettings.addAdminBtn}
           </button>
         )}
       </div>
@@ -98,7 +100,7 @@ export function SettingsClient({ userRole, initialAdmins }: { userRole: string; 
         <div className="p-6 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-indigo-500" />
-            <h3 className="font-semibold text-slate-800">قائمة المسؤولين الحاليين</h3>
+            <h3 className="font-semibold text-slate-800">{t.adminSettings.listTitle}</h3>
           </div>
         </div>
 
@@ -152,18 +154,18 @@ export function SettingsClient({ userRole, initialAdmins }: { userRole: string; 
         onClose={() => setConfirmAction({ type: null })}
         onConfirm={executeAction}
         title={
-          confirmAction.type === "add" ? "تأكيد الإضافة" :
-          confirmAction.type === "delete" ? "تأكيد الإزالة" :
-          confirmAction.type === "block" ? "تأكيد الحظر" : "إلغاء الحظر"
+          confirmAction.type === "add" ? t.adminSettings.confirmAddTitle :
+          confirmAction.type === "delete" ? t.adminSettings.confirmDeleteTitle :
+          confirmAction.type === "block" ? t.adminSettings.confirmBlockTitle : t.adminSettings.confirmUnblockTitle
         }
         description={
-          confirmAction.type === "add" ? `هل أنت متأكد من منح الصلاحية للمستخدم ${confirmAction.payload?.name}؟` :
-          confirmAction.type === "delete" ? `هل أنت متأكد من إزالة صلاحيات ${confirmAction.payload?.name}؟` :
-          confirmAction.type === "block" ? `هل أنت متأكد من حظر ${confirmAction.payload?.name} مؤقتاً؟` :
-          `هل أنت متأكد من إلغاء حظر ${confirmAction.payload?.name}؟`
+          confirmAction.type === "add" ? t.adminSettings.confirmAddMsg.replace("{name}", confirmAction.payload?.name || "") :
+          confirmAction.type === "delete" ? t.adminSettings.confirmDeleteMsg.replace("{name}", confirmAction.payload?.name || "") :
+          confirmAction.type === "block" ? t.adminSettings.confirmBlockMsg.replace("{name}", confirmAction.payload?.name || "") :
+          t.adminSettings.confirmUnblockMsg.replace("{name}", confirmAction.payload?.name || "")
         }
-        confirmText="تأكيد"
-        cancelText="إلغاء"
+        confirmText={t.adminSettings.confirmBtn}
+        cancelText={t.adminSettings.cancel}
         type={confirmAction.type === "delete" || confirmAction.type === "block" ? "danger" : "warning"}
       />
     </div>

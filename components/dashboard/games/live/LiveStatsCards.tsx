@@ -1,6 +1,7 @@
 "use client"
 
 import { Users, Trophy, Activity } from "lucide-react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 type LiveStatsCardsProps = {
   activePlayers: number
@@ -10,6 +11,8 @@ type LiveStatsCardsProps = {
 }
 
 export function LiveStatsCards({ activePlayers, totalStudents, avgScore, correctPercentage }: LiveStatsCardsProps) {
+  const { t } = useLocale()
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="relative bg-white rounded-3xl p-6 border border-indigo-100 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-center gap-4 overflow-hidden group">
@@ -23,7 +26,7 @@ export function LiveStatsCards({ activePlayers, totalStudents, avgScore, correct
           </span>
         </div>
         <div className="relative z-10">
-          <p className="text-gray-500 font-medium mb-1">الطلاب المتصلين</p>
+          <p className="text-gray-500 font-medium mb-1">{t.liveSession.connectedStudents}</p>
           <h3 className="text-3xl font-black text-gray-900">{activePlayers} <span className="text-lg text-gray-400 font-medium">/ {totalStudents}</span></h3>
         </div>
       </div>
@@ -39,7 +42,7 @@ export function LiveStatsCards({ activePlayers, totalStudents, avgScore, correct
           </span>
         </div>
         <div className="relative z-10">
-          <p className="text-gray-500 font-medium mb-1">متوسط الدرجات</p>
+          <p className="text-gray-500 font-medium mb-1">{t.liveSession.avgScore}</p>
           <h3 className="text-3xl font-black text-gray-900">{avgScore}</h3>
         </div>
       </div>
@@ -55,7 +58,7 @@ export function LiveStatsCards({ activePlayers, totalStudents, avgScore, correct
           </span>
         </div>
         <div className="relative z-10">
-          <p className="text-gray-500 font-medium mb-1">معدل الإجابات الصحيحة</p>
+          <p className="text-gray-500 font-medium mb-1">{t.liveSession.correctRate}</p>
           <h3 className="text-3xl font-black text-gray-900">{correctPercentage}%</h3>
         </div>
       </div>

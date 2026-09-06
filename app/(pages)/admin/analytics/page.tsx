@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 import { Suspense } from "react"
+import { AnalyticsHeader } from "@/components/admin/analytics/AnalyticsHeader"
 import {
   KpisSection,
   AiUsageSection,
@@ -21,12 +22,9 @@ import {
 
 export default function AnalyticsPage() {
   return (
-    <div className="space-y-10 pb-12 text-right" dir="rtl">
+    <div className="space-y-10 pb-12">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800">لوحة تحكم التحليلات</h2>
-        <p className="mt-1 text-slate-500">نظرة شاملة على أداء المنصة وأحداث PostHog خلال آخر 30 يوماً</p>
-      </div>
+      <AnalyticsHeader />
 
       {/* Platform KPIs */}
       <Suspense fallback={<KpisSkeleton />}>

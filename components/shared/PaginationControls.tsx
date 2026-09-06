@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useLocale } from "@/lib/i18n/LanguageContext";
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -11,6 +12,7 @@ interface PaginationControlsProps {
 export function PaginationControls({ currentPage, totalPages }: PaginationControlsProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t, locale } = useLocale();
 
   if (totalPages <= 1) return null;
 
@@ -20,6 +22,9 @@ export function PaginationControls({ currentPage, totalPages }: PaginationContro
     return `${pathname}?${params.toString()}`;
   };
 
+  const prevText = t.common?.previous || (locale === 'ar' ? "السابق" : "Previous");
+  const nextText = t.common?.next || (locale === 'ar' ? "التالي" : "Next");
+
   return (
     <div className="flex justify-center items-center gap-2 pt-4">
       {currentPage > 1 ? (
@@ -27,14 +32,14 @@ export function PaginationControls({ currentPage, totalPages }: PaginationContro
           href={createPageURL(currentPage - 1)}
           className="px-4 py-2 rounded-xl text-sm font-bold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all"
         >
-          السابق
+          {prevText}
         </Link>
       ) : (
         <button
           disabled
           className="px-4 py-2 rounded-xl text-sm font-bold bg-white border border-gray-200 text-gray-700 opacity-50 cursor-not-allowed"
         >
-          السابق
+          {prevText}
         </button>
       )}
       
@@ -64,14 +69,14 @@ export function PaginationControls({ currentPage, totalPages }: PaginationContro
           href={createPageURL(currentPage + 1)}
           className="px-4 py-2 rounded-xl text-sm font-bold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all"
         >
-          التالي
+          {nextText}
         </Link>
       ) : (
         <button
           disabled
           className="px-4 py-2 rounded-xl text-sm font-bold bg-white border border-gray-200 text-gray-700 opacity-50 cursor-not-allowed"
         >
-          التالي
+          {nextText}
         </button>
       )}
     </div>

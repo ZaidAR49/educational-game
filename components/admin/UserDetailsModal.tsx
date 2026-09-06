@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { Building2, Gamepad2, Users, Copy, Check, Clock, BrainCircuit, KeySquare, Calendar } from "lucide-react"
 import { useState } from "react"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 
 type UserDetailsModalProps = {
   user: any
@@ -10,6 +11,7 @@ type UserDetailsModalProps = {
 }
 
 export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
+  const { isRTL } = useLocale()
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -19,7 +21,7 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" dir="rtl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -27,7 +29,7 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
         className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col"
       >
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-          <h3 className="text-lg font-bold text-slate-800">تفاصيل الحساب</h3>
+          <h3 className="text-lg font-bold text-slate-800">{isRTL ? "تفاصيل الحساب" : "Account Details"}</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -50,7 +52,7 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
                 <button
                   onClick={handleCopy}
                   className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-indigo-600 rounded-md transition-colors border border-slate-200 shrink-0"
-                  title="نسخ المعرف"
+                  title={isRTL ? "نسخ المعرف" : "Copy ID"}
                 >
                   {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 </button>
@@ -62,51 +64,50 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Building2 className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">المنظمات</span>
+                <span className="text-sm font-medium">{isRTL ? "المنظمات" : "Organizations"}</span>
               </div>
               <div className="text-2xl font-bold text-slate-800">{user.organizations}</div>
             </div>
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Gamepad2 className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">الألعاب</span>
+                <span className="text-sm font-medium">{isRTL ? "الألعاب" : "Games"}</span>
               </div>
               <div className="text-2xl font-bold text-slate-800">{user.games}</div>
             </div>
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 col-span-2">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Users className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">إجمالي اللاعبين</span>
+                <span className="text-sm font-medium">{isRTL ? "إجمالي اللاعبين" : "Total Players"}</span>
               </div>
               <div className="text-2xl font-bold text-slate-800">{user.totalPlayers}</div>
             </div>
             
-            {/* New requested fields */}
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Clock className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">آخر ظهور</span>
+                <span className="text-sm font-medium">{isRTL ? "آخر ظهور" : "Last Active"}</span>
               </div>
-              <div className="text-sm font-bold text-slate-800">{user.lastLoginAt || "لم يسجل الدخول بعد"}</div>
+              <div className="text-sm font-bold text-slate-800">{user.lastLoginAt || (isRTL ? "لم يسجل الدخول بعد" : "Never")}</div>
             </div>
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Calendar className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">انتهاء الاشتراك</span>
+                <span className="text-sm font-medium">{isRTL ? "انتهاء الاشتراك" : "Subscription Expiry"}</span>
               </div>
-              <div className="text-sm font-bold text-slate-800">{user.subscriptionExpiresAt || "غير متوفر"}</div>
+              <div className="text-sm font-bold text-slate-800">{user.subscriptionExpiresAt || (isRTL ? "غير متوفر" : "N/A")}</div>
             </div>
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <BrainCircuit className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">طلبات الذكاء الاصطناعي</span>
+                <span className="text-sm font-medium">{isRTL ? "طلبات الذكاء الاصطناعي" : "AI Requests"}</span>
               </div>
               <div className="text-xl font-bold text-slate-800">{user.aiRequestsCurrentPeriod ?? 0}</div>
             </div>
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <KeySquare className="w-4 h-4 shrink-0" />
-                <span className="text-sm font-medium">الرموز المستخدمة</span>
+                <span className="text-sm font-medium">{isRTL ? "الرموز المستخدمة" : "Tokens Used"}</span>
               </div>
               <div className="text-xl font-bold text-slate-800">{user.aiTokensUsedCurrentPeriod ?? 0}</div>
             </div>
@@ -118,7 +119,7 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
             onClick={onClose}
             className="px-6 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-medium transition-colors"
           >
-            إغلاق
+            {isRTL ? "إغلاق" : "Close"}
           </button>
         </div>
       </motion.div>
