@@ -114,7 +114,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
                 }`}
               />
             </div>
-            {errors.slug && <p className="text-red-500 text-sm font-bold text-left" dir="ltr">{errors.slug}</p>}
+            {errors.slug && <p className="text-red-500 text-sm font-bold text-start">{errors.slug}</p>}
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { Save, UserCircle2, Mail, Loader2, Zap, Star, Globe } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -18,7 +18,7 @@ interface SettingsClientProps {
 
 export default function SettingsClient({ session, isSubscribed, subscriptionPlan, initialLocale = "ar" }: SettingsClientProps) {
   const router = useRouter()
-  const { t, isRTL, setLocale } = useLocale()
+  const { t, isRTL, locale: activeLocale, setLocale } = useLocale()
   const s = t.settings
   const { update: updateSession } = useSession()
   const [isPending, startTransition] = useTransition()
@@ -32,8 +32,15 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
   const [formData, setFormData] = useState({
     name: session?.user?.name || "",
     email: session?.user?.email || "",
-    locale: initialLocale || "ar",
+    locale: (activeLocale === "ar" || activeLocale === "en") ? activeLocale : (initialLocale || "ar"),
   })
+
+  // Sync formData.locale if activeLocale changes (e.g. from navbar switcher)
+  useEffect(() => {
+    if (activeLocale && (activeLocale === "ar" || activeLocale === "en")) {
+      setFormData((prev) => ({ ...prev, locale: activeLocale }))
+    }
+  }, [activeLocale])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -48,11 +55,13 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
     
     startTransition(async () => {
       try {
-        await updateUserAction({ name: formData.name, locale: formData.locale });
-        await updateSession({ name: formData.name, locale: formData.locale });
-        if (formData.locale === "ar" || formData.locale === "en") {
-          setLocale(formData.locale);
-        }
+        const targetLocale = (formData.locale === "ar" || formData.locale === "en")
+          ? formData.locale
+          : (activeLocale || "ar");
+
+        await updateUserAction({ name: formData.name, locale: targetLocale });
+        await updateSession({ name: formData.name, locale: targetLocale });
+        setLocale(targetLocale as "ar" | "en");
         toast.success(s.savedToast);
         router.refresh();
       } catch (err) {
@@ -218,7 +227,10 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, locale: "ar" })}
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, locale: "ar" }))
+                  setLocale("ar")
+                }}
                 className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-start ${
                   formData.locale === "ar"
                     ? "border-emerald-500 bg-emerald-50/60 shadow-sm ring-2 ring-emerald-500/10"
@@ -241,7 +253,10 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
 
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, locale: "en" })}
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, locale: "en" }))
+                  setLocale("en")
+                }}
                 className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-start ${
                   formData.locale === "en"
                     ? "border-emerald-500 bg-emerald-50/60 shadow-sm ring-2 ring-emerald-500/10"

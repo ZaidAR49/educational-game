@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, usageEvents, accounts, sessions, organizations, games, classroomPlays } from "@/lib/db/schema";
 import { requireAuth } from "./utils";
-import { update } from "@/auth";
+import { update, auth } from "@/auth";
 
 export async function updateUserAction(data: { name?: string; locale?: string }) {
   const sessionUser = await requireAuth();
@@ -36,6 +36,23 @@ export async function updateUserAction(data: { name?: string; locale?: string })
   revalidatePath("/dashboard");
   
   return { success: true };
+}
+
+export async function updateUserLocaleAction(locale: string) {
+  try {
+    if (!["ar", "en"].includes(locale)) return { success: false };
+    const session = await auth();
+    if (!session?.user?.id) return { success: false };
+
+    await db
+      .update(users)
+      .set({ locale, updatedAt: new Date() })
+      .where(eq(users.id, session.user.id));
+
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
 }
 
 export async function deleteUserAccountAction() {

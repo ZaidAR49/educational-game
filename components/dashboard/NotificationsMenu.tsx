@@ -134,10 +134,10 @@ export function NotificationsMenu() {
             >
               <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-black text-slate-800">{t.notificationsMenu?.title || "الإشعارات"}</h3>
+                  <h3 className="text-lg font-black text-slate-800">{t.notificationsMenu?.title || (isRTL ? "الإشعارات" : "Notifications")}</h3>
                   {unreadCount > 0 && (
                     <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full">
-                      {unreadCount} {t.notificationsMenu?.newBadge || "جديد"}
+                      {unreadCount} {t.notificationsMenu?.newBadge || (isRTL ? "جديد" : "New")}
                     </span>
                   )}
                 </div>
@@ -147,7 +147,7 @@ export function NotificationsMenu() {
                       onClick={handleMarkAllRead}
                       className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
                     >
-                      {t.notificationsMenu?.markAllRead || "تحديد الكل كمقروء"}
+                      {t.notificationsMenu?.markAllRead || (isRTL ? "تحديد الكل كمقروء" : "Mark all as read")}
                     </button>
                   )}
                   <button 
@@ -163,14 +163,14 @@ export function NotificationsMenu() {
                 {isLoading && combined.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-3">
                     <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
-                    <span className="text-sm">{t.notificationsMenu?.loading || "جاري تحميل الإشعارات..."}</span>
+                    <span className="text-sm">{t.notificationsMenu?.loading || (isRTL ? "جاري تحميل الإشعارات..." : "Loading notifications...")}</span>
                   </div>
                 ) : combined.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-12 text-slate-400 gap-3">
                     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-2">
                       <Bell className="w-8 h-8 text-slate-300" />
                     </div>
-                    <span className="text-sm font-medium">{t.notificationsMenu?.empty || "لا توجد إشعارات حالياً"}</span>
+                    <span className="text-sm font-medium">{t.notificationsMenu?.empty || (isRTL ? "لا توجد إشعارات حالياً" : "No notifications at the moment")}</span>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100">
@@ -228,7 +228,7 @@ export function NotificationsMenu() {
                                           className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
                                         >
                                           <Check className="w-3.5 h-3.5" />
-                                          {t.notificationsMenu?.markRead || "تحديد كمقروء"}
+                                          {t.notificationsMenu?.markRead || (isRTL ? "تحديد كمقروء" : "Mark as read")}
                                         </button>
                                       )}
                                       <button
@@ -239,7 +239,7 @@ export function NotificationsMenu() {
                                         className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
-                                        {t.notificationsMenu?.delete || "حذف"}
+                                        {t.notificationsMenu?.delete || (isRTL ? "حذف" : "Delete")}
                                       </button>
                                     </div>
                                   </motion.div>

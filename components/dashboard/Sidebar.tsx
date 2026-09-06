@@ -37,12 +37,12 @@ export function Sidebar({ user }: { user?: any }) {
   }, [pathname])
 
   const links = [
-    { href: "/dashboard", label: t.dashboardNav?.overview || "نظرة عامة", icon: LayoutDashboard },
-    { href: "/dashboard/organizations", label: t.dashboardNav?.organizations || "المؤسسات", icon: Building2 },
-    { href: "/dashboard/games", label: t.dashboardNav?.games || "ألعابي", icon: Gamepad2 },
-    { href: "/dashboard/sessions", label: t.dashboardNav?.sessions || "الجلسات", icon: History },
-    { href: "/dashboard/help", label: t.dashboardNav?.help || "دليل الاستخدام", icon: HelpCircle },
-    { href: "/dashboard/settings", label: t.dashboardNav?.settings || "الإعدادات", icon: Settings },
+    { href: "/dashboard", label: t.dashboardNav?.overview || (isRTL ? "نظرة عامة" : "Overview"), icon: LayoutDashboard },
+    { href: "/dashboard/organizations", label: t.dashboardNav?.organizations || (isRTL ? "المؤسسات" : "Organizations"), icon: Building2 },
+    { href: "/dashboard/games", label: t.dashboardNav?.games || (isRTL ? "ألعابي" : "My Games"), icon: Gamepad2 },
+    { href: "/dashboard/sessions", label: t.dashboardNav?.sessions || (isRTL ? "الجلسات" : "Sessions"), icon: History },
+    { href: "/dashboard/help", label: t.dashboardNav?.help || (isRTL ? "دليل الاستخدام" : "User Guide"), icon: HelpCircle },
+    { href: "/dashboard/settings", label: t.dashboardNav?.settings || (isRTL ? "الإعدادات" : "Settings"), icon: Settings },
   ]
 
   return (
@@ -136,7 +136,7 @@ export function Sidebar({ user }: { user?: any }) {
                 className="flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold transition-all text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200"
               >
                 <ShieldCheck className="w-5 h-5 shrink-0" />
-                <span>{t.dashboardNav?.adminPanel || "لوحة التحكم الإدارية"}</span>
+                <span>{t.dashboardNav?.adminPanel || (isRTL ? "لوحة التحكم الإدارية" : "Admin Panel")}</span>
               </Link>
             </>
           )}

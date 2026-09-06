@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Bot, Copy, CheckCircle2, ArrowRight, AlertCircle, Wand2, Globe, ChevronDown } from "lucide-react"
+import { Bot, Copy, CheckCircle2, ArrowRight, ArrowLeft, AlertCircle, Wand2, Globe, ChevronDown } from "lucide-react"
 import { useLocale } from "@/lib/i18n/LanguageContext"
 import { GameWizard } from "./GameWizard"
 import { OrganizationOption } from "./wizard/BasicInfoStep"
@@ -59,7 +59,7 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
 
       // Basic validation
       if (!parsed.title || !parsed.scenarios || !Array.isArray(parsed.scenarios)) {
-        throw new Error("JSON لا يحتوي على الحقول الأساسية المطلوبة (title, scenarios).")
+        throw new Error(isRTL ? "JSON لا يحتوي على الحقول الأساسية المطلوبة (title, scenarios)." : "JSON does not contain required fields (title, scenarios).")
       }
 
       const newGameData: Partial<GameFormData> = {
@@ -94,7 +94,7 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
       setParsedScenarios(newScenarios)
       
     } catch (e: any) {
-      setErrorMsg("الـ JSON المدخل غير صالح. يرجى التأكد من نسخه بالكامل وتطابقه مع الصيغة المطلوبة. " + e.message)
+      setErrorMsg((t.gameCreation.byoInvalidJson || "Invalid JSON. ") + " " + e.message)
     }
   }
 
@@ -103,8 +103,8 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
     return (
       <div className="space-y-4">
         <div className="bg-purple-50 text-purple-700 px-6 py-4 rounded-2xl mb-8 flex items-center gap-3 font-bold border border-purple-100">
-          <Wand2 className="w-6 h-6" />
-          تم استيراد اللعبة بنجاح! يمكنك الآن مراجعتها وتعديلها قبل النشر.
+          <Wand2 className="w-6 h-6 shrink-0" />
+          <span>{t.gameCreation.byoSuccess}</span>
         </div>
         <GameWizard 
           isEdit={false} 
@@ -119,8 +119,8 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
               }}
               className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors font-bold text-sm bg-purple-50 hover:bg-purple-100 px-4 py-2 rounded-xl border border-purple-100"
             >
-              <ArrowRight className="w-4 h-4" />
-              <span>العودة لإعدادات الذكاء الاصطناعي</span>
+              {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+              <span>{t.gameCreation.byoBackToSettings}</span>
             </button>
           }
         />
@@ -129,7 +129,7 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20" dir="rtl">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20" dir={isRTL ? "rtl" : "ltr"}>
       
       {/* Header */}
       <div>
@@ -137,30 +137,30 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
           onClick={onBack}
           className="inline-flex items-center gap-2 text-gray-500 hover:text-purple-600 transition-colors font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 mb-6"
         >
-          <ArrowRight className="w-4 h-4" />
-          <span>العودة لطرق الإنشاء</span>
+          {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+          <span>{t.gameCreation.backToMethods}</span>
         </button>
         
         <div className="flex items-center gap-4 mb-2">
           <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
             <Bot className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">بناء عبر موجه (Prompt)</h1>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.gameCreation.byoTitle}</h1>
         </div>
-        <p className="text-gray-500 font-medium text-lg mr-16">
-          استخدم قوة أي ذكاء اصطناعي تفضله لتوليد محتوى لعبتك. اتبع الخطوتين أدناه!
+        <p className="text-gray-500 font-medium text-lg ms-16">
+          {t.gameCreation.byoDesc}
         </p>
       </div>
 
       {/* Step 1 */}
       <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-2 h-full bg-purple-500"></div>
+        <div className="absolute top-0 start-0 w-2 h-full bg-purple-500"></div>
         <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-black">1</span>
-          تجهيز الموجه (Prompt)
+          {t.gameCreation.byoStep1Title}
         </h2>
         <p className="text-gray-600 mb-6 font-medium">
-          اكتب فكرة اللعبة التي تريدها بشكل مبسط، وسنقوم بتجهيز أمر احترافي لنسخه.
+          {t.gameCreation.byoStep1Desc}
         </p>
 
         <div className="space-y-5">
@@ -243,13 +243,13 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
 
       {/* Step 2 */}
       <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-2 h-full bg-emerald-500"></div>
+        <div className="absolute top-0 start-0 w-2 h-full bg-emerald-500"></div>
         <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">2</span>
-          استيراد النتيجة (JSON)
+          {t.gameCreation.byoStep2Title}
         </h2>
         <p className="text-gray-600 mb-6 font-medium">
-          بعد أن يقوم الذكاء الاصطناعي بتوليد النتيجة، قم بنسخ كود الـ JSON فقط والصقه هنا.
+          {t.gameCreation.byoStep2Desc}
         </p>
 
         <div className="space-y-4">
@@ -286,10 +286,10 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
             disabled={!jsonInput.trim()}
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:hover:bg-emerald-600"
           >
-            معالجة الـ JSON وإنشاء اللعبة
+            {t.gameCreation.byoParseBtn}
           </button>
           <p className="text-center text-xs text-gray-400 font-medium mt-3">
-            قد يخطئ الذكاء الاصطناعي أحياناً. يرجى مراجعة الأسئلة والأجوبة والتأكد من صحتها قبل نشر اللعبة.
+            {t.gameCreation.byoAiDisclaimer}
           </p>
         </div>
       </div>

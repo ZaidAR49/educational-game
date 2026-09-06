@@ -3,12 +3,14 @@ import nodemailer from 'nodemailer';
 import { getContactEmailTemplate, getUserConfirmationEmailTemplate } from '@/lib/emails/contact-template';
 
 export async function POST(req: Request) {
+  let isEn = false;
   try {
-    const { name, email, subject, message } = await req.json();
+    const { name, email, subject, message, locale } = await req.json();
+    isEn = locale === 'en';
 
     if (!name || !email || !message) {
       return NextResponse.json(
-        { error: 'جميع الحقول المطلوبة يجب أن تكون ممتلئة.' },
+        { error: isEn ? 'All required fields must be filled.' : 'جميع الحقول المطلوبة يجب أن تكون ممتلئة.' },
         { status: 400 }
       );
     }
@@ -47,11 +49,11 @@ export async function POST(req: Request) {
       transporter.sendMail(userConfirmationMailOptions)
     ]);
 
-    return NextResponse.json({ success: true, message: 'تم إرسال الرسالة بنجاح' });
+    return NextResponse.json({ success: true, message: isEn ? 'Message sent successfully' : 'تم إرسال الرسالة بنجاح' });
   } catch (error) {
     console.error('Error sending email:', error);
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إرسال الرسالة. حاول مرة أخرى لاحقاً.' },
+      { error: isEn ? 'An error occurred while sending your message. Please try again later.' : 'حدث خطأ أثناء إرسال الرسالة. حاول مرة أخرى لاحقاً.' },
       { status: 500 }
     );
   }

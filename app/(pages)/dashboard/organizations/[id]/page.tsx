@@ -9,7 +9,7 @@ export default async function EditOrganizationPage({ params }: { params: Promise
     
     if (!org) return notFound();
 
-    const initialData = {
+    const initialData: Record<string, any> = {
       institutionName: org.name,
       logo: org.logoPath,
       icon: org.introduction?.decorative_emojis?.[0] || "👋",
@@ -17,17 +17,35 @@ export default async function EditOrganizationPage({ params }: { params: Promise
       subtitle: org.introduction?.subtitle || "",
       welcomeMessage: org.introduction?.welcome_box?.description || "",
       buttonText: org.introduction?.button_text || "",
-      resultTitlePass: org.resultScreen?.pass?.title || org.resultScreen?.title || "ممتاز!",
-      resultSubtitlePass: org.resultScreen?.pass?.small_description || org.resultScreen?.small_description || "لقد أثبتّ جدارتك!",
-      resultMessagePass: org.resultScreen?.pass?.message || org.resultScreen?.message || "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر.",
-      resultTitleFail: org.resultScreen?.fail?.title || org.resultScreen?.title || "لا بأس، استمر!",
-      resultSubtitleFail: org.resultScreen?.fail?.small_description || org.resultScreen?.small_description || "كل محاولة تعلّم جديد!",
-      resultMessageFail: org.resultScreen?.fail?.message || org.resultScreen?.message || "لا تيأس! كل سؤال أخطأت فيه هو معلومة جديدة تعلمتها. جرب مرة أخرى!",
-      // Fallbacks for fields not explicitly in schema but present in the form UI
-      orgMessage: "أحسنت على مشاركتك! كل سؤال هو فرصة جديدة للتعلم والنمو. استمر في تطوير معلوماتك ومهاراتك، ونحن واثقون من قدراتك! 🌟",
-      resultPrimaryButtonText: "العب مرة أخرى 🔄",
-      resultSecondaryButtonText: "شارك نتيجتك 📊",
     };
+
+    if (org.resultScreen?.pass?.title || org.resultScreen?.title) {
+      initialData.resultTitlePass = org.resultScreen?.pass?.title || org.resultScreen?.title;
+    }
+    if (org.resultScreen?.pass?.small_description || org.resultScreen?.small_description) {
+      initialData.resultSubtitlePass = org.resultScreen?.pass?.small_description || org.resultScreen?.small_description;
+    }
+    if (org.resultScreen?.pass?.message || org.resultScreen?.message) {
+      initialData.resultMessagePass = org.resultScreen?.pass?.message || org.resultScreen?.message;
+    }
+    if (org.resultScreen?.fail?.title) {
+      initialData.resultTitleFail = org.resultScreen.fail.title;
+    }
+    if (org.resultScreen?.fail?.small_description) {
+      initialData.resultSubtitleFail = org.resultScreen.fail.small_description;
+    }
+    if (org.resultScreen?.fail?.message) {
+      initialData.resultMessageFail = org.resultScreen.fail.message;
+    }
+    if (org.resultScreen?.orgMessage) {
+      initialData.orgMessage = org.resultScreen.orgMessage;
+    }
+    if (org.resultScreen?.primaryButtonText) {
+      initialData.resultPrimaryButtonText = org.resultScreen.primaryButtonText;
+    }
+    if (org.resultScreen?.secondaryButtonText) {
+      initialData.resultSecondaryButtonText = org.resultScreen.secondaryButtonText;
+    }
 
     return <OrganizationForm initialData={initialData} organizationId={org.id} />
   } catch (error) {

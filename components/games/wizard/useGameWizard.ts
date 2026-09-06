@@ -1,6 +1,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useLocale } from "@/lib/i18n/LanguageContext"
 import { GameFormData, Scenario } from "./types"
 import { generateDefaultChoices } from "./constants"
 import { saveFullGameAction } from "@/lib/actions/game-wizard.actions"
@@ -13,6 +14,7 @@ type UseGameWizardProps = {
 
 export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGameWizardProps) {
   const router = useRouter()
+  const { t, isRTL } = useLocale()
   const [step, setStep] = useState(1)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -36,9 +38,9 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
       {
         id: "1",
         icon: "❓",
-        title: "السؤال الأول",
+        title: t.gameWizard?.questionNum ? t.gameWizard.questionNum.replace('{num}', '1') : (isRTL ? "السؤال الأول" : "Question 1"),
         description: "",
-        choices: generateDefaultChoices(),
+        choices: generateDefaultChoices(isRTL),
       },
     ]
   )
@@ -57,14 +59,19 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
 
   const addScenario = () => {
     const newId = Date.now().toString()
+    const nextNum = scenarios.length + 1
+    const nextTitle = t.gameWizard?.questionNum 
+      ? t.gameWizard.questionNum.replace('{num}', String(nextNum))
+      : (isRTL ? `السؤال ${nextNum}` : `Question ${nextNum}`)
+
     setScenarios([
       ...scenarios,
       {
         id: newId,
         icon: "❓",
-        title: `السؤال ${scenarios.length + 1}`,
+        title: nextTitle,
         description: "",
-        choices: generateDefaultChoices(),
+        choices: generateDefaultChoices(isRTL),
       },
     ])
     setActiveScenarioId(newId)
@@ -73,7 +80,9 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
 
   const removeScenario = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (scenarios.length <= 1) return toast.error("يجب أن تحتوي اللعبة على سؤال واحد على الأقل.")
+    if (scenarios.length <= 1) {
+      return toast.error(t.gameWizard?.minOneQuestion || (isRTL ? "يجب أن تحتوي اللعبة على سؤال واحد على الأقل." : "The game must contain at least one question."))
+    }
     const filtered = scenarios.filter((s) => s.id !== id)
     setScenarios(filtered)
     if (activeScenarioId === id) {
@@ -100,7 +109,9 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
         if (field === "isCorrect") {
           updatedChoices.forEach((c, idx) => {
             c.isCorrect = idx === choiceIndex
-            c.feedback.title = idx === choiceIndex ? "إجابة صحيحة! 🌟" : "إجابة غير صحيحة! 🤔"
+            c.feedback.title = idx === choiceIndex 
+              ? (isRTL ? "إجابة صحيحة! 🌟" : "Correct answer! 🌟")
+              : (isRTL ? "إجابة غير صحيحة! 🤔" : "Incorrect answer! 🤔")
           })
         } else {
           if (field.startsWith("feedback.")) {
@@ -133,15 +144,15 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.title.trim()) newErrors.title = "الرجاء إدخال عنوان اللعبة."
-    if (!formData.description.trim()) newErrors.description = "الرجاء إدخال وصف اللعبة."
-    if (!formData.slug.trim()) newErrors.slug = "الرجاء إدخال الرابط المختصر."
-    if (!formData.icon.trim()) newErrors.icon = "الرجاء إدخال أيقونة."
-    if (!formData.organizationId) newErrors.organizationId = "الرجاء اختيار المؤسسة التابعة لها اللعبة."
+    if (!formData.title.trim()) newErrors.title = isRTL ? "الرجاء إدخال عنوان اللعبة." : "Please enter game title."
+    if (!formData.description.trim()) newErrors.description = isRTL ? "الرجاء إدخال وصف اللعبة." : "Please enter game description."
+    if (!formData.slug.trim()) newErrors.slug = isRTL ? "الرجاء إدخال الرابط المختصر." : "Please enter short link."
+    if (!formData.icon.trim()) newErrors.icon = isRTL ? "الرجاء إدخال أيقونة." : "Please enter an icon."
+    if (!formData.organizationId) newErrors.organizationId = isRTL ? "الرجاء اختيار المؤسسة التابعة لها اللعبة." : "Please select an organization."
 
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) {
-      return "يرجى تعبئة جميع الحقول المطلوبة."
+      return t.gameWizard?.fillRequired || (isRTL ? "يرجى تعبئة جميع الحقول المطلوبة." : "Please fill in all required fields.")
     }
     return null
   }
@@ -149,23 +160,24 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {}
     let firstErrorScenarioId = ""
+    const reqText = isRTL ? "مطلوب" : "Required"
 
     for (let i = 0; i < scenarios.length; i++) {
       const s = scenarios[i]
-      if (!s.title.trim()) newErrors[`scenario_${s.id}_title`] = "مطلوب"
-      if (!s.description.trim()) newErrors[`scenario_${s.id}_desc`] = "مطلوب"
-      if (!s.icon.trim()) newErrors[`scenario_${s.id}_icon`] = "مطلوب"
+      if (!s.title.trim()) newErrors[`scenario_${s.id}_title`] = reqText
+      if (!s.description.trim()) newErrors[`scenario_${s.id}_desc`] = reqText
+      if (!s.icon.trim()) newErrors[`scenario_${s.id}_icon`] = reqText
 
       let hasError = !s.title.trim() || !s.description.trim() || !s.icon.trim()
 
       for (let j = 0; j < s.choices.length; j++) {
         const c = s.choices[j]
         if (!c.text.trim()) {
-          newErrors[`scenario_${s.id}_choice_${j}`] = "مطلوب"
+          newErrors[`scenario_${s.id}_choice_${j}`] = reqText
           hasError = true
         }
         if (!c.feedback.message.trim()) {
-          newErrors[`scenario_${s.id}_feedback_${j}`] = "مطلوب"
+          newErrors[`scenario_${s.id}_feedback_${j}`] = reqText
           hasError = true
         }
       }
@@ -179,7 +191,7 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
 
     if (Object.keys(newErrors).length > 0) {
       if (firstErrorScenarioId) setActiveScenarioId(firstErrorScenarioId)
-      return "يوجد حقول غير مكتملة في الأسئلة، يرجى مراجعتها."
+      return t.gameWizard?.incompleteQuestions || (isRTL ? "يوجد حقول غير مكتملة في الأسئلة، يرجى مراجعتها." : "There are incomplete fields in questions, please review.")
     }
     return null
   }
@@ -235,7 +247,7 @@ export function useGameWizard({ gameId, initialGame, initialScenarios }: UseGame
         }
       } catch (error) {
         console.error("Failed to save game", error)
-        setErrorMsg("حدث خطأ أثناء حفظ اللعبة. يرجى المحاولة مرة أخرى.")
+        setErrorMsg(t.gameWizard?.saveError || (isRTL ? "حدث خطأ أثناء حفظ اللعبة. يرجى المحاولة مرة أخرى." : "An error occurred while saving the game. Please try again."))
       }
     })
   }

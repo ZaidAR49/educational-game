@@ -8,7 +8,7 @@ export function ContactClient() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState("")
-  const { messages: t } = useLocale()
+  const { messages: t, locale } = useLocale()
 
   const c = t.contactPage
 
@@ -26,6 +26,7 @@ export function ContactClient() {
       email: formData.get("email"),
       subject: formData.get("subject"),
       message: formData.get("message"),
+      locale,
     }
 
     try {

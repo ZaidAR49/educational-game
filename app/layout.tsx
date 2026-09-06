@@ -7,8 +7,10 @@ import { Toaster } from "sonner"
 import { auth } from "@/auth"
 import { PosthogIdentify } from "@/components/shared/PosthogIdentify"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { cookies } from "next/headers"
 import { LanguageProvider } from "@/lib/i18n/LanguageContext"
 import { HtmlDirSync } from "@/components/shared/HtmlDirSync"
+import { LOCALE_STORAGE_KEY, type Locale } from "@/lib/i18n"
 import "./globals.css"
 
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["300", "400", "500", "700"] })
@@ -70,11 +72,15 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const session = await auth()
+  const cookieStore = await cookies()
+  const cookieLocale = cookieStore.get(LOCALE_STORAGE_KEY)?.value as Locale | undefined
+  const initialLocale: Locale = (cookieLocale === "en" || cookieLocale === "ar") ? cookieLocale : "ar"
+  const isRTL = initialLocale === "ar"
 
   return (
-    <html lang="ar" dir="rtl" className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
+    <html lang={initialLocale} dir={isRTL ? "rtl" : "ltr"} className="bg-gradient-to-br from-emerald-50 to-blue-50" data-scroll-behavior="smooth">
       <body className={`${tajawal.className} font-sans antialiased`}>
-        <LanguageProvider>
+        <LanguageProvider initialLocale={initialLocale}>
           <HtmlDirSync />
           {children}
           {session?.user?.id && (

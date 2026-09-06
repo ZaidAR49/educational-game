@@ -24,6 +24,7 @@ import {
   type Locale,
   type Messages,
 } from "@/lib/i18n"
+import { updateUserLocaleAction } from "@/lib/actions/users.actions"
 
 export interface LanguageContextValue {
   locale: Locale
@@ -53,24 +54,36 @@ function detectBrowserLocale(): Locale {
   return DEFAULT_LOCALE
 }
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  // Start with DEFAULT_LOCALE to avoid SSR mismatch; real value set in useEffect
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
+export function LanguageProvider({
+  children,
+  initialLocale,
+}: {
+  children: ReactNode
+  initialLocale?: Locale
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale || DEFAULT_LOCALE)
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null
       if (stored && SUPPORTED_LOCALES.includes(stored)) {
-        // User previously made a choice — honour it
-        setLocaleState(stored)
+        if (stored !== locale) {
+          setLocaleState(stored)
+        }
+        document.cookie = `${LOCALE_STORAGE_KEY}=${stored}; path=/; max-age=31536000; SameSite=Lax`
+      } else if (initialLocale && SUPPORTED_LOCALES.includes(initialLocale)) {
+        localStorage.setItem(LOCALE_STORAGE_KEY, initialLocale)
+        document.cookie = `${LOCALE_STORAGE_KEY}=${initialLocale}; path=/; max-age=31536000; SameSite=Lax`
       } else {
-        // First visit — use the browser language
-        setLocaleState(detectBrowserLocale())
+        const detected = detectBrowserLocale()
+        setLocaleState(detected)
+        localStorage.setItem(LOCALE_STORAGE_KEY, detected)
+        document.cookie = `${LOCALE_STORAGE_KEY}=${detected}; path=/; max-age=31536000; SameSite=Lax`
       }
     } catch {
-      setLocaleState(detectBrowserLocale())
+      // ignore
     }
-  }, [])
+  }, [initialLocale])
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -84,12 +97,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (typeof document !== "undefined") {
       document.documentElement.lang = newLocale
       document.documentElement.dir = newLocale === "ar" ? "rtl" : "ltr"
+      try {
+        localStorage.setItem(LOCALE_STORAGE_KEY, newLocale)
+        document.cookie = `${LOCALE_STORAGE_KEY}=${newLocale}; path=/; max-age=31536000; SameSite=Lax`
+      } catch {
+        // ignore
+      }
     }
-    try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, newLocale)
-    } catch {
-      // ignore
-    }
+    // Update user locale in DB if logged in
+    updateUserLocaleAction(newLocale).catch(() => {})
   }, [])
 
   const toggleLocale = useCallback(() => {

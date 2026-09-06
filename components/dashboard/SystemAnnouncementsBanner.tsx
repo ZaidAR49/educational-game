@@ -10,7 +10,7 @@ import {
 import { useLocale } from "@/lib/i18n/LanguageContext";
 
 export function SystemAnnouncementsBanner() {
-  const { locale, t } = useLocale();
+  const { locale, t, isRTL } = useLocale();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -124,7 +124,7 @@ export function SystemAnnouncementsBanner() {
                         </h3>
                         <span className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${style.badge}`}>
                           <Sparkles className="w-3 h-3" />
-                          {t.announcements?.newBadge || "جديد"}
+                          {t.announcements?.newBadge || (isRTL ? "جديد" : "New")}
                         </span>
                       </div>
                       
@@ -147,8 +147,8 @@ export function SystemAnnouncementsBanner() {
                     <button
                       onClick={(e) => handleDismiss(e, item.id)}
                       className="shrink-0 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors group z-10"
-                      title={t.announcements?.dismiss || "إخفاء الإعلان"}
-                      aria-label={t.announcements?.ariaDismiss || "إخفاء"}
+                      title={t.announcements?.dismiss || (isRTL ? "إخفاء الإعلان" : "Dismiss announcement")}
+                      aria-label={t.announcements?.ariaDismiss || (isRTL ? "إخفاء" : "Dismiss")}
                     >
                       <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                     </button>
