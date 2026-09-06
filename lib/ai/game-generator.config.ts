@@ -75,8 +75,8 @@ Keep it tight: message = 1–2 sentences, tip = 1 sentence. Explanatory value ma
 };
 
 export const gameGeneratorConfig = {
-  // We use gemini-2.5-flash as it is highly capable for structured JSON output and fast.
-  model: "gemini-2.5-flash",
+  // Configurable via GEMINI_GAME_MODEL in .env.local (default: gemini-2.5-flash)
+  model: process.env.GEMINI_GAME_MODEL || "gemini-2.5-flash",
 
   // Model generation settings
   config: {

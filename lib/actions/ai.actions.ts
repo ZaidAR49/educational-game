@@ -6,6 +6,8 @@ import { getAiUsageAndLimit, recordAiUsage, checkAndResetAiUsage } from "@/lib/s
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const AI_TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || "gemini-2.0-flash-lite";
+
 export async function improveTextAction(text: string, context: string): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -36,7 +38,7 @@ CRITICAL RULES:
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: AI_TEXT_MODEL,
         contents: prompt,
       });
 
@@ -108,7 +110,7 @@ CRITICAL RULES:
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: AI_TEXT_MODEL,
         contents: prompt,
         config: {
           responseMimeType: "application/json",
