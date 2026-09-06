@@ -199,10 +199,10 @@ export default function NotificationsClient({ userRole }: { userRole: string }) 
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* CREATE FORM COLUMN */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-5 space-y-4">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
             <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2 mb-6">
               <Plus className="w-5 h-5 text-indigo-500" />
@@ -237,13 +237,15 @@ export default function NotificationsClient({ userRole }: { userRole: string }) 
                     placeholder={t.adminNotifications.placeholderSysText}
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+                {/* Type & Severity in 2 columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">{t.adminNotifications.labelType}</label>
                     <select
                       value={sysForm.type}
                       onChange={(e) => setSysForm({ ...sysForm, type: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm transition-all"
                     >
                       <option value="message">{t.adminNotifications.typeMessage}</option>
                       <option value="update">{t.adminNotifications.typeUpdate}</option>
@@ -256,25 +258,27 @@ export default function NotificationsClient({ userRole }: { userRole: string }) 
                     <select
                       value={sysForm.severity}
                       onChange={(e) => setSysForm({ ...sysForm, severity: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm transition-all"
                     >
                       <option value="info">{t.adminNotifications.severityInfo}</option>
                       <option value="warning">{t.adminNotifications.severityWarning}</option>
                       <option value="critical">{t.adminNotifications.severityCritical}</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">{t.adminNotifications.labelLanguage}</label>
-                    <select
-                      value={sysForm.language}
-                      onChange={(e) => setSysForm({ ...sysForm, language: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm font-medium"
-                    >
-                      <option value="all">{t.adminNotifications.langAll}</option>
-                      <option value="ar">{t.adminNotifications.langAr}</option>
-                      <option value="en">{t.adminNotifications.langEn}</option>
-                    </select>
-                  </div>
+                </div>
+
+                {/* Target Language on new line */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t.adminNotifications.labelLanguage}</label>
+                  <select
+                    value={sysForm.language}
+                    onChange={(e) => setSysForm({ ...sysForm, language: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm font-medium transition-all"
+                  >
+                    <option value="all">{t.adminNotifications.langAll}</option>
+                    <option value="ar">{t.adminNotifications.langAr}</option>
+                    <option value="en">{t.adminNotifications.langEn}</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">{t.adminNotifications.labelEndsAt}</label>
@@ -357,7 +361,7 @@ export default function NotificationsClient({ userRole }: { userRole: string }) 
         </div>
 
         {/* LIST COLUMN */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-7 space-y-4">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 min-h-[500px]">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <h2 className="text-lg font-semibold text-slate-800">
