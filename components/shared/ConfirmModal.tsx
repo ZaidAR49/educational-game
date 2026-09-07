@@ -42,38 +42,51 @@ export function ConfirmModal({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/50 transition-colors duration-500" dir={isRTL ? "rtl" : "ltr"}>
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs transition-colors duration-300" 
+          dir={isRTL ? "rtl" : "ltr"}
+          onClick={onClose}
+        >
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 sm:p-6 flex flex-col items-center text-center"
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl p-5 flex flex-col items-center text-center"
           >
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${
+            <button 
+              onClick={onClose}
+              className="absolute top-3 end-3 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 ${
               type === 'danger' ? 'bg-red-100 text-red-600' :
               type === 'warning' ? 'bg-amber-100 text-amber-600' :
               'bg-blue-100 text-blue-600'
             }`}>
-              {type === 'info' ? <Info className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
+              {type === 'info' ? <Info className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
             </div>
 
-            <h3 className="text-2xl font-black text-gray-900 mb-2">{title}</h3>
-            <p className="text-gray-500 mb-6 leading-relaxed">{description}</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-1.5">{title}</h3>
+            <p className="text-xs sm:text-sm text-gray-500 mb-5 leading-relaxed">{description}</p>
 
-            <div className="flex w-full gap-3">
+            <div className="flex w-full gap-2.5">
               <button 
                 onClick={onConfirm}
-                className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all shadow-sm ${
-                  type === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-600/20 hover:shadow-lg' :
-                  type === 'warning' ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20 hover:shadow-lg' :
-                  'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:shadow-lg'
+                className={`flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-xs ${
+                  type === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-600/20' :
+                  type === 'warning' ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20' :
+                  'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20'
                 }`}
               >
                 {resolvedConfirmText}
               </button>
               <button 
                 onClick={onClose}
-                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors shadow-sm"
+                className="flex-1 py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-xs"
               >
                 {resolvedCancelText}
               </button>
