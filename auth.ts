@@ -10,7 +10,16 @@ const authResult = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
-      authorization: { params: { prompt: "select_account" } }
+      authorization: { params: { prompt: "select_account" } },
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: null, // Never persist picture or image URL to database
+          role: "user",
+        }
+      },
     }),
   ],
   adapter: DrizzleAdapter(db, {
@@ -45,10 +54,19 @@ const authResult = NextAuth({
       return true;
     },
     async jwt({ token, user, profile, trigger, session }) {
+      if (profile) {
+        // Extract Google picture directly into session token without saving to DB
+        const googlePic = (profile as any)?.picture || (profile as any)?.image;
+        if (googlePic) {
+          token.image = googlePic;
+        }
+      }
       if (user) {
         // First sign-in: user object is populated from the OAuth profile + adapter
         token.id = user.id
-        token.image = user.image || (profile?.picture as string)
+        if (!token.image) {
+          token.image = user.image || (profile as any)?.picture || (token as any)?.picture
+        }
         token.name = user.name
         token.role = user.role
         token.isLocked = user.isLocked
@@ -81,7 +99,7 @@ const authResult = NextAuth({
     session({ session, token }) {
       if (session.user && token) {
         session.user.id = token.id as string
-        session.user.image = token.image as string
+        session.user.image = (token.image as string) || (token.picture as string) || null
         session.user.role = token.role as string
         session.user.isLocked = token.isLocked as boolean
       }

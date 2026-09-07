@@ -22,8 +22,9 @@ export const requireAuth = cache(async () => {
 
   try {
     // Fetch fresh user from DB to check for real-time locks and subscription
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(session.user.id);
     const dbUser = await db.query.users.findFirst({
-      where: eq(users.id, session.user.id),
+      where: isUuid ? eq(users.id, session.user.id) : eq(users.email, session.user.email!),
       columns: { isLocked: true, role: true, isSubscribed: true, subscriptionPlan: true, locale: true }
     });
 
