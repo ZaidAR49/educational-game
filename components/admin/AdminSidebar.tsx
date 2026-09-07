@@ -25,6 +25,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
     setIsOpen(false)
   }, [pathname])
 
+  useEffect(() => {
+    setImageError(false)
+  }, [user?.image])
+
   const navItems = [
     { name: t.adminNav.accounts, href: "/admin/accounts", icon: Users },
     { name: t.adminNav.analytics, href: "/admin/analytics", icon: LayoutDashboard },

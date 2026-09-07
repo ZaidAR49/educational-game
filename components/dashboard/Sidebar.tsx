@@ -36,6 +36,11 @@ export function Sidebar({ user }: { user?: any }) {
     setIsOpen(false)
   }, [pathname])
 
+  // Reset image error state when user image changes
+  useEffect(() => {
+    setImageError(false)
+  }, [user?.image])
+
   const links = [
     { href: "/dashboard", label: t.dashboardNav?.overview || (isRTL ? "نظرة عامة" : "Overview"), icon: LayoutDashboard },
     { href: "/dashboard/organizations", label: t.dashboardNav?.organizations || (isRTL ? "المؤسسات" : "Organizations"), icon: Building2 },
@@ -176,8 +181,8 @@ export function Sidebar({ user }: { user?: any }) {
                       onError={() => setImageError(true)}
                     />
                   ) : (
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base ${
-                      isPro ? "bg-amber-100 text-amber-700 border-2 border-amber-50" : "bg-emerald-100 text-emerald-700"
+                    <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-base select-none ${
+                      isPro ? "bg-amber-100 text-amber-700 border-2 border-amber-50" : "bg-gradient-to-tr from-emerald-500 to-teal-600 text-white shadow-sm"
                     }`}>
                       {user.name?.charAt(0).toUpperCase() || "U"}
                     </div>

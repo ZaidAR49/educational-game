@@ -23,6 +23,10 @@ export function NavbarClient({ session }: { session: any }) {
   const [imageError, setImageError] = useState(false)
   const { messages: t } = useLocale()
 
+  useEffect(() => {
+    setImageError(false)
+  }, [session?.user?.image])
+
   return (
     <>
       <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
@@ -95,8 +99,8 @@ export function NavbarClient({ session }: { session: any }) {
                       onError={() => setImageError(true)}
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold shadow-sm">
-                      {session.user?.name?.charAt(0) || "U"}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold shadow-sm select-none">
+                      {session.user?.name?.charAt(0).toUpperCase() || "U"}
                     </div>
                   )}
                 </div>
@@ -177,8 +181,8 @@ export function NavbarClient({ session }: { session: any }) {
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg shadow-sm border-2 border-white shrink-0">
-                  {session.user?.name?.charAt(0) || "U"}
+                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-sm border-2 border-white shrink-0 select-none">
+                  {session.user?.name?.charAt(0).toUpperCase() || "U"}
                 </div>
               )}
               <div className="flex flex-col flex-1 min-w-0">

@@ -95,7 +95,12 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
     });
   }
 
+  const [imageError, setImageError] = useState(false)
   const userImage = session?.user?.image
+
+  useEffect(() => {
+    setImageError(false)
+  }, [userImage])
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
@@ -157,11 +162,19 @@ export default function SettingsClient({ session, isSubscribed, subscriptionPlan
         
         {/* Profile Picture Section (Read-only) */}
         <div className="flex items-center gap-6 pb-8 border-b border-gray-50">
-          <div className="w-24 h-24 rounded-full bg-emerald-50 border-4 border-white shadow-md flex items-center justify-center overflow-hidden shrink-0 relative">
-            {userImage ? (
-              <Image src={userImage} alt="Profile" fill className="object-cover" />
+          <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 border-4 border-white shadow-md flex items-center justify-center overflow-hidden shrink-0 relative select-none">
+            {userImage && !imageError ? (
+              <Image 
+                src={userImage} 
+                alt="Profile" 
+                fill 
+                className="object-cover" 
+                onError={() => setImageError(true)}
+              />
             ) : (
-              <UserCircle2 className="w-12 h-12 text-emerald-300" />
+              <span className="text-3xl font-extrabold text-white">
+                {formData.name?.charAt(0).toUpperCase() || session?.user?.name?.charAt(0).toUpperCase() || "U"}
+              </span>
             )}
           </div>
           <div>

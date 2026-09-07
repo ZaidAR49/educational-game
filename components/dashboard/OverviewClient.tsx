@@ -1,5 +1,6 @@
 "use client"
-
+ 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Gamepad2, Users, Target, Trophy, ArrowLeft, ArrowRight, Plus, Building2, ListChecks, Zap, AlertTriangle } from "lucide-react"
 import DashboardCharts from "@/components/dashboard/DashboardCharts"
@@ -12,6 +13,12 @@ interface OverviewClientProps {
 
 export function OverviewClient({ user, data }: OverviewClientProps) {
   const { t, locale, isRTL } = useLocale()
+  const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setImageError(false)
+  }, [user?.image])
+
   const o = t.dashboardOverview
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight
 
@@ -30,10 +37,15 @@ export function OverviewClient({ user, data }: OverviewClientProps) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          {user.image ? (
-            <img src={user.image} alt={user.name || "Profile"} className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" />
+          {user.image && !imageError ? (
+            <img 
+              src={user.image} 
+              alt={user.name || "Profile"} 
+              className="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover shrink-0" 
+              onError={() => setImageError(true)}
+            />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm shrink-0 select-none">
               {user.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           )}
