@@ -26,9 +26,41 @@ export async function GET(req: Request) {
     const { lt } = await import("drizzle-orm")
     await db.delete(players).where(lt(players.createdAt, thirtyDaysAgo))
 
+    // 3. Auto-close stale live sessions older than TTL
+    const { classroomPlays, games } = await import("@/lib/db/schema")
+    const { and, eq, inArray } = await import("drizzle-orm")
+    const { config } = await import("@/lib/config")
+    const cutoffTime = new Date(Date.now() - config.session.maxLiveDurationMs)
+
+    const stalePlays = await db
+      .select({ id: classroomPlays.id, gameId: classroomPlays.gameId })
+      .from(classroomPlays)
+      .where(
+        and(
+          eq(classroomPlays.status, "live"),
+          sql`COALESCE(${classroomPlays.startedAt}, ${classroomPlays.createdAt}) < ${cutoffTime}`
+        )
+      )
+
+    if (stalePlays.length > 0) {
+      const stalePlayIds = stalePlays.map((p) => p.id)
+      const staleGameIds = Array.from(new Set(stalePlays.map((p) => p.gameId)))
+
+      await db
+        .update(classroomPlays)
+        .set({ status: "closed", endedAt: new Date(), updatedAt: new Date() })
+        .where(inArray(classroomPlays.id, stalePlayIds))
+
+      await db
+        .update(games)
+        .set({ status: "draft", updatedAt: new Date() })
+        .where(inArray(games.id, staleGameIds))
+    }
+
     return NextResponse.json({ 
       success: true, 
-      message: "Database pinged successfully. Connection is warm! Pruned stale player records.",
+      message: "Database pinged successfully. Pruned stale player records and closed expired sessions.",
+      closedSessionsCount: stalePlays.length,
       timestamp: new Date().toISOString()
     })
   } catch (error: any) {

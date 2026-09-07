@@ -18,19 +18,21 @@ export function StartScreen({
   const { messages: t } = useLocale()
   const intro = game.organization?.introduction
 
-  const title = game.isDemo
+  const isDemo = game.id === "demo"
+
+  const title = isDemo
     ? t.game.demo.title
     : intro?.title || game.title
-  const subtitle = game.isDemo
+  const subtitle = isDemo
     ? t.game.demo.description
     : intro?.subtitle || game.description || t.game.start.defaultSubtitle
 
   // Use localized welcome text and button label
-  const welcomeText = game.isDemo
+  const welcomeText = isDemo
     ? t.game.start.welcomeBox
     : intro?.welcome_box?.description || t.game.start.welcomeBox
 
-  const buttonLabel = game.isDemo
+  const buttonLabel = isDemo
     ? t.game.start.startButton
     : intro?.button_text || t.game.start.startButton
 

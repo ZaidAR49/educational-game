@@ -22,7 +22,7 @@ export function JoinScreen({
 }: JoinScreenProps) {
   const { messages: t } = useLocale()
 
-  const gameTitle = game.isDemo ? t.game.demo.title : game.title
+  const gameTitle = game.id === "demo" ? t.game.demo.title : game.title
 
   return (
     <form

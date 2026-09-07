@@ -146,6 +146,7 @@ export async function getLiveSessionDataAction(gameId: string) {
     .select({
       id: classroomPlays.id,
       date: classroomPlays.createdAt,
+      startedAt: classroomPlays.startedAt,
       gameName: games.title,
     })
     .from(classroomPlays)
@@ -161,6 +162,25 @@ export async function getLiveSessionDataAction(gameId: string) {
 
   const sessionData = playResult[0];
   if (!sessionData) {
+    return null;
+  }
+
+  // Lazy auto-expiration for sessions exceeding max live TTL
+  const { config } = await import("@/lib/config");
+  const sessionStartTime = sessionData.startedAt || sessionData.date;
+  const isExpired = sessionStartTime && (Date.now() - sessionStartTime.getTime() > config.session.maxLiveDurationMs);
+
+  if (isExpired) {
+    await db.update(classroomPlays)
+      .set({ status: 'closed', endedAt: new Date(), updatedAt: new Date() })
+      .where(eq(classroomPlays.id, sessionData.id));
+
+    await db.update(games)
+      .set({ status: 'draft', updatedAt: new Date() })
+      .where(eq(games.id, gameId));
+
+    updateTag(`sessions-${user.id}`);
+    updateTag(`games-${user.id}`);
     return null;
   }
 

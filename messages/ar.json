@@ -237,7 +237,7 @@
       "shareLabel": "📤 شارك نتيجتك",
       "retryButton": "إعادة المحاولة 🔄",
       "backHome": "العودة للرئيسية 🏠",
-      "backDashboard": "العودة للوحة التحكم 🔙",
+      "backDashboard": "العودة للوحة التحكم",
       "scoreSaved": "تم تسجيل النتيجة وحفظها بنجاح 🎯",
       "copiedMessage": "✅ تم نسخ النتيجة! يمكنك لصقها ومشاركتها مع أصدقائك.",
       "shareText": "🎯 لعبت لعبة \"{gameTitle}\" وحصلت على {score} نقطة! 🌟\n\n🎮 جرب الآن:\n{gameUrl}",
@@ -706,7 +706,11 @@
     "secondPlace": "المركز الثاني",
     "thirdPlace": "المركز الثالث",
     "tableTitle": "نتائج الطلاب",
-    "noPlayersFound": "لم يتم العثور على أي طلاب مطابقين للبحث."
+    "noPlayersFound": "لم يتم العثور على أي طلاب مطابقين للبحث.",
+    "backToSession": "العودة للجلسة",
+    "toggleFullscreen": "ملء الشاشة",
+    "exitFullscreen": "إنهاء ملء الشاشة",
+    "replayCelebration": "إعادة الاحتفال 🎉"
   },
   "adminNav": {
     "accounts": "الحسابات",

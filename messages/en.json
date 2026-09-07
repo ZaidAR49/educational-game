@@ -237,7 +237,7 @@
       "shareLabel": "📤 Share Your Score",
       "retryButton": "Try Again 🔄",
       "backHome": "Back to Home 🏠",
-      "backDashboard": "Back to Dashboard 🔙",
+      "backDashboard": "Back to Dashboard",
       "scoreSaved": "Score recorded and saved successfully 🎯",
       "copiedMessage": "✅ Result copied! You can paste and share it with your friends.",
       "shareText": "🎯 I played \"{gameTitle}\" and scored {score} points! 🌟\n\n🎮 Try it now:\n{gameUrl}",
@@ -706,7 +706,11 @@
     "secondPlace": "2nd Place",
     "thirdPlace": "3rd Place",
     "tableTitle": "Student Results",
-    "noPlayersFound": "No matching students found."
+    "noPlayersFound": "No matching students found.",
+    "backToSession": "Back to Session",
+    "toggleFullscreen": "Full Screen",
+    "exitFullscreen": "Exit Full Screen",
+    "replayCelebration": "Replay Celebration 🎉"
   },
   "adminNav": {
     "accounts": "Accounts",

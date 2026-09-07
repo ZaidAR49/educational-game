@@ -9,7 +9,7 @@ type Scenario = any // Simplified for hook signature
 type GameScreen = "join" | "start" | "game" | "result"
 
 type UseGameFlowProps = {
-  game: { id: string; isDemo?: boolean }
+  game: { id: string; isDemo?: boolean; isPreview?: boolean }
   playId: string
   scenarios: Scenario[]
   playerId: string | null
@@ -38,8 +38,10 @@ export function useGameFlow({
   const [showFeedback, setShowFeedback] = useState(false)
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
 
+  const isDemoOrPreview = Boolean(game.isDemo || game.isPreview)
+
   const trackEvent = (eventName: string, properties?: any) => {
-    if (!game.isDemo) posthog.capture(eventName, properties)
+    if (!isDemoOrPreview) posthog.capture(eventName, properties)
   }
 
   const currentScenario = scenarios[currentScenarioIndex]
@@ -65,7 +67,7 @@ export function useGameFlow({
     setShowFeedback(false)
     trackEvent("game_started", { game_id: game.id, scenario_count: scenarios.length })
 
-    if (!game.isDemo && playerId) {
+    if (!isDemoOrPreview && playerId) {
       localStorage.setItem(
         `eduplay_session_${playId}`,
         JSON.stringify({
@@ -142,7 +144,7 @@ export function useGameFlow({
       wrong_answers: wrongAnswers,
     })
 
-    if (game.isDemo || resultPercentage >= config.game.resultThresholds.good) {
+    if (isDemoOrPreview || resultPercentage >= config.game.resultThresholds.good) {
       setConfetti(createConfettiPieces())
       setTimeout(() => setConfetti([]), config.game.confettiClearMs)
     }
@@ -160,7 +162,7 @@ export function useGameFlow({
     setIsSkipped(false)
     setShowFeedback(false)
 
-    if (!game.isDemo && playerId) {
+    if (!isDemoOrPreview && playerId) {
       localStorage.setItem(
         `eduplay_session_${playId}`,
         JSON.stringify({

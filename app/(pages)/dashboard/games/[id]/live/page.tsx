@@ -26,9 +26,10 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
   const [isPending, startTransition] = useTransition()
   const [showQrModal, setShowQrModal] = useState(false)
 
-  // Use Supabase Realtime for instant live updates
+  // Use Supabase Realtime with session-scoped filtering for optimal scalability
   useEffect(() => {
     let mounted = true;
+    let subscription: ReturnType<typeof supabase.channel> | null = null;
     
     const fetchLiveSession = async () => {
       try {
@@ -37,6 +38,25 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           if (data) {
             setSession(data.session);
             setStudents(data.players);
+
+            // Scope subscription strictly to this session's players
+            if (!subscription && data.session?.id) {
+              subscription = supabase
+                .channel(`live-session-${data.session.id}`)
+                .on(
+                  'postgres_changes', 
+                  { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'players',
+                    filter: `classroom_play_id=eq.${data.session.id}`
+                  }, 
+                  () => {
+                    if (mounted) fetchLiveSession();
+                  }
+                )
+                .subscribe();
+            }
           }
           setIsLoading(false);
         }
@@ -47,20 +67,11 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
 
     fetchLiveSession();
 
-    const subscription = supabase
-      .channel('live-players')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'players' 
-      }, () => {
-        fetchLiveSession();
-      })
-      .subscribe();
-
     return () => {
       mounted = false;
-      supabase.removeChannel(subscription);
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
     };
   }, [id]);
 

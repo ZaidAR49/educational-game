@@ -29,4 +29,7 @@ export const config = {
       subscribed: 1_000_000,
     },
   },
+  session: {
+    maxLiveDurationMs: 2 * 60 * 60 * 1000, // 2 hours
+  },
 } as const

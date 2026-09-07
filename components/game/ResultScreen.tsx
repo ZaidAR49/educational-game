@@ -150,7 +150,7 @@ export function ResultScreen({
             {shareLabel}
           </button>
 
-          {game.isDemo && (
+          {(game.id === "demo" || game.isPreview) && (
             <>
               <button
                 type="button"
@@ -170,7 +170,7 @@ export function ResultScreen({
             </>
           )}
 
-          {!game.isDemo && (
+          {!game.isPreview && game.id !== "demo" && (
             <div className="text-gray-400 font-medium text-sm mt-4">
               {t.game.result.scoreSaved}
             </div>

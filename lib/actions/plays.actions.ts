@@ -196,6 +196,24 @@ export async function getLiveGameForStudentAction(gameId: string) {
     return { error: "لا توجد جلسة مباشرة نشطة لهذه اللعبة حالياً. يرجى الانتظار حتى يبدأ المعلم الجلسة." };
   }
 
+  // Lazy auto-expiration for sessions exceeding max live TTL
+  const { config } = await import("@/lib/config");
+  const sessionStartTime = livePlay.startedAt || livePlay.createdAt;
+  const isExpired = sessionStartTime && (Date.now() - sessionStartTime.getTime() > config.session.maxLiveDurationMs);
+
+  if (isExpired) {
+    // Lazily close the stale session and set game to draft
+    await db.update(classroomPlays)
+      .set({ status: "closed", endedAt: new Date(), updatedAt: new Date() })
+      .where(eq(classroomPlays.id, livePlay.id));
+
+    await db.update(games)
+      .set({ status: "draft", updatedAt: new Date() })
+      .where(eq(games.id, gameId));
+
+    return { error: "انتهت صلاحية هذه الجلسة المباشرة تلقائياً لمرور الوقت المحدد. يرجى من المعلم بدء جلسة جديدة." };
+  }
+
   // Get scenarios with choices
   const gameScenarios = await db.query.scenarios.findMany({
     where: eq(scenarios.gameId, gameId),
@@ -251,7 +269,7 @@ export async function getGameForPreviewAction(gameId: string) {
   });
 
   return {
-    game: { ...game, isDemo: true }, // Force isDemo true for previews
+    game: { ...game, isDemo: false, isPreview: true },
     play: { id: "preview-play" },
     scenarios: gameScenarios,
   };

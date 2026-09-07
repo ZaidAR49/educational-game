@@ -52,36 +52,39 @@ export default function GameClient({
   play,
   scenarios,
 }: {
-  game: Game & { isDemo?: boolean }
+  game: Game & { isDemo?: boolean; isPreview?: boolean }
   play: Pick<ClassroomPlay, "id"> | { id: string }
   scenarios: SanitizedScenario[]
 }) {
   const { locale, messages: t } = useLocale()
-  const [screen, setScreen] = useState<GameScreen>(game.isDemo ? "start" : "join")
+  const isDemoOrPreview = Boolean(game.isDemo || game.isPreview)
+  const isDemoGame = game.id === "demo"
+
+  const [screen, setScreen] = useState<GameScreen>(isDemoOrPreview ? "start" : "join")
   const [playerName, setPlayerName] = useState("")
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const { gameStart, gamePlay, results } = uiContent
 
-  // Localized demo game title and description
+  // Localized demo game title and description ONLY for static marketing demo (/game/demo)
   const activeGame = useMemo(() => {
-    if (!game.isDemo) return game
+    if (!isDemoGame) return game
     return getDemoGame(locale)
-  }, [game, locale])
+  }, [game, isDemoGame, locale])
 
-  // Localized demo scenarios
+  // Localized demo scenarios ONLY for static marketing demo (/game/demo)
   const activeScenarios = useMemo(() => {
-    if (!game.isDemo) return scenarios
+    if (!isDemoGame) return scenarios
     return getDemoScenarios(locale)
-  }, [game.isDemo, scenarios, locale])
+  }, [isDemoGame, scenarios, locale])
 
-  // Offline sync hook
+  // Offline sync hook - disable in demo or preview
   const { isOffline, syncProgress } = useOfflineSync({
     playId: play.id,
     playerId,
     playerName,
-    isDemo: game.isDemo ?? false,
+    isDemo: isDemoOrPreview,
   })
 
   // Game flow hook
@@ -109,7 +112,7 @@ export default function GameClient({
     nextScenario,
     trackEvent,
   } = useGameFlow({
-    game: activeGame,
+    game: { ...activeGame, isDemo: isDemoOrPreview, isPreview: game.isPreview },
     playId: play.id,
     scenarios: activeScenarios,
     playerId,
@@ -121,7 +124,7 @@ export default function GameClient({
   // Session restore hook
   useGameSession({
     playId: play.id,
-    isDemo: game.isDemo ?? false,
+    isDemo: isDemoOrPreview,
     locale,
     startTransition,
     setPlayerId,
@@ -154,10 +157,10 @@ export default function GameClient({
 
     startTransition(async () => {
       try {
-        if (game.isDemo) {
-          setPlayerId("demo-player-id")
+        if (isDemoOrPreview) {
+          setPlayerId(game.isPreview ? "preview-teacher" : "demo-player-id")
           localStorage.setItem("drugGamePlayerName", playerName.trim())
-          trackEvent("game_joined", { game_id: game.id, is_demo: true })
+          trackEvent("game_joined", { game_id: game.id, is_demo: game.isDemo, is_preview: game.isPreview })
           setScreen("start")
           return
         }
@@ -250,13 +253,25 @@ export default function GameClient({
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-100 flex items-center justify-center p-4 pt-20 sm:pt-4 relative">
       {/* Top Floating Bar */}
       <div className="fixed top-4 inset-x-4 sm:inset-x-8 max-w-5xl mx-auto flex items-center justify-between pointer-events-none z-40">
-        <Link
-          href="/"
-          className="pointer-events-auto flex items-center gap-2 px-3.5 py-2 bg-white/90 hover:bg-white text-gray-700 hover:text-emerald-600 rounded-xl font-bold text-sm shadow-sm border border-gray-200/80 backdrop-blur-md transition-all hover:scale-105"
-        >
-          <Home className="w-4 h-4 text-emerald-600" />
-          <span className="hidden sm:inline">{t.game.backToHome}</span>
-        </Link>
+        {game.isPreview ? (
+          <Link
+            href="/dashboard/games"
+            className="pointer-events-auto flex items-center gap-2 px-3.5 py-2 bg-white/90 hover:bg-white text-gray-700 hover:text-emerald-600 rounded-xl font-bold text-sm shadow-sm border border-gray-200/80 backdrop-blur-md transition-all hover:scale-105"
+          >
+            <Home className="w-4 h-4 text-emerald-600" />
+            <span>{t.game.result.backDashboard || "لوحة التحكم"}</span>
+          </Link>
+        ) : (
+          <Link
+            href="/"
+            className="pointer-events-auto flex items-center gap-2 px-3.5 py-2 bg-white/90 hover:bg-white text-gray-700 hover:text-emerald-600 rounded-xl font-bold text-sm shadow-sm border border-gray-200/80 backdrop-blur-md transition-all hover:scale-105"
+          >
+            <Home className="w-4 h-4 text-emerald-600" />
+            <span className="hidden sm:inline">{t.game.backToHome}</span>
+          </Link>
+        )}
+
+
 
         <div className="pointer-events-auto">
           <LanguageDropdown variant="glass" />
