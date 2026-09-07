@@ -236,28 +236,28 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         {/* Form Area */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-4 sm:space-y-5">
           {/* Basic Info Card */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">{o.basicInfo}</h2>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 block text-start">{o.orgNameLabel}</label>
+          <div className="bg-white rounded-2xl p-4.5 sm:p-5 border border-gray-100 shadow-sm">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">{o.basicInfo}</h2>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.orgNameLabel}</label>
                 <input
                   type="text"
                   name="institutionName"
                   value={formData.institutionName}
                   onChange={handleChange}
                   placeholder={o.orgNamePlaceholder}
-                  className={`w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-start ${
+                  className={`w-full px-3.5 py-2.5 rounded-xl border focus:ring-2 outline-none transition-all text-start font-medium text-sm sm:text-base ${
                     errors.institutionName
                       ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                       : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
                   }`}
                 />
-                {errors.institutionName && <p className="text-red-500 text-sm font-bold">{errors.institutionName}</p>}
+                {errors.institutionName && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.institutionName}</p>}
               </div>
 
               <LogoUploader
@@ -272,16 +272,16 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
           </div>
 
           {/* Tab switcher */}
-          <div className="flex bg-gray-100/50 p-1 rounded-2xl">
+          <div className="flex bg-gray-100/50 p-1 rounded-xl sm:rounded-2xl">
             <button
               onClick={() => setActiveTab("welcome")}
-              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === "welcome" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`flex-1 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all ${activeTab === "welcome" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
             >
               {o.tabWelcome}
             </button>
             <button
               onClick={() => setActiveTab("result")}
-              className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === "result" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`flex-1 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all ${activeTab === "result" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
             >
               {o.tabResult}
             </button>
@@ -311,13 +311,13 @@ export function OrganizationForm({ initialData, organizationId }: OrganizationFo
           )}
 
           {/* Action Buttons */}
-          <div className="pt-6 border-t border-gray-100 flex justify-end">
+          <div className="pt-4 border-t border-gray-100 flex justify-end">
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md w-full md:w-auto text-lg"
+              className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm w-full md:w-auto text-sm sm:text-base"
             >
-              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               <span>{isSaving ? o.saving : o.saveChanges}</span>
             </button>
           </div>

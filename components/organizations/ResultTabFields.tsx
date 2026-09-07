@@ -24,7 +24,7 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
   const paddingForAi = isRTL ? "pl-12" : "pr-12"
 
   const field = (name: keyof OrganizationFormData, extra = "") =>
-    `w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-start ${extra} ${
+    `w-full px-3.5 py-2.5 rounded-xl border focus:ring-2 outline-none transition-all text-start font-medium text-sm sm:text-base ${extra} ${
       errors[name]
         ? "border-red-500 focus:border-red-500 focus:ring-red-200"
         : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
@@ -81,21 +81,21 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="bg-white rounded-2xl p-4.5 sm:p-5 border border-gray-100 shadow-sm space-y-5 animate-in fade-in zoom-in-95 duration-200">
       
       {/* State Switcher */}
-      <div className="flex bg-gray-50 p-1 rounded-xl mb-4 border border-gray-100">
+      <div className="flex bg-gray-50 p-1 rounded-xl mb-3 border border-gray-100">
         <button
           type="button"
           onClick={() => onResultViewChange("pass")}
-          className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${isPass ? "bg-white text-emerald-600 shadow-sm border border-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+          className={`flex-1 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${isPass ? "bg-white text-emerald-600 shadow-sm border border-gray-200" : "text-gray-500 hover:text-gray-700"}`}
         >
           {o.passState}
         </button>
         <button
           type="button"
           onClick={() => onResultViewChange("fail")}
-          className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${!isPass ? "bg-white text-amber-600 shadow-sm border border-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+          className={`flex-1 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all ${!isPass ? "bg-white text-amber-600 shadow-sm border border-gray-200" : "text-gray-500 hover:text-gray-700"}`}
         >
           {o.failState}
         </button>
@@ -103,31 +103,31 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
 
       <div className="animate-in fade-in slide-in-from-right-4 duration-300">
         {resultView === "pass" ? (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-              <h3 className="font-bold text-emerald-600 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> <span>{o.passMessages}</span>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <h3 className="font-bold text-emerald-600 text-sm sm:text-base flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> <span>{o.passMessages}</span>
               </h3>
               <button
                 type="button"
                 onClick={handleEnhancePassSection}
                 disabled={isGlobalLoading}
-                className="flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-xl font-bold transition-all text-sm"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-xl font-bold transition-all text-xs sm:text-sm"
               >
-                {isGlobalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {isGlobalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                 <span>{o.enhancePass}</span>
               </button>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block text-start">{o.resultTitleLabel}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.resultTitleLabel}</label>
               <div className="relative">
                 <input
                   type="text"
                   name="resultTitlePass"
                   value={formData.resultTitlePass}
                   onChange={onChange}
-                  className={`${field("resultTitlePass", paddingForAi)} text-emerald-600 font-black text-xl`}
+                  className={`${field("resultTitlePass", paddingForAi)} text-emerald-600 font-bold text-base sm:text-lg`}
                 />
                 <AiImproveButton 
                   text={formData.resultTitlePass} 
@@ -138,11 +138,11 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
                   onGlobalLoadingChange={onGlobalLoadingChange}
                 />
               </div>
-              {errors.resultTitlePass && <p className="text-red-500 text-sm font-bold">{errors.resultTitlePass}</p>}
+              {errors.resultTitlePass && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultTitlePass}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block text-start">{o.resultDescPassLabel}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.resultDescPassLabel}</label>
               <div className="relative">
                 <input
                   type="text"
@@ -160,18 +160,18 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
                   onGlobalLoadingChange={onGlobalLoadingChange}
                 />
               </div>
-              {errors.resultSubtitlePass && <p className="text-red-500 text-sm font-bold">{errors.resultSubtitlePass}</p>}
+              {errors.resultSubtitlePass && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultSubtitlePass}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block text-start">{o.resultMsgPassLabel}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.resultMsgPassLabel}</label>
               <div className="relative">
                 <textarea
                   name="resultMessagePass"
                   value={formData.resultMessagePass}
                   onChange={onChange}
-                  rows={4}
-                  className={`${field("resultMessagePass", paddingForAi)} text-sm leading-relaxed resize-none text-gray-600`}
+                  rows={3}
+                  className={`${field("resultMessagePass", paddingForAi)} text-xs sm:text-sm leading-relaxed resize-none text-gray-600`}
                 />
                 <AiImproveButton 
                   text={formData.resultMessagePass} 
@@ -182,35 +182,35 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
                   onGlobalLoadingChange={onGlobalLoadingChange}
                 />
               </div>
-              {errors.resultMessagePass && <p className="text-red-500 text-sm font-bold">{errors.resultMessagePass}</p>}
+              {errors.resultMessagePass && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultMessagePass}</p>}
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-              <h3 className="font-bold text-red-500 flex items-center gap-2">
-                <XCircle className="w-5 h-5" /> <span>{o.failMessages}</span>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <h3 className="font-bold text-red-500 text-sm sm:text-base flex items-center gap-1.5">
+                <XCircle className="w-4 h-4 sm:w-5 sm:h-5" /> <span>{o.failMessages}</span>
               </h3>
               <button
                 type="button"
                 onClick={handleEnhanceFailSection}
                 disabled={isGlobalLoading}
-                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-500 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-xl font-bold transition-all text-sm"
+                className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-500 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-xl font-bold transition-all text-xs sm:text-sm"
               >
-                {isGlobalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {isGlobalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                 <span>{o.enhanceFail}</span>
               </button>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block text-start">{o.resultTitleLabel}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.resultTitleLabel}</label>
               <div className="relative">
                 <input
                   type="text"
                   name="resultTitleFail"
                   value={formData.resultTitleFail}
                   onChange={onChange}
-                  className={`${field("resultTitleFail", paddingForAi)} text-red-500 font-black text-xl`}
+                  className={`${field("resultTitleFail", paddingForAi)} text-red-500 font-bold text-base sm:text-lg`}
                 />
                 <AiImproveButton 
                   text={formData.resultTitleFail} 
@@ -221,11 +221,11 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
                   onGlobalLoadingChange={onGlobalLoadingChange}
                 />
               </div>
-              {errors.resultTitleFail && <p className="text-red-500 text-sm font-bold">{errors.resultTitleFail}</p>}
+              {errors.resultTitleFail && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultTitleFail}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block text-start">{o.resultDescFailLabel}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.resultDescFailLabel}</label>
               <div className="relative">
                 <input
                   type="text"
@@ -243,18 +243,18 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
                   onGlobalLoadingChange={onGlobalLoadingChange}
                 />
               </div>
-              {errors.resultSubtitleFail && <p className="text-red-500 text-sm font-bold">{errors.resultSubtitleFail}</p>}
+              {errors.resultSubtitleFail && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultSubtitleFail}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 block text-start">{o.resultMsgFailLabel}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.resultMsgFailLabel}</label>
               <div className="relative">
                 <textarea
                   name="resultMessageFail"
                   value={formData.resultMessageFail}
                   onChange={onChange}
-                  rows={4}
-                  className={`${field("resultMessageFail", paddingForAi)} text-sm leading-relaxed resize-none text-gray-600`}
+                  rows={3}
+                  className={`${field("resultMessageFail", paddingForAi)} text-xs sm:text-sm leading-relaxed resize-none text-gray-600`}
                 />
                 <AiImproveButton 
                   text={formData.resultMessageFail} 
@@ -265,25 +265,25 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
                   onGlobalLoadingChange={onGlobalLoadingChange}
                 />
               </div>
-              {errors.resultMessageFail && <p className="text-red-500 text-sm font-bold">{errors.resultMessageFail}</p>}
+              {errors.resultMessageFail && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultMessageFail}</p>}
             </div>
           </div>
         )}
       </div>
 
       {/* Common Result Fields */}
-      <div className="pt-6 border-t border-gray-100 space-y-6">
-        <h4 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">{o.generalResultSettings}</h4>
+      <div className="pt-4 border-t border-gray-100 space-y-4">
+        <h4 className="text-base sm:text-lg font-bold text-gray-900 border-b border-gray-100 pb-2.5">{o.generalResultSettings}</h4>
         
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-700 block text-start">{o.orgMsgLabel}</label>
+        <div className="space-y-1.5">
+          <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.orgMsgLabel}</label>
           <div className="relative">
             <textarea
               name="orgMessage"
               value={formData.orgMessage}
               onChange={onChange}
-              rows={4}
-              className={`${field("orgMessage", paddingForAi)} text-sm leading-relaxed resize-none`}
+              rows={3}
+              className={`${field("orgMessage", paddingForAi)} text-xs sm:text-sm leading-relaxed resize-none`}
             />
             <AiImproveButton 
               text={formData.orgMessage} 
@@ -294,12 +294,12 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
               onGlobalLoadingChange={onGlobalLoadingChange}
             />
           </div>
-          {errors.orgMessage && <p className="text-red-500 text-sm font-bold">{errors.orgMessage}</p>}
+          {errors.orgMessage && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.orgMessage}</p>}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700 block text-start">{o.primaryBtnLabel}</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.primaryBtnLabel}</label>
             <div className="relative">
               <input
                 type="text"
@@ -318,11 +318,11 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
               />
             </div>
             {errors.resultPrimaryButtonText && (
-              <p className="text-red-500 text-sm font-bold">{errors.resultPrimaryButtonText}</p>
+              <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultPrimaryButtonText}</p>
             )}
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700 block text-start">{o.secondaryBtnLabel}</label>
+          <div className="space-y-1.5">
+            <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.secondaryBtnLabel}</label>
             <div className="relative">
               <input
                 type="text"
@@ -341,7 +341,7 @@ export function ResultTabFields({ formData, errors, onChange, onBulkChange, resu
               />
             </div>
             {errors.resultSecondaryButtonText && (
-              <p className="text-red-500 text-sm font-bold">{errors.resultSecondaryButtonText}</p>
+              <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.resultSecondaryButtonText}</p>
             )}
           </div>
         </div>

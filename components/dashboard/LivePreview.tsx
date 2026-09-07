@@ -62,19 +62,19 @@ export function LivePreview({
 
   return (
     <div className="flex flex-col items-center">
-      <h3 className="text-gray-500 font-bold mb-6">{o.livePreviewTitle}</h3>
+      <h3 className="text-gray-500 font-bold text-xs sm:text-sm mb-3">{o.livePreviewTitle}</h3>
       
       {/* Phone Mockup Frame */}
-      <div className="relative w-[320px] h-[650px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl border-4 border-slate-800 overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
+      <div className="relative w-[280px] sm:w-[295px] h-[520px] sm:h-[550px] bg-slate-900 rounded-[2.5rem] p-2.5 sm:p-3 shadow-xl border-4 border-slate-800 overflow-hidden" dir={isRTL ? "rtl" : "ltr"}>
         
         {/* Screen */}
-        <div className="w-full h-full bg-slate-50 rounded-[2.5rem] overflow-hidden relative flex flex-col pt-10">
+        <div className="w-full h-full bg-slate-50 rounded-[2rem] overflow-hidden relative flex flex-col pt-7 sm:pt-8">
           
           {/* Notch / Dynamic Island */}
-          <div className="absolute top-0 inset-x-0 h-6 bg-slate-900 rounded-b-3xl w-40 mx-auto z-10" />
+          <div className="absolute top-0 inset-x-0 h-5 bg-slate-900 rounded-b-2xl w-32 mx-auto z-10" />
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-5 pb-8 flex flex-col">
+          <div className="flex-1 overflow-y-auto px-3.5 sm:px-4 pb-6 flex flex-col custom-scrollbar">
             
             <AnimatePresence mode="wait">
               {previewMode === "welcome" && (
@@ -86,52 +86,52 @@ export function LivePreview({
                   className="flex flex-col h-full"
                 >
                   {/* Header */}
-                  <div className="text-center mb-6 pt-4 flex flex-col items-center justify-center gap-2">
+                  <div className="text-center mb-3 pt-2 flex flex-col items-center justify-center gap-1.5">
                     {logo && (
-                      <div className="w-12 h-12 relative rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white">
-                        <Image src={logo} alt="Logo" fill className="object-contain p-1" />
+                      <div className="w-9 h-9 relative rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white">
+                        <Image src={logo} alt="Logo" fill className="object-contain p-0.5" />
                       </div>
                     )}
-                    <span className="text-sm font-bold text-gray-500">
+                    <span className="text-xs font-bold text-gray-500">
                       {institutionName || (locale === 'ar' ? "اسم المؤسسة" : "Organization Name")}
                     </span>
                   </div>
 
                   {/* Main Title & Subtitle */}
-                  <div className="text-center mb-8">
-                    <h1 className="text-2xl font-black text-emerald-700 mb-2 leading-tight">
+                  <div className="text-center mb-4">
+                    <h1 className="text-lg sm:text-xl font-black text-emerald-700 mb-1 leading-tight">
                       {mainTitle || (locale === 'ar' ? "اختبر معلوماتك" : "Test Your Knowledge")}
                     </h1>
-                    <p className="text-gray-500 font-medium text-sm">
+                    <p className="text-gray-500 font-medium text-xs">
                       {subtitle || (locale === 'ar' ? "لعبة تفاعلية تعليمية للجميع" : "Interactive educational game for everyone")}
                     </p>
                   </div>
 
                   {/* Welcome Box */}
-                  <div className="bg-emerald-50 rounded-3xl p-5 text-center border border-emerald-100 shadow-sm mb-auto">
-                    <div className="mb-4">
-                      <span className="text-xl">{icon || "👋"}</span>
+                  <div className="bg-emerald-50 rounded-2xl p-3 sm:p-3.5 text-center border border-emerald-100 shadow-sm mb-auto">
+                    <div className="mb-2">
+                      <span className="text-lg">{icon || "👋"}</span>
                     </div>
-                    <p className="text-gray-700 font-medium leading-relaxed whitespace-pre-line text-sm">
+                    <p className="text-gray-700 font-medium leading-relaxed whitespace-pre-line text-xs">
                       {welcomeMessage || defaultWelcomeMsg}
                     </p>
                   </div>
 
                   {/* Action Button */}
-                  <div className="mt-8 flex flex-col gap-6">
-                    <button type="button" className="w-full bg-emerald-600 text-white rounded-2xl py-3 font-bold text-base shadow-lg shadow-emerald-600/30">
+                  <div className="mt-4 flex flex-col gap-3">
+                    <button type="button" className="w-full bg-emerald-600 text-white rounded-xl py-2.5 font-bold text-sm shadow-md shadow-emerald-600/30">
                       {buttonText || (locale === 'ar' ? "ابدأ الاختبار 🚀" : "Start Quiz 🚀")}
                     </button>
                     
                     {/* Decorative Stars */}
-                    <div className="flex justify-center items-center gap-4 text-amber-400">
-                      <span className="text-xl">⭐</span>
-                      <span className="text-2xl">☀️</span>
-                      <span className="text-xl">✨</span>
+                    <div className="flex justify-center items-center gap-3 text-amber-400">
+                      <span className="text-base">⭐</span>
+                      <span className="text-lg">☀️</span>
+                      <span className="text-base">✨</span>
                     </div>
                     
                     {/* Back Link */}
-                    <button type="button" className="text-gray-400 text-xs font-bold mt-2">
+                    <button type="button" className="text-gray-400 text-[11px] font-bold mt-1">
                       {locale === 'ar' ? "العودة للرئيسية" : "Back to Home"}
                     </button>
                   </div>
@@ -144,22 +144,22 @@ export function LivePreview({
                   initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isRTL ? -20 : 20 }}
-                  className="flex flex-col h-full gap-4 pt-2"
+                  className="flex flex-col h-full gap-3 pt-1"
                 >
                   {/* Preview Toggle */}
-                  <div className="flex justify-center mb-2">
-                    <div className="bg-gray-100 rounded-lg p-1 flex text-[10px] font-bold">
+                  <div className="flex justify-center mb-1">
+                    <div className="bg-gray-100 rounded-lg p-0.5 flex text-[10px] font-bold">
                       <button 
                         type="button"
                         onClick={() => onResultPreviewStateChange?.("pass")}
-                        className={`px-3 py-1 rounded-md ${resultPreviewState === "pass" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500"}`}
+                        className={`px-2.5 py-0.5 rounded-md ${resultPreviewState === "pass" ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500"}`}
                       >
                         {locale === 'ar' ? "نجاح" : "Pass"}
                       </button>
                       <button 
                         type="button"
                         onClick={() => onResultPreviewStateChange?.("fail")}
-                        className={`px-3 py-1 rounded-md ${resultPreviewState === "fail" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500"}`}
+                        className={`px-2.5 py-0.5 rounded-md ${resultPreviewState === "fail" ? "bg-white text-amber-600 shadow-sm" : "text-gray-500"}`}
                       >
                         {locale === 'ar' ? "رسوب" : "Retry"}
                       </button>
@@ -168,17 +168,17 @@ export function LivePreview({
 
                   {/* Result Header icon */}
                   <div className="text-center">
-                    <span className="text-4xl">{resultPreviewState === "pass" ? "🏆" : "🌱"}</span>
+                    <span className="text-3xl">{resultPreviewState === "pass" ? "🏆" : "🌱"}</span>
                   </div>
 
                   {/* Title & Subtitle */}
-                  <div className="text-center mb-2">
-                    <h1 className={`text-2xl font-black mb-1 leading-tight ${resultPreviewState === "pass" ? "text-emerald-600" : "text-amber-600"}`}>
+                  <div className="text-center mb-1">
+                    <h1 className={`text-lg sm:text-xl font-black mb-0.5 leading-tight ${resultPreviewState === "pass" ? "text-emerald-600" : "text-amber-600"}`}>
                       {resultPreviewState === "pass" 
                         ? (resultTitlePass || (locale === 'ar' ? "ممتاز!" : "Excellent!")) 
                         : (resultTitleFail || (locale === 'ar' ? "لا بأس، استمر!" : "Keep Going!"))}
                     </h1>
-                    <p className="text-gray-500 font-medium text-xs">
+                    <p className="text-gray-500 font-medium text-[11px]">
                       {resultPreviewState === "pass" 
                         ? (resultSubtitlePass || (locale === 'ar' ? "لقد أثبتّ جدارتك!" : "You proved yourself!")) 
                         : (resultSubtitleFail || (locale === 'ar' ? "كل محاولة تعلّم جديد!" : "Every attempt is learning!"))}
@@ -186,16 +186,16 @@ export function LivePreview({
                   </div>
 
                   {/* Score Box */}
-                  <div className={`${resultPreviewState === "pass" ? "bg-emerald-600" : "bg-amber-500"} text-white rounded-2xl p-4 text-center shadow-md`}>
-                    <div className="text-xs font-bold mb-1 opacity-90">{locale === 'ar' ? "نتيجتك النهائية" : "Your Final Score"}</div>
+                  <div className={`${resultPreviewState === "pass" ? "bg-emerald-600" : "bg-amber-500"} text-white rounded-xl p-2.5 text-center shadow-sm`}>
+                    <div className="text-[10px] font-bold mb-0.5 opacity-90">{locale === 'ar' ? "نتيجتك النهائية" : "Your Final Score"}</div>
                     <div className="flex items-baseline justify-center gap-1" dir="ltr">
-                      <span className="text-3xl font-black tracking-tighter">{resultPreviewState === "pass" ? "100" : "10"}</span>
-                      <span className="text-lg opacity-80">/ 110 {locale === 'ar' ? "نقطة" : "pts"}</span>
+                      <span className="text-2xl font-black tracking-tighter">{resultPreviewState === "pass" ? "100" : "10"}</span>
+                      <span className="text-xs opacity-80">/ 110 {locale === 'ar' ? "نقطة" : "pts"}</span>
                     </div>
                   </div>
 
                   {/* Message Box */}
-                  <div className={`bg-gray-50 text-gray-800 rounded-xl p-3 text-center text-xs font-bold leading-relaxed shadow-sm border ${resultPreviewState === "pass" ? "border-emerald-200" : "border-amber-200"}`}>
+                  <div className={`bg-gray-50 text-gray-800 rounded-lg p-2 text-center text-[11px] font-bold leading-snug shadow-sm border ${resultPreviewState === "pass" ? "border-emerald-200" : "border-amber-200"}`}>
                     {resultPreviewState === "pass" ? "🌟 " : "📚 "} 
                     {resultPreviewState === "pass" 
                       ? (resultMessagePass || (locale === 'ar' ? "أحسنت صنعاً! لقد أتممت الاختبار بنجاح مبهر." : "Well done! You passed the quiz with flying colors.")) 
@@ -203,26 +203,26 @@ export function LivePreview({
                   </div>
 
                   {/* Org Message Box */}
-                  <div className="border-2 border-emerald-400 bg-emerald-50/50 rounded-2xl p-4 text-center mt-2 shadow-sm relative">
-                    <div className="w-10 h-10 rounded-full bg-white border border-gray-200 mx-auto mb-3 flex items-center justify-center overflow-hidden shadow-sm relative">
+                  <div className="border border-emerald-400 bg-emerald-50/50 rounded-xl p-2.5 text-center mt-1 shadow-sm relative">
+                    <div className="w-7 h-7 rounded-full bg-white border border-gray-200 mx-auto mb-1 flex items-center justify-center overflow-hidden shadow-sm relative">
                       {logo ? (
                         <Image src={logo} alt="Logo" fill className="object-contain p-0.5" />
                       ) : (
-                        <span className="text-xs text-gray-300 font-bold">{locale === 'ar' ? "شعار" : "Logo"}</span>
+                        <span className="text-[9px] text-gray-300 font-bold">{locale === 'ar' ? "شعار" : "Logo"}</span>
                       )}
                     </div>
-                    <h3 className="text-emerald-700 font-bold text-sm mb-2">{locale === 'ar' ? `رسالة من ${institutionName || "المؤسسة"}` : `Message from ${institutionName || "Organization"}`}</h3>
-                    <p className="text-gray-600 text-[10px] leading-relaxed font-medium">
+                    <h3 className="text-emerald-700 font-bold text-xs mb-1">{locale === 'ar' ? `رسالة من ${institutionName || "المؤسسة"}` : `Message from ${institutionName || "Organization"}`}</h3>
+                    <p className="text-gray-600 text-[9.5px] leading-relaxed font-medium">
                       {orgMessage || defaultOrgMsg}
                     </p>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="mt-auto pt-4 flex flex-col gap-3">
-                    <button type="button" className="w-full bg-emerald-600 text-white rounded-xl py-3 font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                  <div className="mt-auto pt-2 flex flex-col gap-2">
+                    <button type="button" className="w-full bg-emerald-600 text-white rounded-lg py-2 font-bold text-xs shadow-sm shadow-emerald-600/20 flex items-center justify-center gap-1.5">
                       <span>{resultPrimaryButtonText || (locale === 'ar' ? "العب مرة أخرى 🔄" : "Play Again 🔄")}</span>
                     </button>
-                    <button type="button" className="w-full bg-white text-emerald-600 border-2 border-emerald-500 rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2">
+                    <button type="button" className="w-full bg-white text-emerald-600 border border-emerald-500 rounded-lg py-1.5 font-bold text-xs flex items-center justify-center gap-1.5">
                       <span>{resultSecondaryButtonText || (locale === 'ar' ? "شارك نتيجتك 📊" : "Share Score 📊")}</span>
                     </button>
                   </div>

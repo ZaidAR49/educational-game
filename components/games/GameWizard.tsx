@@ -73,7 +73,7 @@ export function GameWizard({
   const qrLogo = selectedOrg?.logo || "/logo.png"
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-28">
+    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8 sm:pb-12">
       
       {/* Top Navigation & Wizard Header */}
       <GameWizardHeader 
@@ -89,16 +89,16 @@ export function GameWizard({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-sm"
+            className="bg-red-50 border-2 border-red-200 text-red-700 px-5 py-3 rounded-2xl font-bold flex items-center gap-3 shadow-sm text-sm"
           >
-            <AlertCircle className="w-6 h-6 shrink-0" />
+            <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{errorMsg}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="min-h-[600px]">
+      <div className="w-full">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <BasicInfoStep 

@@ -21,7 +21,7 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
   const o = t.orgForm
 
   const field = (name: keyof OrganizationFormData, error?: string, extra?: string) =>
-    `w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none transition-all text-start ${extra || ""} ${
+    `w-full px-3.5 py-2.5 rounded-xl border focus:ring-2 outline-none transition-all text-start font-medium text-sm sm:text-base ${extra || ""} ${
       error ? "border-red-500 focus:border-red-500 focus:ring-red-200" : "border-gray-200 focus:border-emerald-500 focus:ring-emerald-200"
     }`
 
@@ -50,32 +50,32 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="bg-white rounded-2xl p-4.5 sm:p-5 border border-gray-100 shadow-sm space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-200">
       
-      <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-        <h3 className="font-bold text-gray-800">{o.welcomeTexts}</h3>
+      <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+        <h3 className="font-bold text-gray-800 text-sm sm:text-base">{o.welcomeTexts}</h3>
         <button
           type="button"
           onClick={handleEnhanceSection}
           disabled={isGlobalLoading}
-          className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-xl font-bold transition-all text-sm"
+          className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-xl font-bold transition-all text-xs sm:text-sm"
         >
-          {isGlobalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {isGlobalLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
           <span>{o.enhanceWelcome}</span>
         </button>
       </div>
 
       {/* Title + Icon row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="space-y-2 md:col-span-3">
-          <label className="text-sm font-bold text-gray-700 block text-start">{o.mainTitleLabel}</label>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="space-y-1.5 md:col-span-3">
+          <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.mainTitleLabel}</label>
           <div className="relative">
             <input
               type="text"
               name="mainTitle"
               value={formData.mainTitle}
               onChange={onChange}
-              className={`${field("mainTitle", errors.mainTitle, paddingForAi)} font-bold text-lg`}
+              className={`${field("mainTitle", errors.mainTitle, paddingForAi)} font-bold text-base sm:text-lg`}
             />
             <AiImproveButton 
               text={formData.mainTitle} 
@@ -86,24 +86,24 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
               onGlobalLoadingChange={onGlobalLoadingChange}
             />
           </div>
-          {errors.mainTitle && <p className="text-red-500 text-sm font-bold">{errors.mainTitle}</p>}
+          {errors.mainTitle && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.mainTitle}</p>}
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-700 block text-start">{o.iconLabel}</label>
+        <div className="space-y-1.5">
+          <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.iconLabel}</label>
           <input
             type="text"
             name="icon"
             value={formData.icon}
             onChange={onChange}
-            className={`${field("icon", errors.icon)} text-center text-xl`}
+            className={`${field("icon", errors.icon)} text-center text-lg sm:text-xl`}
           />
-          {errors.icon && <p className="text-red-500 text-sm font-bold">{errors.icon}</p>}
+          {errors.icon && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.icon}</p>}
         </div>
       </div>
 
       {/* Subtitle */}
-      <div className="space-y-2">
-        <label className="text-sm font-bold text-gray-700 block text-start">{o.subTitleLabel}</label>
+      <div className="space-y-1.5">
+        <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.subTitleLabel}</label>
         <div className="relative">
           <input
             type="text"
@@ -121,19 +121,19 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
             onGlobalLoadingChange={onGlobalLoadingChange}
           />
         </div>
-        {errors.subtitle && <p className="text-red-500 text-sm font-bold">{errors.subtitle}</p>}
+        {errors.subtitle && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.subtitle}</p>}
       </div>
 
       {/* Welcome message */}
-      <div className="space-y-2">
-        <label className="text-sm font-bold text-gray-700 block text-start">{o.welcomeMsgLabel}</label>
+      <div className="space-y-1.5">
+        <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.welcomeMsgLabel}</label>
         <div className="relative">
           <textarea
             name="welcomeMessage"
             value={formData.welcomeMessage}
             onChange={onChange}
-            rows={5}
-            className={`${field("welcomeMessage", errors.welcomeMessage, paddingForAi)} text-sm leading-relaxed resize-none`}
+            rows={4}
+            className={`${field("welcomeMessage", errors.welcomeMessage, paddingForAi)} text-xs sm:text-sm leading-relaxed resize-none`}
           />
           <AiImproveButton 
             text={formData.welcomeMessage} 
@@ -144,15 +144,15 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
             onGlobalLoadingChange={onGlobalLoadingChange}
           />
         </div>
-        {errors.welcomeMessage && <p className="text-red-500 text-sm font-bold">{errors.welcomeMessage}</p>}
+        {errors.welcomeMessage && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.welcomeMessage}</p>}
         <p className="text-xs text-emerald-600/70 font-medium text-start">
           {o.welcomeMsgHint}
         </p>
       </div>
 
       {/* Button text */}
-      <div className="space-y-2">
-        <label className="text-sm font-bold text-gray-700 block text-start">{o.buttonTextLabel}</label>
+      <div className="space-y-1.5">
+        <label className="text-xs sm:text-sm font-bold text-gray-700 block text-start">{o.buttonTextLabel}</label>
         <div className="relative">
           <input
             type="text"
@@ -170,7 +170,7 @@ export function WelcomeTabFields({ formData, errors, onChange, onBulkChange, isG
             onGlobalLoadingChange={onGlobalLoadingChange}
           />
         </div>
-        {errors.buttonText && <p className="text-red-500 text-sm font-bold">{errors.buttonText}</p>}
+        {errors.buttonText && <p className="text-red-500 text-xs sm:text-sm font-bold">{errors.buttonText}</p>}
       </div>
     </div>
   )

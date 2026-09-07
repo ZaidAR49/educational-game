@@ -43,16 +43,19 @@ export function NewGameFlow({ organizations }: NewGameFlowProps) {
 
   if (method === 'manual') {
     return (
-      <div className="space-y-4">
-        <button 
-          onClick={() => setMethod('select')}
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 mb-4"
-        >
-          {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          <span>{t.gameCreation.backToMethods}</span>
-        </button>
-        <GameWizard isEdit={false} organizations={organizations} />
-      </div>
+      <GameWizard 
+        isEdit={false} 
+        organizations={organizations}
+        customTopActions={
+          <button 
+            onClick={() => setMethod('select')}
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100"
+          >
+            {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+            <span>{t.gameCreation.backToMethods}</span>
+          </button>
+        }
+      />
     )
   }
 
@@ -66,37 +69,37 @@ export function NewGameFlow({ organizations }: NewGameFlowProps) {
 
   // Select Method Screen
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-16">
       
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mt-8">
-        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Sparkles className="w-7 h-7" />
+      <div className="text-center max-w-2xl mx-auto mt-4">
+        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+          <Sparkles className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">{t.gameCreation.howToCreate}</h1>
-        <p className="text-gray-500 font-medium text-base">
+        <h1 className="text-xl sm:text-2xl font-black text-gray-900 mb-2 tracking-tight">{t.gameCreation.howToCreate}</h1>
+        <p className="text-gray-500 font-medium text-sm sm:text-base">
           {t.gameCreation.howToCreateDesc}
         </p>
       </div>
 
       {/* Methods Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
         
         {/* Manual Method */}
         <motion.button
-          whileHover={{ y: -5 }}
+          whileHover={{ y: -3 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setMethod('manual')}
-          className="bg-white rounded-3xl p-6 border-2 border-gray-100 hover:border-emerald-500 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.2)] transition-all group flex flex-col items-start text-start"
+          className="bg-white rounded-2xl p-4.5 sm:p-5 border-2 border-gray-100 hover:border-emerald-500 hover:shadow-lg transition-all group flex flex-col items-start text-start"
         >
-          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-            <PenTool className="w-6 h-6" />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+            <PenTool className="w-5 h-5" />
           </div>
-          <h3 className="text-xl font-black text-gray-900 mb-2">{t.gameCreation.manualTitle}</h3>
-          <p className="text-gray-500 font-medium leading-relaxed mb-4 flex-1">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 mb-1.5">{t.gameCreation.manualTitle}</h3>
+          <p className="text-gray-500 font-medium text-xs sm:text-sm leading-relaxed mb-3.5 flex-1">
             {t.gameCreation.manualDesc}
           </p>
-          <div className="text-emerald-600 font-bold flex items-center gap-2 group-hover:gap-3 transition-all">
+          <div className="text-emerald-600 font-bold text-sm sm:text-base flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
             <span>{t.gameCreation.manualBtn}</span>
             {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           </div>
@@ -104,19 +107,19 @@ export function NewGameFlow({ organizations }: NewGameFlowProps) {
 
         {/* BYO AI Method */}
         <motion.button
-          whileHover={{ y: -5 }}
+          whileHover={{ y: -3 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setMethod('byo-ai')}
-          className="bg-white rounded-3xl p-6 border-2 border-gray-100 hover:border-purple-500 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.2)] transition-all group flex flex-col items-start text-start relative overflow-hidden"
+          className="bg-white rounded-2xl p-4.5 sm:p-5 border-2 border-gray-100 hover:border-purple-500 hover:shadow-lg transition-all group flex flex-col items-start text-start relative overflow-hidden"
         >
-          <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10">
-            <Bot className="w-6 h-6" />
+          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform relative z-10">
+            <Bot className="w-5 h-5" />
           </div>
-          <h3 className="text-xl font-black text-gray-900 mb-2 relative z-10">{t.gameCreation.byoTitle}</h3>
-          <p className="text-gray-500 font-medium leading-relaxed mb-4 flex-1 relative z-10">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 mb-1.5 relative z-10">{t.gameCreation.byoTitle}</h3>
+          <p className="text-gray-500 font-medium text-xs sm:text-sm leading-relaxed mb-3.5 flex-1 relative z-10">
             {t.gameCreation.byoDesc}
           </p>
-          <div className="text-purple-600 font-bold flex items-center gap-2 group-hover:gap-3 transition-all relative z-10">
+          <div className="text-purple-600 font-bold text-sm sm:text-base flex items-center gap-1.5 group-hover:gap-2.5 transition-all relative z-10">
             <span>{t.gameCreation.byoBtn}</span>
             {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           </div>
@@ -125,29 +128,29 @@ export function NewGameFlow({ organizations }: NewGameFlowProps) {
 
         {/* Auto AI Method */}
         <motion.button
-          whileHover={{ y: -5 }}
+          whileHover={{ y: -3 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setMethod('auto-ai')}
-          className="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-3xl p-6 border-2 border-transparent shadow-xl hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.4)] transition-all group flex flex-col items-start text-start relative overflow-hidden"
+          className="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-4.5 sm:p-5 border-2 border-transparent shadow-lg hover:shadow-xl transition-all group flex flex-col items-start text-start relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 animate-[pulse_4s_ease-in-out_infinite]"></div>
           
-          <div className="w-full flex items-center justify-between mb-4 relative z-10">
-            <div className="w-12 h-12 bg-white/20 text-white backdrop-blur-sm rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
-              <Sparkles className="w-6 h-6" />
+          <div className="w-full flex items-center justify-between mb-3 relative z-10">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white/20 text-white backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+              <Sparkles className="w-5 h-5" />
             </div>
-            <span className="bg-white text-emerald-800 text-xs px-3 py-1 rounded-full font-black shadow-sm tracking-wide whitespace-nowrap">
+            <span className="bg-white text-emerald-800 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-black shadow-sm tracking-wide whitespace-nowrap">
               {t.gameCreation.autoAiBadge}
             </span>
           </div>
 
-          <h3 className="text-xl font-black text-white mb-2 relative z-10">
+          <h3 className="text-lg sm:text-xl font-black text-white mb-1.5 relative z-10">
             {t.gameCreation.autoAiTitle}
           </h3>
-          <p className="text-emerald-50 font-medium leading-relaxed mb-4 flex-1 relative z-10">
+          <p className="text-emerald-50 font-medium text-xs sm:text-sm leading-relaxed mb-3.5 flex-1 relative z-10">
             {t.gameCreation.autoAiDesc}
           </p>
-          <div className="text-white font-bold flex items-center gap-2 group-hover:gap-3 transition-all relative z-10">
+          <div className="text-white font-bold text-sm sm:text-base flex items-center gap-1.5 group-hover:gap-2.5 transition-all relative z-10">
             <span>{t.gameCreation.autoAiBtn}</span>
             {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           </div>

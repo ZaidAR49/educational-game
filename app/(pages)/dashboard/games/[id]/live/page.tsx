@@ -139,28 +139,28 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
     : 0
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-7xl mx-auto space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-1.5">
             <Link 
               href="/dashboard/games" 
-              className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm"
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-500 hover:text-emerald-600 hover:border-emerald-200 transition-colors shadow-sm"
               title={t.liveSession.backToGames}
             >
               {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
             </Link>
-            <h1 className="text-3xl font-black text-gray-900">{t.liveSession.title}</h1>
-            <div className="flex items-center gap-2 bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold rtl:mr-4 ltr:ml-4">
-              <div className="relative flex h-2.5 w-2.5">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{t.liveSession.title}</h1>
+            <div className="flex items-center gap-2 bg-red-100 text-red-600 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold rtl:mr-3 ltr:ml-3">
+              <div className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-red-500"></span>
               </div>
               <span>{t.liveSession.liveNow}</span>
             </div>
           </div>
-          <p className="text-gray-500 rtl:mr-14 ltr:ml-14 font-bold text-lg">
+          <p className="text-gray-500 rtl:mr-12 ltr:ml-12 font-bold text-sm sm:text-base">
             {session.gameName}
           </p>
         </div>
@@ -169,7 +169,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowQrModal(true)}
-            className="flex items-center justify-center w-[42px] h-[42px] bg-white border border-gray-100 shadow-sm text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 rounded-xl transition-all"
+            className="flex items-center justify-center w-10 h-10 bg-white border border-gray-100 shadow-sm text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 rounded-xl transition-all"
             title={t.liveSession.showQr}
           >
             <QrCode className="w-5 h-5" />
@@ -177,7 +177,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
           <button 
             disabled={isPending}
             onClick={handleEndSession}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-100 shadow-sm text-red-600 hover:bg-red-100 disabled:opacity-50 rounded-xl font-bold transition-all"
+            className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-red-50 border border-red-100 shadow-sm text-red-600 hover:bg-red-100 disabled:opacity-50 rounded-xl font-bold text-sm sm:text-base transition-all"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PowerOff className="w-4 h-4" />}
             <span>{t.liveSession.endSession}</span>
@@ -194,7 +194,7 @@ export default function LiveSessionPage({ params }: { params: Promise<{ id: stri
       />
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         <LivePodium top3={top3} totalStudents={students.length} />
         <LiveLeaderboardTable sortedStudents={sortedStudents} />
       </div>

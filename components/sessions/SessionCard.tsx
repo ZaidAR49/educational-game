@@ -37,9 +37,9 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
   return (
     <div 
       {...longPressProps}
-      className={`bg-white rounded-3xl border-2 transition-all shadow-sm overflow-hidden flex flex-col cursor-pointer select-none ${isSelected ? 'border-indigo-500 ring-4 ring-indigo-50' : 'border-gray-100 hover:border-gray-200 hover:shadow-md'}`}
+      className={`bg-white rounded-2xl border-2 transition-all shadow-sm overflow-hidden flex flex-col cursor-pointer select-none ${isSelected ? 'border-indigo-500 ring-4 ring-indigo-50' : 'border-gray-100 hover:border-gray-200 hover:shadow-md'}`}
     >
-      <div className="p-5 flex-1 flex flex-col relative">
+      <div className="p-4 sm:p-4.5 flex-1 flex flex-col relative">
         
         {/* Selection Checkbox */}
         {isSelectionMode && (
