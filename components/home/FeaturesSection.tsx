@@ -33,7 +33,7 @@ export function FeaturesSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 max-w-7xl">
 
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center mb-14">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -78,9 +78,9 @@ export function FeaturesSection() {
             >
               <div className="absolute -top-24 -start-24 w-48 h-48 bg-emerald-500 rounded-full blur-[80px] opacity-40 group-hover:opacity-60 transition-opacity" />
 
-              <div className="relative z-10">
-                <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6">
-                  <Wand2 className="w-7 h-7 text-emerald-400" />
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-emerald-500/20 shadow-md">
+                  <Wand2 className="w-6 h-6 text-emerald-400" />
                 </div>
                 <h4 className="text-2xl font-black mb-4">{t.features.autoAiTitle}</h4>
                 <p className="text-emerald-100/80 font-medium leading-relaxed text-sm md:text-base mb-8">
@@ -151,8 +151,8 @@ export function FeaturesSection() {
         {/* 2. Core Platform Features */}
         <div>
           <div className="flex items-center gap-3 mb-8 justify-center lg:justify-start">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-              <Zap className="w-5.5 h-5.5" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-blue-100">
+              <Zap className="w-6 h-6 text-blue-600" />
             </div>
             <h3 className="text-2xl font-black text-gray-900">
               {t.features.coreFeaturesTitle}
@@ -166,7 +166,7 @@ export function FeaturesSection() {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-gray-50 hover:bg-white rounded-[2rem] p-8 border border-gray-100 hover:border-emerald-200 hover:shadow-xl transition-all duration-300 group flex items-start gap-6 text-start"
+              className="flex flex-col items-center justify-between p-6 md:p-8 rounded-3xl shadow-xl border-2 hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 cursor-default group min-h-[380px]"
             >
               <div className="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Zap className="w-7 h-7" />

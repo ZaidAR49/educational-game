@@ -59,7 +59,7 @@ export function GameplayScreen({
       <div className="flex justify-between items-center mb-4 gap-2">
         <div className="bg-gradient-to-br from-emerald-50 to-blue-50 px-4 py-2 rounded-xl text-center min-w-[80px]">
           <span className="block text-xs text-gray-500 font-bold">{scoreLabel}</span>
-          <span className="text-2xl font-black text-emerald-600">{score}</span>
+          <span className="text-xl font-black text-emerald-600">{score}</span>
         </div>
 
         {/* Skip button — center */}
@@ -95,8 +95,8 @@ export function GameplayScreen({
 
       {/* Scenario card */}
       <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 rounded-2xl p-5 text-center mb-5 animate-in fade-in duration-500">
-        <div className="text-5xl mb-3">{currentScenario.icon || "❓"}</div>
-        <h2 className="text-xl font-black text-gray-800 mb-2">
+        <div className="text-4xl mb-3">{currentScenario.icon || "❓"}</div>
+        <h2 className="text-lg font-black text-gray-800 mb-2">
           {currentScenario.title}
         </h2>
         <p className="text-gray-600 font-medium leading-relaxed">
@@ -112,7 +112,7 @@ export function GameplayScreen({
             type="button"
             onClick={() => onSelectChoice(index)}
             disabled={hasAnswered}
-            className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-300 text-start font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300
+            className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all duration-300 text-start font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300
               ${
                 !hasAnswered
                   ? "border-gray-200 hover:border-blue-400 hover:bg-gray-50 rtl:hover:-translate-x-1 ltr:hover:translate-x-1"
@@ -142,7 +142,7 @@ export function GameplayScreen({
               ${hasAnswered ? "pointer-events-none" : "cursor-pointer"}
             `}
           >
-            {choice.icon && <span className="text-2xl flex-shrink-0">{choice.icon}</span>}
+            {choice.icon && <span className="text-xl flex-shrink-0">{choice.icon}</span>}
             <span className="text-gray-700">{choice.text}</span>
           </button>
         ))}
@@ -152,11 +152,11 @@ export function GameplayScreen({
       {showFeedback && activeFeedback && (
         <div className="absolute inset-0 bg-white/98 rounded-3xl flex items-center justify-center p-6 animate-in fade-in duration-300 z-10">
           <div className="text-center w-full">
-            <div className="text-6xl mb-4 animate-in zoom-in duration-500">
+            <div className="text-5xl mb-4 animate-in zoom-in duration-500">
               {isSkipped ? "⏭️" : feedbackIsCorrect ? "✅" : "💡"}
             </div>
             <h3
-              className={`text-2xl font-black mb-3 ${
+              className={`text-xl font-black mb-3 ${
                 isSkipped
                   ? "text-amber-500"
                   : feedbackIsCorrect
@@ -174,7 +174,7 @@ export function GameplayScreen({
 
             {activeFeedback.tip && (
               <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-4 mb-5 flex items-start gap-3 text-start">
-                <span className="text-2xl flex-shrink-0">💡</span>
+                <span className="text-xl flex-shrink-0">💡</span>
                 <span className="text-gray-700 font-medium text-sm">
                   {activeFeedback.tip}
                 </span>
@@ -184,7 +184,7 @@ export function GameplayScreen({
             <button
               type="button"
               onClick={onNextScenario}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-lg font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full"
+              className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-base font-bold px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full"
             >
               {currentScenarioIndex >= totalScenarios - 1
                 ? showResultsLabel

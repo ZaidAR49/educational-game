@@ -145,15 +145,15 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
           <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
             <Bot className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.gameCreation.byoTitle}</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t.gameCreation.byoTitle}</h1>
         </div>
-        <p className="text-gray-500 font-medium text-lg ms-16">
+        <p className="text-gray-500 font-medium text-base ms-16">
           {t.gameCreation.byoDesc}
         </p>
       </div>
 
       {/* Step 1 */}
-      <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 start-0 w-2 h-full bg-purple-500"></div>
         <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-black">1</span>
@@ -242,7 +242,7 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
       </div>
 
       {/* Step 2 */}
-      <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 start-0 w-2 h-full bg-emerald-500"></div>
         <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
           <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">2</span>
@@ -253,7 +253,7 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
         </p>
 
         <div className="space-y-4">
-          <div className="relative flex rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 transition-all font-mono text-sm h-[400px]" dir="ltr">
+          <div className="relative flex rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 transition-all font-mono text-sm h-[320px]" dir="ltr">
             <div 
               className="w-12 bg-gray-100 text-gray-400 flex flex-col items-end pr-3 py-4 select-none overflow-hidden shrink-0 border-r border-gray-200"
             >
@@ -284,7 +284,7 @@ export function ByoAiWizard({ organizations, onBack }: ByoAiWizardProps) {
           <button
             onClick={handleParseJSON}
             disabled={!jsonInput.trim()}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:hover:bg-emerald-600"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:hover:bg-emerald-600"
           >
             {t.gameCreation.byoParseBtn}
           </button>

@@ -28,16 +28,16 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm space-y-6 max-w-4xl mx-auto"
     >
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[1.5rem] mx-auto flex items-center justify-center mb-4 text-4xl shadow-inner border border-emerald-100/50">
+      <div className="text-center mb-6">
+        <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-2xl mx-auto flex items-center justify-center mb-4 text-3xl shadow-inner border border-emerald-100/50">
           {formData.icon}
         </div>
         <h2 className="text-2xl font-black text-gray-900 mb-2">{t.gameWizard.step1Label}</h2>
         <p className="text-gray-500 font-medium text-base">{t.gameWizard.basicInfoSubtitle}</p>
       </div>
 
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <div className="md:col-span-4 space-y-3">
             <label className="text-sm font-bold text-gray-700 block text-start">{t.gameWizard.gameTitle}</label>
             <input 
@@ -46,7 +46,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
               value={formData.title}
               onChange={onChange}
               placeholder={t.gameWizard.gameTitlePlaceholder}
-              className={`w-full px-5 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-start font-black text-lg placeholder:text-gray-300 ${
+              className={`w-full px-5 py-3 rounded-xl border-2 focus:ring-4 outline-none transition-all text-start font-black text-base placeholder:text-gray-300 ${
                 errors.title 
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                   : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
@@ -61,7 +61,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
               name="icon"
               value={formData.icon}
               onChange={onChange}
-              className={`w-full px-4 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-center text-2xl ${
+              className={`w-full px-4 py-3 rounded-xl border-2 focus:ring-4 outline-none transition-all text-center text-2xl ${
                 errors.icon 
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                   : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
@@ -71,7 +71,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <label className="text-sm font-bold text-gray-700 block text-start">{t.gameWizard.gameOrg}</label>
             <div className="relative">
@@ -79,7 +79,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
                 name="organizationId"
                 value={formData.organizationId}
                 onChange={onChange}
-                className={`w-full px-5 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-start font-black text-lg text-gray-700 bg-white appearance-none cursor-pointer placeholder:text-gray-300 ${
+                className={`w-full px-5 py-3 rounded-xl border-2 focus:ring-4 outline-none transition-all text-start font-black text-base text-gray-700 bg-white appearance-none cursor-pointer placeholder:text-gray-300 ${
                   errors.organizationId 
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                     : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'
@@ -90,7 +90,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
               </select>
-              <ChevronDown className={`absolute ${isRTL ? 'left-6' : 'right-6'} top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-6 h-6`} />
+              <ChevronDown className={`absolute ${isRTL ? 'left-6' : 'right-6'} top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-5 h-5`} />
             </div>
             {errors.organizationId && <p className="text-red-500 text-sm font-bold text-start">{errors.organizationId}</p>}
           </div>
@@ -109,7 +109,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
                 value={formData.slug}
                 onChange={onChange}
                 placeholder="career-path"
-                className={`flex-1 min-w-0 px-4 py-3.5 focus:ring-4 outline-none transition-all font-sans font-bold text-emerald-700 text-base placeholder:text-gray-300 ${
+                className={`flex-1 min-w-0 px-4 py-3 focus:ring-4 outline-none transition-all font-sans font-bold text-emerald-700 text-base placeholder:text-gray-300 ${
                   errors.slug ? 'focus:ring-red-500/10 bg-red-50/10' : 'focus:ring-emerald-500/10'
                 }`}
               />
@@ -126,7 +126,7 @@ export function BasicInfoStep({ formData, onChange, errors = {}, organizations =
             onChange={onChange}
             rows={4}
             placeholder={t.gameWizard.gameDescPlaceholder}
-            className={`w-full px-5 py-3.5 rounded-2xl border-2 focus:ring-4 outline-none transition-all text-start text-gray-600 resize-none leading-relaxed text-base placeholder:text-gray-300 ${
+            className={`w-full px-5 py-3 rounded-xl border-2 focus:ring-4 outline-none transition-all text-start text-gray-600 resize-none leading-relaxed text-base placeholder:text-gray-300 ${
               errors.description 
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
                 : 'border-gray-100 focus:border-emerald-500 focus:ring-emerald-500/10'

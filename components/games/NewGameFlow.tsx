@@ -23,18 +23,18 @@ export function NewGameFlow({ organizations }: NewGameFlowProps) {
   if (organizations.length === 0) {
     return (
       <div className="max-w-2xl mx-auto mt-20 p-8 bg-white rounded-3xl shadow-sm border-2 border-gray-100 text-center animate-in fade-in slide-in-from-bottom-4">
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
-          <Building2 className="w-10 h-10" />
+        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
+          <Building2 className="w-8 h-8" />
         </div>
-        <h1 className="text-3xl font-black text-gray-900 mb-4">{t.gameCreation.noOrgTitle}</h1>
-        <p className="text-gray-500 text-lg mb-8 leading-relaxed">
+        <h1 className="text-2xl font-black text-gray-900 mb-4">{t.gameCreation.noOrgTitle}</h1>
+        <p className="text-gray-500 text-base mb-8 leading-relaxed">
           {t.gameCreation.noOrgDesc}
         </p>
         <Link 
           href="/dashboard/organizations"
-          className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-md text-lg"
+          className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md text-base"
         >
-          <PlusCircle className="w-6 h-6" />
+          <PlusCircle className="w-5 h-5" />
           <span>{t.gameCreation.createOrgBtn}</span>
         </Link>
       </div>
@@ -70,10 +70,10 @@ export function NewGameFlow({ organizations }: NewGameFlowProps) {
       
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto mt-8">
-        <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Sparkles className="w-8 h-8" />
+        <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Sparkles className="w-7 h-7" />
         </div>
-        <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">{t.gameCreation.howToCreate}</h1>
+        <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">{t.gameCreation.howToCreate}</h1>
         <p className="text-gray-500 font-medium text-base">
           {t.gameCreation.howToCreateDesc}
         </p>

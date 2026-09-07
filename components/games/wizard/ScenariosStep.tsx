@@ -45,7 +45,7 @@ export function ScenariosStep({
             </h3>
             <button 
               onClick={addScenario}
-              className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm"
+              className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition-colors shadow-sm"
               title={t.gameWizard.addScenario}
             >
               <Plus className="w-5 h-5" />
@@ -98,7 +98,7 @@ export function ScenariosStep({
             
             <div className="flex flex-col md:flex-row md:items-start gap-5 pb-6 border-b border-gray-100">
               <div className="flex flex-col items-center gap-1 shrink-0 self-center md:self-start">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner border ${
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner border ${
                   errors[`scenario_${activeScenario.id}_icon`] ? 'bg-red-50 text-red-500 border-red-200' : 'bg-blue-50 text-blue-500 border-blue-100'
                 }`}>
                   <input 
@@ -126,7 +126,7 @@ export function ScenariosStep({
                   onChange={(e) => updateActiveScenario('description', e.target.value)}
                   placeholder={t.gameWizard.scenarioDescPlaceholder}
                   rows={2}
-                  className={`w-full text-xl md:text-2xl font-black outline-none resize-none leading-tight ${
+                  className={`w-full text-lg md:text-xl font-black outline-none resize-none leading-tight ${
                     errors[`scenario_${activeScenario.id}_desc`] ? 'text-red-600 placeholder:text-red-200' : 'text-gray-900 placeholder:text-gray-200'
                   }`}
                 />
@@ -135,8 +135,8 @@ export function ScenariosStep({
             </div>
 
             <div>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
-                <h3 className="font-black text-gray-800 text-lg">{t.gameWizard.choicesTitle}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                <h3 className="font-black text-gray-800 text-base">{t.gameWizard.choicesTitle}</h3>
                 <span className="text-sm font-bold bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full inline-block w-fit">
                   {t.gameWizard.oneCorrectWarning}
                 </span>
@@ -183,7 +183,7 @@ export function ScenariosStep({
                         </div>
                         <button 
                           onClick={() => updateChoice(index, 'isCorrect', 'true')}
-                          className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all w-full sm:w-auto shrink-0
+                          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all w-full sm:w-auto shrink-0
                             ${choice.isCorrect 
                               ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' 
                               : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'

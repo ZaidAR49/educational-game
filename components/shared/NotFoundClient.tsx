@@ -27,14 +27,14 @@ export function NotFoundClient() {
         <div className="relative">
           <div className="absolute inset-0 bg-emerald-200/40 blur-3xl rounded-full scale-150 -z-10"></div>
           <div className="relative flex justify-center">
-            <div className="w-32 h-32 bg-white rounded-3xl shadow-2xl border border-gray-100 flex items-center justify-center rotate-[15deg] hover:rotate-0 transition-all duration-500 ease-out group">
-              <Compass className="w-16 h-16 text-emerald-500 group-hover:text-emerald-600 transition-colors duration-500" />
+            <div className="w-28 h-28 bg-white rounded-3xl shadow-2xl border border-gray-100 flex items-center justify-center rotate-[15deg] hover:rotate-0 transition-all duration-500 ease-out group">
+              <Compass className="w-14 h-14 text-emerald-500 group-hover:text-emerald-600 transition-colors duration-500" />
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <h1 className="text-8xl font-black text-gray-900 tracking-tighter drop-shadow-sm">
+          <h1 className="text-7xl font-black text-gray-900 tracking-tighter drop-shadow-sm">
             404
           </h1>
           <h2 className="text-2xl font-bold text-gray-800">
@@ -48,7 +48,7 @@ export function NotFoundClient() {
         <div className="pt-4">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0"
           >
             <Home className="w-5 h-5" />
             <span>{t.notFound.backHome}</span>

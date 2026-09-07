@@ -99,7 +99,7 @@ export function LivePreview({
 
                   {/* Main Title & Subtitle */}
                   <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-emerald-700 mb-2 leading-tight">
+                    <h1 className="text-2xl font-black text-emerald-700 mb-2 leading-tight">
                       {mainTitle || (locale === 'ar' ? "اختبر معلوماتك" : "Test Your Knowledge")}
                     </h1>
                     <p className="text-gray-500 font-medium text-sm">
@@ -108,9 +108,9 @@ export function LivePreview({
                   </div>
 
                   {/* Welcome Box */}
-                  <div className="bg-emerald-50 rounded-3xl p-6 text-center border border-emerald-100 shadow-sm mb-auto">
+                  <div className="bg-emerald-50 rounded-3xl p-5 text-center border border-emerald-100 shadow-sm mb-auto">
                     <div className="mb-4">
-                      <span className="text-2xl">{icon || "👋"}</span>
+                      <span className="text-xl">{icon || "👋"}</span>
                     </div>
                     <p className="text-gray-700 font-medium leading-relaxed whitespace-pre-line text-sm">
                       {welcomeMessage || defaultWelcomeMsg}
@@ -119,7 +119,7 @@ export function LivePreview({
 
                   {/* Action Button */}
                   <div className="mt-8 flex flex-col gap-6">
-                    <button type="button" className="w-full bg-emerald-600 text-white rounded-2xl py-4 font-bold text-lg shadow-lg shadow-emerald-600/30">
+                    <button type="button" className="w-full bg-emerald-600 text-white rounded-2xl py-3 font-bold text-base shadow-lg shadow-emerald-600/30">
                       {buttonText || (locale === 'ar' ? "ابدأ الاختبار 🚀" : "Start Quiz 🚀")}
                     </button>
                     
@@ -168,7 +168,7 @@ export function LivePreview({
 
                   {/* Result Header icon */}
                   <div className="text-center">
-                    <span className="text-5xl">{resultPreviewState === "pass" ? "🏆" : "🌱"}</span>
+                    <span className="text-4xl">{resultPreviewState === "pass" ? "🏆" : "🌱"}</span>
                   </div>
 
                   {/* Title & Subtitle */}

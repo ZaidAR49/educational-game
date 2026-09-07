@@ -27,14 +27,14 @@ export function NavbarClient({ session }: { session: any }) {
     <>
       <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
         <div className="w-full px-4 sm:px-8 lg:px-16 2xl:px-24 mx-auto">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-14 h-14 overflow-hidden flex items-center justify-center rounded-xl">
-                <Image src={AppLogo} alt="Logo" width={60} height={60} className="object-contain" priority />
+              <div className="w-10 h-10 overflow-hidden flex items-center justify-center rounded-xl">
+                <Image src={AppLogo} alt="Logo" width={40} height={40} className="object-contain" priority />
               </div>
-              <span className="text-2xl font-black text-gray-900 tracking-tight">
+              <span className="text-xl font-black text-gray-900 tracking-tight">
                 {uiContent.app.name}
               </span>
             </Link>
@@ -195,13 +195,13 @@ export function NavbarClient({ session }: { session: any }) {
             <LanguageDropdown compact />
           </div>
 
-          <Link href="/#features" className="px-4 py-3.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/#features" className="px-4 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             {t.nav.features}
           </Link>
-          <Link href="/#how-it-works" className="px-4 py-3.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/#how-it-works" className="px-4 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             {t.nav.howItWorks}
           </Link>
-          <Link href="/contact" className="px-4 py-3.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/contact" className="px-4 py-3 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             {t.nav.contact}
           </Link>
 
@@ -209,7 +209,7 @@ export function NavbarClient({ session }: { session: any }) {
             <>
               <div className="my-2 border-t border-gray-100" />
 
-              <Link href="/game/demo" className="px-4 py-3.5 flex items-center gap-3 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href="/game/demo" className="px-4 py-3 flex items-center gap-3 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                 <div className="bg-white p-1.5 rounded-lg shadow-sm">
                   <Gamepad2 className="w-5 h-5 text-emerald-600" />
                 </div>
@@ -220,14 +220,14 @@ export function NavbarClient({ session }: { session: any }) {
 
           {session && (
             <>
-              <Link href="/dashboard" className="px-4 py-3.5 flex items-center gap-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-emerald-600 font-bold transition-colors mt-1" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href="/dashboard" className="px-4 py-3 flex items-center gap-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-emerald-600 font-bold transition-colors mt-1" onClick={() => setIsMobileMenuOpen(false)}>
                 <div className="bg-gray-100 p-1.5 rounded-lg text-gray-500">
                   <LayoutDashboard className="w-5 h-5" />
                 </div>
                 <span>{t.nav.dashboard}</span>
               </Link>
               {['admin', 'super_admin', 'viewer'].includes(session.user?.role) && (
-                <Link href="/admin" className="px-4 py-3.5 flex items-center gap-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-purple-600 font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/admin" className="px-4 py-3 flex items-center gap-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-purple-600 font-bold transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                   <div className="bg-purple-50 p-1.5 rounded-lg text-purple-600">
                     <Shield className="w-5 h-5" />
                   </div>
@@ -239,7 +239,7 @@ export function NavbarClient({ session }: { session: any }) {
 
           {!session && (
             <div className="mt-2">
-              <Link href="/login" className="px-4 py-3.5 flex items-center justify-center gap-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold transition-colors shadow-sm" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href="/login" className="px-4 py-3 flex items-center justify-center gap-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold transition-colors shadow-sm" onClick={() => setIsMobileMenuOpen(false)}>
                 <LogIn className="w-5 h-5" />
                 <span>{t.nav.login}</span>
               </Link>
@@ -252,7 +252,7 @@ export function NavbarClient({ session }: { session: any }) {
           <div className="p-5 border-t border-gray-100 bg-gray-50/50 mt-auto">
             <button
               onClick={() => { posthog.reset(); signOut() }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-gray-200 hover:border-red-200 font-bold transition-all shadow-sm"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-gray-200 hover:border-red-200 font-bold transition-all shadow-sm"
             >
               <span>{t.nav.logout}</span>
             </button>

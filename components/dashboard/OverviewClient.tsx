@@ -44,7 +44,7 @@ export function OverviewClient({ user, data }: OverviewClientProps) {
         </div>
         <Link 
           href="/dashboard/games/new"
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shrink-0"
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-md shrink-0"
         >
           <Plus className="w-5 h-5" />
           <span>{o.createNewGame}</span>
@@ -57,8 +57,8 @@ export function OverviewClient({ user, data }: OverviewClientProps) {
           const Icon = stat.icon
           return (
             <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.color}`}>
-                <Icon className="w-6 h-6" />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${stat.color}`}>
+                <Icon className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-500 mb-1">{stat.label}</p>
@@ -74,8 +74,8 @@ export function OverviewClient({ user, data }: OverviewClientProps) {
         
         {/* Left side: Icon + Title */}
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <Zap className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <Zap className="w-5 h-5" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-900">{o.aiUsageTitle}</h2>
@@ -177,8 +177,8 @@ export function OverviewClient({ user, data }: OverviewClientProps) {
               </table>
             ) : (
               <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-                  <Gamepad2 className="w-8 h-8" />
+                <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                  <Gamepad2 className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{o.noGamesYet}</h3>
                 <p className="text-gray-500 mb-6">{o.noGamesDesc}</p>

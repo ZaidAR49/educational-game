@@ -47,18 +47,18 @@ export function ConfirmModal({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col items-center text-center"
+            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 sm:p-6 flex flex-col items-center text-center"
           >
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${
               type === 'danger' ? 'bg-red-100 text-red-600' :
               type === 'warning' ? 'bg-amber-100 text-amber-600' :
               'bg-blue-100 text-blue-600'
             }`}>
-              {type === 'info' ? <Info className="w-8 h-8" /> : <AlertTriangle className="w-8 h-8" />}
+              {type === 'info' ? <Info className="w-7 h-7" /> : <AlertTriangle className="w-7 h-7" />}
             </div>
 
             <h3 className="text-2xl font-black text-gray-900 mb-2">{title}</h3>
-            <p className="text-gray-500 mb-8 leading-relaxed">{description}</p>
+            <p className="text-gray-500 mb-6 leading-relaxed">{description}</p>
 
             <div className="flex w-full gap-3">
               <button 

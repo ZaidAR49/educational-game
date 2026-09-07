@@ -142,7 +142,7 @@ export function UsersTable({
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
       {/* Toolbar */}
-      <div className="p-6 border-b border-slate-100 flex flex-col gap-4">
+      <div className="p-5 border-b border-slate-100 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative max-w-md w-full">
             <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400`} />
@@ -231,7 +231,7 @@ export function UsersTable({
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold">
+                    <div className="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold">
                       {user.name.charAt(0)}
                     </div>
                     <div>
@@ -308,11 +308,11 @@ export function UsersTable({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 p-6 bg-white border-t border-slate-100 rounded-b-2xl">
+        <div className="flex justify-center items-center gap-2 p-5 bg-white border-t border-slate-100 rounded-b-2xl">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1 || isPending}
-            className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isRTL ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
           </button>
@@ -327,7 +327,7 @@ export function UsersTable({
             ) {
               if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
                 return (
-                  <span key={i} className="w-10 h-10 flex items-center justify-center text-slate-400">
+                  <span key={i} className="w-9 h-9 flex items-center justify-center text-slate-400">
                     ...
                   </span>
                 );
@@ -340,7 +340,7 @@ export function UsersTable({
                 key={i}
                 onClick={() => handlePageChange(pageNum)}
                 disabled={isPending}
-                className={`w-10 h-10 rounded-xl font-bold transition-colors ${
+                className={`w-9 h-9 rounded-xl font-bold transition-colors ${
                   currentPage === pageNum
                     ? "bg-indigo-600 text-white shadow-sm"
                     : "border border-slate-200 text-slate-600 hover:bg-slate-50"
@@ -354,7 +354,7 @@ export function UsersTable({
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages || isPending}
-            className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </button>

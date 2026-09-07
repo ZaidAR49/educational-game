@@ -39,11 +39,11 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
       {...longPressProps}
       className={`bg-white rounded-3xl border-2 transition-all shadow-sm overflow-hidden flex flex-col cursor-pointer select-none ${isSelected ? 'border-indigo-500 ring-4 ring-indigo-50' : 'border-gray-100 hover:border-gray-200 hover:shadow-md'}`}
     >
-      <div className="p-6 flex-1 flex flex-col relative">
+      <div className="p-5 flex-1 flex flex-col relative">
         
         {/* Selection Checkbox */}
         {isSelectionMode && (
-          <div className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} z-10 animate-in fade-in zoom-in duration-200`}>
+          <div className={`absolute top-5 ${isRTL ? 'left-5' : 'right-5'} z-10 animate-in fade-in zoom-in duration-200`}>
             <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-300 bg-white'}`}>
               {isSelected && <CheckCircle2 className="w-4 h-4" />}
             </div>
@@ -51,8 +51,8 @@ export function SessionCard({ session, isSelected, isSelectionMode, onToggleSele
         )}
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
-            <History className="w-6 h-6" />
+          <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+            <History className="w-5 h-5" />
           </div>
           <div>
             <h3 className="font-bold text-gray-900 text-lg leading-tight">{session.gameName}</h3>

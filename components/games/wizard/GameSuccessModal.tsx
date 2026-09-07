@@ -50,10 +50,10 @@ export function GameSuccessModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-3xl p-8 md:p-10 w-full max-w-xl shadow-2xl flex flex-col items-center text-center space-y-8 z-10 pointer-events-auto"
+            className="relative bg-white rounded-3xl p-6 md:p-8 w-full max-w-xl shadow-2xl flex flex-col items-center text-center space-y-8 z-10 pointer-events-auto"
           >
-            <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-2">
-              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
             </div>
 
             <div>
@@ -94,7 +94,7 @@ export function GameSuccessModal({
             <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full mt-4">
               <button
                 onClick={copyLink}
-                className="flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-6 py-4 rounded-xl flex-1 transition-colors border-2 border-emerald-100"
+                className="flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-6 py-3 rounded-xl flex-1 transition-colors border-2 border-emerald-100"
               >
                 <LinkIcon className="w-5 h-5" />
                 <span>{t.gameWizard.copyLink}</span>
@@ -102,7 +102,7 @@ export function GameSuccessModal({
               
               <Link 
                 href="/dashboard/games"
-                className="flex items-center justify-center gap-2 bg-gray-900 hover:bg-black text-white font-bold px-6 py-4 rounded-xl flex-1 transition-colors shadow-lg shadow-gray-900/20"
+                className="flex items-center justify-center gap-2 bg-gray-900 hover:bg-black text-white font-bold px-6 py-3 rounded-xl flex-1 transition-colors shadow-lg shadow-gray-900/20"
               >
                 <span>{t.gameWizard.backToDashboard}</span>
               </Link>

@@ -27,12 +27,12 @@ export function JoinScreen({
   return (
     <form
       onSubmit={onJoin}
-      className="bg-white rounded-3xl p-8 shadow-xl text-center animate-in fade-in duration-500"
+      className="bg-white rounded-3xl p-6 shadow-xl text-center animate-in fade-in duration-500"
     >
       <div
-        className={`w-20 h-20 ${
+        className={`w-16 h-16 ${
           game.organization?.logoPath ? "bg-transparent" : "bg-indigo-50"
-        } rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600 text-4xl overflow-hidden`}
+        } rounded-2xl flex items-center justify-center mx-auto mb-5 text-indigo-600 text-3xl overflow-hidden`}
       >
         {game.organization?.logoPath ? (
           <img
@@ -45,10 +45,10 @@ export function JoinScreen({
         )}
       </div>
 
-      <h1 className="text-3xl font-black text-gray-900 mb-2">
+      <h1 className="text-2xl font-black text-gray-900 mb-2">
         {t.game.join.title}
       </h1>
-      <p className="text-gray-500 font-bold mb-8">{gameTitle}</p>
+      <p className="text-gray-500 font-bold mb-6">{gameTitle}</p>
 
       <div className="mb-6 text-start">
         <label className="block text-gray-700 font-bold mb-2">
@@ -60,7 +60,7 @@ export function JoinScreen({
             required
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="w-full rtl:pl-16 rtl:pr-5 ltr:pr-16 ltr:pl-5 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-bold"
+            className="w-full rtl:pl-16 rtl:pr-5 ltr:pr-16 ltr:pl-5 py-2.5 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-bold"
             placeholder={t.game.join.placeholder}
             autoFocus
           />
@@ -80,10 +80,10 @@ export function JoinScreen({
       <button
         type="submit"
         disabled={isPending || !playerName.trim()}
-        className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+        className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-base font-bold px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
       >
         {isPending ? (
-          <Loader2 className="w-6 h-6 animate-spin" />
+          <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
           t.game.join.submitButton
         )}

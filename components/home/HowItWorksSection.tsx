@@ -49,7 +49,7 @@ export function HowItWorksSection() {
   ]
 
   return (
-    <section id="how-it-works" className="py-24 bg-gray-50/50 relative overflow-hidden">
+    <section id="how-it-works" className="py-20 bg-gray-50/50 relative overflow-hidden">
       {/* Accent blurs — use logical end/start positioning */}
       <div className="absolute top-[20%] -end-[10%] w-[350px] h-[350px] bg-blue-400/5 rounded-full blur-[80px] pointer-events-none" />
       <div className="absolute bottom-[20%] -start-[10%] w-[350px] h-[350px] bg-purple-400/5 rounded-full blur-[80px] pointer-events-none" />
@@ -57,7 +57,7 @@ export function HowItWorksSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 max-w-7xl">
 
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-14">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -90,14 +90,14 @@ export function HowItWorksSection() {
                 <button
                   key={index}
                   onClick={() => setActiveStep(index)}
-                  className={`w-full text-start p-6 rounded-[2rem] border-2 transition-all duration-300 flex items-start gap-5 relative group ${
+                  className={`w-full p-5 rounded-2xl transition-all duration-300 text-start border-2 relative group ${
                     isActive
                       ? /* Slide toward the visual panel (inline-end direction) */
                         "bg-white border-emerald-500 shadow-xl shadow-emerald-500/5 rtl:translate-x-2 ltr:-translate-x-2"
                       : "bg-white/40 hover:bg-white border-transparent hover:border-gray-200"
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-sm transition-transform ${
                     isActive
                       ? `bg-gradient-to-br ${step.gradient} text-white scale-110`
                       : `${step.bgColor} ${step.colorText} group-hover:scale-105`

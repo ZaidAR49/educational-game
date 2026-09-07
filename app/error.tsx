@@ -35,15 +35,15 @@ export default function Error({
         </div>
       </div>
 
-      <div className="max-w-md w-full text-center space-y-8 bg-white p-10 rounded-[2rem] shadow-2xl border border-gray-100 relative overflow-hidden pt-12 sm:pt-10">
+      <div className="max-w-md w-full text-center space-y-8 bg-white p-8 rounded-[2rem] shadow-2xl border border-gray-100 relative overflow-hidden pt-12 sm:pt-10">
         {/* Background decorative elements */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-red-500/5 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl"></div>
 
         <div className="flex justify-center relative">
-          <div className="w-24 h-24 bg-red-50 rounded-[1.5rem] flex items-center justify-center border-4 border-red-100 relative shadow-inner">
+          <div className="w-20 h-20 bg-red-50 rounded-[1.5rem] flex items-center justify-center border-2 border-red-100 relative shadow-inner">
             <div className="absolute inset-0 bg-red-500/10 animate-pulse rounded-[1.25rem]"></div>
-            <AlertOctagon className="w-12 h-12 text-red-500 relative z-10 drop-shadow-sm" />
+            <AlertOctagon className="w-10 h-10 text-red-500 relative z-10 drop-shadow-sm" />
           </div>
         </div>
 
@@ -60,7 +60,7 @@ export default function Error({
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-emerald-600/25 hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-emerald-600/25 hover:-translate-y-0.5 active:translate-y-0"
           >
             <RotateCcw className="w-5 h-5" />
             <span>{t.errorPage.tryAgain}</span>

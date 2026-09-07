@@ -11,7 +11,7 @@ export function HeroSection() {
   const { messages: t } = useLocale()
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-emerald-50/60 via-blue-50/30 to-white min-h-[90vh] flex items-center pt-28 pb-20">
+    <section className="relative min-h-[85vh] flex items-center overflow-hidden pt-24 pb-16" id="hero">
 
       {/* Abstract Glowing Blobs */}
       <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
@@ -39,7 +39,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black text-gray-900 leading-[1.15] mb-6 tracking-tight"
+              className="text-4xl md:text-5xl xl:text-6xl font-black text-gray-900 leading-tight tracking-tight mb-6"
             >
               {t.hero.headline1} <br />
               {/* Gradient flows toward inline-end to match text reading direction */}
@@ -74,9 +74,9 @@ export function HeroSection() {
               </Link>
               <Link
                 href="/game/demo"
-                className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-100 hover:border-gray-200 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0"
               >
-                <PlayCircle className="w-5 h-5 text-blue-600" />
+                <PlayCircle className="w-5 h-5 text-white" />
                 <span>{t.hero.ctaSecondary}</span>
               </Link>
             </motion.div>
@@ -110,6 +110,6 @@ export function HeroSection() {
           </motion.div>
         </Link>
       </motion.div>
-    </div>
+    </section>
   )
 }

@@ -39,7 +39,7 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
 
         <div className="p-6 space-y-6 overflow-y-auto">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl font-bold shrink-0">
+            <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-lg font-bold shrink-0">
               {user.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -61,50 +61,50 @@ export function UserDetailsModal({ user, onClose }: UserDetailsModalProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Building2 className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "المنظمات" : "Organizations"}</span>
               </div>
-              <div className="text-2xl font-bold text-slate-800">{user.organizations}</div>
+              <div className="text-xl font-bold text-slate-800">{user.organizations}</div>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Gamepad2 className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "الألعاب" : "Games"}</span>
               </div>
-              <div className="text-2xl font-bold text-slate-800">{user.games}</div>
+              <div className="text-xl font-bold text-slate-800">{user.games}</div>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 col-span-2">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 col-span-2">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Users className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "إجمالي اللاعبين" : "Total Players"}</span>
               </div>
-              <div className="text-2xl font-bold text-slate-800">{user.totalPlayers}</div>
+              <div className="text-xl font-bold text-slate-800">{user.totalPlayers}</div>
             </div>
             
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Clock className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "آخر ظهور" : "Last Active"}</span>
               </div>
               <div className="text-sm font-bold text-slate-800">{user.lastLoginAt || (isRTL ? "لم يسجل الدخول بعد" : "Never")}</div>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <Calendar className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "انتهاء الاشتراك" : "Subscription Expiry"}</span>
               </div>
               <div className="text-sm font-bold text-slate-800">{user.subscriptionExpiresAt || (isRTL ? "غير متوفر" : "N/A")}</div>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <BrainCircuit className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "طلبات الذكاء الاصطناعي" : "AI Requests"}</span>
               </div>
               <div className="text-xl font-bold text-slate-800">{user.aiRequestsCurrentPeriod ?? 0}</div>
             </div>
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <KeySquare className="w-4 h-4 shrink-0" />
                 <span className="text-sm font-medium">{isRTL ? "الرموز المستخدمة" : "Tokens Used"}</span>

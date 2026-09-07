@@ -23,8 +23,8 @@ export function GameErrorScreen({ error }: { error?: string }) {
         </div>
       </div>
 
-      <div className="text-center p-8 bg-white rounded-2xl shadow-sm max-w-md w-full">
-        <div className="text-6xl mb-4">⏳</div>
+      <div className="text-center p-6 bg-white rounded-2xl shadow-sm max-w-md w-full">
+        <div className="text-5xl mb-4">⏳</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           {t.game.cannotJoinTitle}
         </h1>

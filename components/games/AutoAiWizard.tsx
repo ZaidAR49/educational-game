@@ -167,9 +167,9 @@ export function AutoAiWizard({ organizations, onBack }: AutoAiWizardProps) {
           <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0">
             <Sparkles className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.gameCreation.autoAiTitle}</h1>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t.gameCreation.autoAiTitle}</h1>
         </div>
-        <p className="text-gray-500 font-medium text-lg rtl:mr-16 ltr:ml-16">
+        <p className="text-gray-500 font-medium text-base ms-16">
           {t.gameCreation.autoAiSubhead}
         </p>
       </div>

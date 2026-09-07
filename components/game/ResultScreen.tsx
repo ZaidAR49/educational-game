@@ -73,7 +73,7 @@ export function ResultScreen({
   const shareLabel = t.game.result.shareLabel || results?.shareLabel
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl text-center relative overflow-hidden animate-in fade-in duration-500">
+    <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-xl text-center relative overflow-hidden animate-in fade-in duration-500">
       {/* Player Name Badge */}
       <div className="flex justify-start mb-4 relative z-20">
         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 text-indigo-800 px-3 py-0.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-sm max-w-[90%]">
@@ -96,19 +96,19 @@ export function ResultScreen({
       ))}
 
       <div className="relative z-10">
-        <div className="text-7xl mb-4 animate-in zoom-in duration-700 flex justify-center">
+        <div className="text-6xl mb-4 animate-in zoom-in duration-700 flex justify-center">
           {game.organization?.logoPath ? (
             <img
               src={game.organization.logoPath}
               alt="Logo"
-              className="w-24 h-24 object-contain"
+              className="w-20 h-20 object-contain"
             />
           ) : (
             badge
           )}
         </div>
         <h1
-          className={`text-3xl font-black mb-2 ${
+          className={`text-2xl font-black mb-2 ${
             isPass ? "text-emerald-600" : "text-amber-600"
           }`}
         >
@@ -117,7 +117,7 @@ export function ResultScreen({
         <p className="text-gray-500 font-medium mb-6">{subtitle}</p>
 
         <div
-          className={`text-white rounded-2xl p-5 mb-5 shadow-inner ${
+          className={`text-white rounded-2xl p-4 mb-5 shadow-inner ${
             isPass
               ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
               : "bg-gradient-to-r from-amber-500 to-amber-600"
@@ -126,7 +126,7 @@ export function ResultScreen({
           <span className="block text-sm opacity-90 font-bold mb-1">
             {finalScoreLabel}
           </span>
-          <span className="text-5xl font-black">{score}</span>
+          <span className="text-4xl font-black">{score}</span>
           <span className="text-lg opacity-90 font-bold">
             {" "}
             / {maxScore} {pointsSuffix}
@@ -145,7 +145,7 @@ export function ResultScreen({
           <button
             type="button"
             onClick={onShare}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-lg font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-base font-bold px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
           >
             {shareLabel}
           </button>
@@ -155,13 +155,13 @@ export function ResultScreen({
               <button
                 type="button"
                 onClick={onRetry}
-                className="bg-white border-2 border-emerald-500 text-emerald-600 text-lg font-bold px-6 py-3 rounded-xl shadow-sm hover:bg-emerald-50 hover:scale-105 transition-all duration-300"
+                className="bg-white border-2 border-emerald-500 text-emerald-600 text-base font-bold px-6 py-2.5 rounded-xl shadow-sm hover:bg-emerald-50 hover:scale-105 transition-all duration-300"
               >
                 {t.game.result.retryButton}
               </button>
               <Link
                 href={game.id === "demo" ? "/" : "/dashboard/games"}
-                className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-2xl text-lg font-bold transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-2xl text-base font-bold transition-colors"
               >
                 {game.id === "demo"
                   ? t.game.result.backHome

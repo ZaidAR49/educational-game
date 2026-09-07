@@ -32,13 +32,13 @@ export function GameShareModal({ game, onClose, hideLiveSessionButton }: GameSha
           className={`relative flex flex-col items-center text-center bg-white shadow-2xl overflow-y-auto custom-scrollbar transition-all duration-500 ${
             isQrFullscreen 
                ? 'w-auto max-w-[95vw] max-h-[95vh] p-8 md:p-12 rounded-[3rem]' 
-              : 'w-full max-w-xl max-h-[90vh] p-6 sm:p-10 rounded-3xl'
+              : 'w-full max-w-xl max-h-[90vh] p-5 sm:p-8 rounded-3xl'
           }`}
         >
           {/* Close Button */}
           <button 
             onClick={() => { onClose(); setIsQrFullscreen(false); }}
-            className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full flex items-center justify-center transition-colors z-20`}
+            className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} w-9 h-9 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full flex items-center justify-center transition-colors z-20`}
             title={t.gameShare.closeBtn}
           >
             <X className="w-5 h-5" />
@@ -113,7 +113,7 @@ export function GameShareModal({ game, onClose, hideLiveSessionButton }: GameSha
                 {hideLiveSessionButton ? (
                   <button
                     onClick={() => { onClose(); setIsQrFullscreen(false); }}
-                    className="mt-6 w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 px-6 rounded-xl font-bold transition-all shadow-sm"
+                    className="mt-6 w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-bold transition-all shadow-sm"
                   >
                     <X className="w-5 h-5" />
                     <span>{t.gameShare.closeBtn}</span>
@@ -121,7 +121,7 @@ export function GameShareModal({ game, onClose, hideLiveSessionButton }: GameSha
                 ) : (
                   <Link
                     href={`/dashboard/games/${game.id}/live`}
-                    className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-xl font-bold transition-all shadow-md shadow-indigo-600/20"
+                    className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl font-bold transition-all shadow-md shadow-indigo-600/20"
                   >
                     <Users className="w-5 h-5" />
                     <span>{t.gameShare.viewLiveBtn}</span>

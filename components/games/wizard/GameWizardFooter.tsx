@@ -21,11 +21,11 @@ export function GameWizardFooter({
   const { t, isRTL } = useLocale()
 
   return (
-    <div className={`fixed bottom-0 ${isRTL ? 'right-0 md:right-64 left-0' : 'left-0 md:left-64 right-0'} p-6 md:p-10 flex items-center justify-between z-30 pointer-events-none`}>
+    <div className={`fixed bottom-0 ${isRTL ? 'right-0 md:right-64 left-0' : 'left-0 md:left-64 right-0'} p-4 md:p-6 flex items-center justify-between z-30 pointer-events-none`}>
       <button 
         onClick={onPrevStep}
         disabled={step === 1}
-        className={`pointer-events-auto flex items-center justify-center gap-2 w-full sm:w-[240px] px-6 py-4 rounded-xl font-bold text-lg transition-all
+        className={`pointer-events-auto flex items-center justify-center gap-2 w-full sm:w-[200px] px-5 py-3 rounded-xl font-bold text-base transition-all
           ${step === 1 
             ? "opacity-0" 
             : "bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 shadow-md hover:shadow-lg"
@@ -38,7 +38,7 @@ export function GameWizardFooter({
       {step < 3 ? (
         <button 
           onClick={onNextStep}
-          className="pointer-events-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-[240px] px-6 py-4 rounded-xl font-bold text-lg transition-all shadow-xl shadow-emerald-600/30 hover:scale-105 active:scale-95"
+          className="pointer-events-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-[200px] px-5 py-3 rounded-xl font-bold text-base transition-all shadow-xl shadow-emerald-600/30 hover:scale-105 active:scale-95"
         >
           <span>{t.gameWizard.nextStep}</span>
           {isRTL ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
@@ -47,9 +47,9 @@ export function GameWizardFooter({
         <button 
           onClick={onSave}
           disabled={isPending}
-          className="pointer-events-auto flex items-center justify-center gap-3 bg-gray-900 hover:bg-black disabled:bg-gray-700 text-white w-full sm:w-[240px] px-6 py-4 rounded-xl font-black text-lg transition-all shadow-2xl shadow-gray-900/40 hover:scale-105 active:scale-95"
+          className="pointer-events-auto flex items-center justify-center gap-3 bg-gray-900 hover:bg-black disabled:bg-gray-700 text-white w-full sm:w-[200px] px-5 py-3 rounded-xl font-black text-base transition-all shadow-2xl shadow-gray-900/40 hover:scale-105 active:scale-95"
         >
-          {isPending ? <Loader2 className="w-6 h-6 animate-spin text-emerald-400" /> : <Save className="w-6 h-6 text-emerald-400" />}
+          {isPending ? <Loader2 className="w-5 h-5 animate-spin text-emerald-400" /> : <Save className="w-5 h-5 text-emerald-400" />}
           <span>{isPending ? t.gameWizard.saving : t.gameWizard.saveAndConfirm}</span>
         </button>
       )}

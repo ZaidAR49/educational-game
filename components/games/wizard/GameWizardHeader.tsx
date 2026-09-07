@@ -30,7 +30,7 @@ export function GameWizardHeader({ isEdit, step, customTopActions }: GameWizardH
       {/* Wizard Header */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 mb-6 tracking-tight">
+          <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
             {isEdit ? t.gameWizard.editGameTitle : t.gameWizard.newGameTitle}
           </h1>
           
@@ -42,7 +42,7 @@ export function GameWizardHeader({ isEdit, step, customTopActions }: GameWizardH
               { num: 3, label: t.gameWizard.step3Label, icon: Send },
             ].map((s, i) => (
               <div key={s.num} className="flex items-center gap-3 md:gap-4 shrink-0">
-                <div className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl font-bold text-sm md:text-base transition-all
+                <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-bold text-sm md:text-base transition-all
                   ${step === s.num 
                     ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20 scale-105" 
                     : step > s.num 

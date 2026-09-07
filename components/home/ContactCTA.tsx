@@ -16,13 +16,13 @@ export function ContactCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 bg-gray-800/40 border border-gray-700/50 rounded-[2.5rem] p-8 md:p-12 shadow-2xl"
+          className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 bg-gray-800/40 border border-gray-700/50 rounded-[2.5rem] p-6 md:p-10 shadow-2xl"
         >
           {/* Text block — md:items-start = inline-start (right in RTL, left in LTR) */}
           <div className="flex flex-col items-center md:items-start text-center md:text-start gap-3">
             <div className="flex items-center gap-4 mb-1">
-              <div className="w-14 h-14 bg-gray-800/80 text-emerald-400 rounded-2xl flex items-center justify-center border border-gray-700 shadow-inner">
-                <HeadphonesIcon className="w-7 h-7" />
+              <div className="w-12 h-12 bg-gray-800/80 text-emerald-400 rounded-2xl flex items-center justify-center border border-gray-700 shadow-inner">
+                <HeadphonesIcon className="w-6 h-6" />
               </div>
               <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
                 {t.contact.heading}
@@ -36,7 +36,7 @@ export function ContactCTA() {
 
           <Link
             href="/contact"
-            className="shrink-0 group flex items-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-bold px-8 py-4.5 rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95"
+            className="shrink-0 group flex items-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-bold px-6 py-3.5 rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95"
           >
             <span>{t.contact.button}</span>
             <MessageSquare className="w-5 h-5 text-gray-500 group-hover:text-emerald-600 transition-colors" />
