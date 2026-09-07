@@ -7,6 +7,7 @@ import { useLocale } from "@/lib/i18n/LanguageContext"
 import { GameWizard } from "./GameWizard"
 import { OrganizationOption } from "./wizard/BasicInfoStep"
 import { GameFormData, Scenario } from "./wizard/types"
+import { safeParseAiGameJson } from "@/lib/ai/json-repair"
 
 interface AutoAiWizardProps {
   organizations: OrganizationOption[];
@@ -70,9 +71,7 @@ export function AutoAiWizard({ organizations, onBack }: AutoAiWizardProps) {
 
       let parsed;
       try {
-        const jsonMatch = streamedJson.match(/\{[\s\S]*\}/);
-        const cleanJson = jsonMatch ? jsonMatch[0] : streamedJson;
-        parsed = JSON.parse(cleanJson);
+        parsed = safeParseAiGameJson(streamedJson);
       } catch (parseError) {
         console.error("Failed to parse JSON:", streamedJson);
         throw new Error(t.gameCreation.autoAiParseFailed);

@@ -3,6 +3,9 @@ import { gameGeneratorConfig } from "@/lib/ai/game-generator.config";
 import { auth } from "@/auth";
 import { getAiUsageAndLimit, recordAiUsage, checkAndResetAiUsage } from "@/lib/services/usage.service";
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
